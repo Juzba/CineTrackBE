@@ -2,6 +2,10 @@
 {
     public class FilmGenre
     {
+        public int Id { get; set; }
+
+
+        // Film //
         public int FilmId { get; set; }
         public Film Film { get; set; } = null!;
 
