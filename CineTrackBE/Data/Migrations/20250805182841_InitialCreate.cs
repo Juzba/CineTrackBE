@@ -289,9 +289,9 @@ namespace CineTrackBE.Data.Migrations
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Discriminator", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
                 values: new object[,]
                 {
-                    { "id-Juzba", 0, "concurrency-stamp1-#sfdf", "User", "Juzba@gmail.com", true, false, null, null, "JUZBA", "$argon2id$v=19$m=65536,t=3,p=1$+g3wENe8VfgrJvTd4E9YNQ$zvtCx0lwFdXwvR6DLKTOH6FJzm8rB6y54wSEpXbIkJk", null, false, "security-stamp1-#dsad", false, "Juzba" },
-                    { "id-Karel", 0, "concurrency-stamp3-#wwsh", "User", "Karel@gmail.com", true, false, null, null, "KAREL", "$argon2id$v=19$m=65536,t=3,p=1$tyqbuA8MlWrR6ZE7pWMioA$wjo5b2y+qFdDrbr23ymFvKi9xv2W55g1uvX/3T0z9/s", null, false, "security-stamp3-#dser", false, "Karel" },
-                    { "id-Katka", 0, "concurrency-stamp2-#qwwe", "User", "Katka@gmail.com", true, false, null, null, "KATKA", "$argon2id$v=19$m=65536,t=3,p=1$VSs65qBpJTKEJSTb7qXkAw$fBlpCgya4Z9LRmKnhUFzXh7tqnXrWSl2vyHkNCwEKCg", null, false, "security-stamp2-#oioi", false, "Katka" }
+                    { "id-Juzba", 0, "concurrency-stamp1-#sfdf", "User", "Juzba@gmail.com", true, false, null, null, "JUZBA", "AQAAAAIAAYagAAAAEEtE8TBZNfq5WYGGHoaa8n5kX2UlsEJebHPUJRWxDjrEx5VW3NXeNQbL8tN5oIYJng==", null, false, "security-stamp1-#dsad", false, "Juzba" },
+                    { "id-Karel", 0, "concurrency-stamp3-#wwsh", "User", "Karel@gmail.com", true, false, null, null, "KAREL", "AQAAAAIAAYagAAAAEGTULgpM7dQXOTBJWKDizbyPzwYtj8ixfvSfbCVp7kJ5V+V39280pzDa42v/cZ1SiA==", null, false, "security-stamp3-#dser", false, "Karel" },
+                    { "id-Katka", 0, "concurrency-stamp2-#qwwe", "User", "Katka@gmail.com", true, false, null, null, "KATKA", "AQAAAAIAAYagAAAAECOcv9Vu94/XH41PY720P1vJF0oNN2xqPR45p0z0aZBj+ei8Ouxg8xlYBwxxhcs0XQ==", null, false, "security-stamp2-#oioi", false, "Katka" }
                 });
 
             migrationBuilder.InsertData(
