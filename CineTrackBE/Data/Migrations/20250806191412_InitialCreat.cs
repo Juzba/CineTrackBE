@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CineTrackBE.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialCreat : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -32,7 +32,6 @@ namespace CineTrackBE.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Discriminator = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -128,8 +127,8 @@ namespace CineTrackBE.Data.Migrations
                 name: "AspNetUserLogins",
                 columns: table => new
                 {
-                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    ProviderKey = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
@@ -173,8 +172,8 @@ namespace CineTrackBE.Data.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
@@ -286,12 +285,12 @@ namespace CineTrackBE.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
-                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Discriminator", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
+                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
                 values: new object[,]
                 {
-                    { "id-Juzba", 0, "concurrency-stamp1-#sfdf", "User", "Juzba@gmail.com", true, false, null, null, "JUZBA", "AQAAAAIAAYagAAAAEEtE8TBZNfq5WYGGHoaa8n5kX2UlsEJebHPUJRWxDjrEx5VW3NXeNQbL8tN5oIYJng==", null, false, "security-stamp1-#dsad", false, "Juzba" },
-                    { "id-Karel", 0, "concurrency-stamp3-#wwsh", "User", "Karel@gmail.com", true, false, null, null, "KAREL", "AQAAAAIAAYagAAAAEGTULgpM7dQXOTBJWKDizbyPzwYtj8ixfvSfbCVp7kJ5V+V39280pzDa42v/cZ1SiA==", null, false, "security-stamp3-#dser", false, "Karel" },
-                    { "id-Katka", 0, "concurrency-stamp2-#qwwe", "User", "Katka@gmail.com", true, false, null, null, "KATKA", "AQAAAAIAAYagAAAAECOcv9Vu94/XH41PY720P1vJF0oNN2xqPR45p0z0aZBj+ei8Ouxg8xlYBwxxhcs0XQ==", null, false, "security-stamp2-#oioi", false, "Katka" }
+                    { "id-Juzba", 0, "", "Juzba@gmail.com", true, false, null, "JUZBA@GMAIL.COM", "JUZBA", "AQAAAAIAAYagAAAAEOadgFzBJnpnkBkmi8SqFcuYgy60qk0ZBrgllZ0PPoVBypQav6KsXimrjBfiPVo6Mw==", null, false, "", false, "Juzba" },
+                    { "id-Karel", 0, "", "Karel@gmail.com", true, false, null, "KAREL@GMAIL.COM", "KAREL", "AQAAAAIAAYagAAAAEI3e/eOUTskYsHiohjGn7iVPezNTxmLT5XjporF7MfKyPsdcioNgrAJkTmk5H1c+IQ==", null, false, "", false, "Karel" },
+                    { "id-Katka", 0, "", "Katka@gmail.com", true, false, null, "KATKA@GMAIL.COM", "KATKA", "AQAAAAIAAYagAAAAEJaTtbyo9uZ+7zhBsqPgOSRVqq81uC1HilQAFs30aTxQs18hzOp3e9o7jZMtt3nTow==", null, false, "", false, "Katka" }
                 });
 
             migrationBuilder.InsertData(

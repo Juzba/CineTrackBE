@@ -1,15 +1,16 @@
 using CineTrackBE.Data;
 using CineTrackBE.Models;
+using CineTrackBE.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 namespace CineTrackBE.Controllers
 {
-    public class HomeController(ILogger<HomeController> logger, ApplicationDbContext context) : Controller
+    public class HomeController(ILogger<HomeController> logger, UserManager<User> userManager) : Controller
     {
         private readonly ILogger<HomeController> _logger = logger;
-        private readonly ApplicationDbContext _context = context;
+        private readonly UserManager<User> _userManager = userManager;
 
         public IActionResult Index()
         {
@@ -19,15 +20,10 @@ namespace CineTrackBE.Controllers
         [HttpPost]
         public IActionResult Index(string input1)
         {
-       
 
-            var user = _context.Users.FirstOrDefault(p => p.Email == "Karel@gmail.com");
+            PasswordHasher<User> hasher = new();
+            var hashPass = hasher.HashPassword(null!, "123456");
 
-            if(user == null) return View();
-
-
-            PasswordHasher<IdentityUser> hasher = new();
-            var hashPass = hasher.HashPassword(user, "123456");
 
             ViewBag.hash = hashPass;
             return View();

@@ -4,6 +4,7 @@ using CineTrackBE.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CineTrackBE.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250806191412_InitialCreat")]
+    partial class InitialCreat
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -220,12 +223,12 @@ namespace CineTrackBE.Data.Migrations
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "JUZBA@GMAIL.COM",
-                            NormalizedUserName = "JUZBA@GMAIL.COM",
+                            NormalizedUserName = "JUZBA",
                             PasswordHash = "AQAAAAIAAYagAAAAEOadgFzBJnpnkBkmi8SqFcuYgy60qk0ZBrgllZ0PPoVBypQav6KsXimrjBfiPVo6Mw==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TwoFactorEnabled = false,
-                            UserName = "Juzba@gmail.com"
+                            UserName = "Juzba"
                         },
                         new
                         {
@@ -236,12 +239,12 @@ namespace CineTrackBE.Data.Migrations
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "KATKA@GMAIL.COM",
-                            NormalizedUserName = "KATKA@GMAIL.COM",
+                            NormalizedUserName = "KATKA",
                             PasswordHash = "AQAAAAIAAYagAAAAEJaTtbyo9uZ+7zhBsqPgOSRVqq81uC1HilQAFs30aTxQs18hzOp3e9o7jZMtt3nTow==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TwoFactorEnabled = false,
-                            UserName = "Katka@gmail.com"
+                            UserName = "Katka"
                         },
                         new
                         {
@@ -252,12 +255,12 @@ namespace CineTrackBE.Data.Migrations
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "KAREL@GMAIL.COM",
-                            NormalizedUserName = "KAREL@GMAIL.COM",
+                            NormalizedUserName = "KAREL",
                             PasswordHash = "AQAAAAIAAYagAAAAEI3e/eOUTskYsHiohjGn7iVPezNTxmLT5XjporF7MfKyPsdcioNgrAJkTmk5H1c+IQ==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TwoFactorEnabled = false,
-                            UserName = "Karel@gmail.com"
+                            UserName = "Karel"
                         });
                 });
 
