@@ -1,5 +1,5 @@
 using CineTrackBE.Data;
-using CineTrackBE.Models;
+using CineTrackBE.Models.Entities;
 using CineTrackBE.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

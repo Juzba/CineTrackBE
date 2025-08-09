@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace CineTrackBE.Models
+namespace CineTrackBE.Models.Entities
 {
     public class Comment
     {

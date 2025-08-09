@@ -1,4 +1,5 @@
-﻿using CineTrackBE.Models;
+﻿using CineTrackBE.Models.Entities;
+using CineTrackBE.Models.ViewModel;
 using CineTrackBE.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -13,10 +14,41 @@ namespace CineTrackBE.Areas.Admin.Controllers
     {
         private readonly IUserService _userService = userService;
 
+        const string AdminConst = "Admin";
+        const string UserConst = "User";
+
+
 
 
         // INDEX //
-        public async Task<IActionResult> Index() => View(await _userService.GetUsersList());
+        public async Task<IActionResult> Index()
+        {
+            var users = await _userService.GetUsersList();
+            var roles = await _userService.GetRole_List();
+            var userRoles = await _userService.GetUserRole_List();
+
+
+
+            var userWithRolesList = users.Select(p => new UserWithRoles()
+            {
+                Id = p.Id,
+                EmailConfirmed = p.EmailConfirmed,
+                PhoneNumber = p.PhoneNumber,
+                UserName = p.UserName,
+                Roles = []
+            }).ToList();
+
+
+            foreach (var userRole in userRoles)
+            {
+                var roleName = roles.FirstOrDefault(p => p.Id == userRole.RoleId)?.Name;
+
+                userWithRolesList.FirstOrDefault(p => p.Id == userRole.UserId)?.Roles.Add(roleName);
+            }
+
+
+            return View(userWithRolesList);
+        }
 
 
         // DETAILS //
@@ -28,36 +60,50 @@ namespace CineTrackBE.Areas.Admin.Controllers
 
             if (user == null) return NotFound();
 
-            return View(user);
+            var roles = await _userService.GetRoles_FromUser(user);
+
+
+            var userWithRoles = new UserWithRoles()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+                EmailConfirmed = user.EmailConfirmed,
+                Id = user.Id,
+                PhoneNumber = user.PhoneNumber,
+                Roles = [.. roles.Select(p => p.Name)]
+            };
+
+
+            return View(userWithRoles);
         }
 
 
 
         // CREATE //
-        public IActionResult Create() => View();
+        //public IActionResult Create() => View();
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id, Email, PhoneNumber, PasswordHash, EmailConfirmed")] User user)
-        {
-            if (ModelState.IsValid)
-            {
-                // user with this email exist
-                if (_userService.AnyUserExists_Email(user.Email))
-                {
-                    ModelState.AddModelError("Email", "Zadejte platnou e-mailovou adresu.");
-                    return View(user);
-                }
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create([Bind("Id, Email, PhoneNumber, PasswordHash, EmailConfirmed")] User user)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        // user with this email exist
+        //        if (_userService.AnyUserExists_UserName(user.UserName))
+        //        {
+        //            ModelState.AddModelError("Email", "Zadejte platnou e-mailovou adresu.");
+        //            return View(user);
+        //        }
 
-                Add_Additional_UserParametrs(ref user);
-                Add_Hash_To_UserPassword(ref user);
+        //        Add_Additional_UserParametrs(ref user);
+        //        Add_Hash_To_UserPassword(ref user);
 
-                await _userService.AddUser(user);
-                await _userService.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(user);
-        }
+        //        await _userService.AddUser(user);
+        //        await _userService.SaveChangesAsync();
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    return View(user);
+        //}
 
 
 
@@ -70,45 +116,78 @@ namespace CineTrackBE.Areas.Admin.Controllers
 
             if (user == null) return NotFound();
 
-            user.PasswordHash = "******";
 
-            return View(user);
+            var roles = await _userService.GetRoles_FromUser(user);
+
+
+            var userWithRoles = new UserWithRoles()
+            {
+                Id = user.Id,
+                EmailConfirmed = user.EmailConfirmed,
+                PasswordHash = "******",
+                PhoneNumber = user.PhoneNumber,
+                UserName = user.UserName,
+                Roles = roles.Select(p => p.Name).ToList()
+            };
+
+
+
+
+            return View(userWithRoles);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Id, Email, PhoneNumber, PasswordHash, EmailConfirmed")] User user)
+        public async Task<IActionResult> Edit(string id, [Bind("Id, UserName, PhoneNumber, PasswordHash, EmailConfirmed")] UserWithRoles formUser, bool roleAdmin, bool roleUser)
         {
-            if (id != user.Id) return NotFound();
+            if (id != formUser.Id) return NotFound();
+
 
 
             if (ModelState.IsValid)
             {
-                // user with this email exist
-                if (_userService.AnyUserExists_Email(user.Email))
+                var defaultUser = await _userService.GetUser(id);
+                if (defaultUser == null) return NotFound();
+
+
+                // user with this UserName exist?
+                if (defaultUser.UserName != formUser.UserName && _userService.AnyUserExists_UserName(formUser.UserName))
                 {
-                    ModelState.AddModelError("Email", "Zadejte platnou e-mailovou adresu.");
-                    return View(user);
+                    ModelState.AddModelError("UserName", "User je obsazen.");
+                    return View(formUser);
                 }
 
 
-                var completeUser = await CompleteUseData(user);
-                if (completeUser == null) return NotFound();
+                var completedUser = CompleteUseData(formUser, defaultUser);
+                if (completedUser == null) return NotFound();
+
+
+
+                // DODELAT ROLE //
+
+                // add roles
+                if (roleAdmin) await _userService.AddUserRole(completedUser, AdminConst);
+                else { } // remove
+                if (roleUser) await _userService.AddUserRole(completedUser, UserConst);
+                else { } // remove
+
+                ///       ///
+
 
                 try
                 {
-                    _userService.UpdateUser(completeUser);
+                    _userService.UpdateUser(completedUser);
                     await _userService.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!_userService.AnyUserExists_Id(completeUser.Id)) return NotFound();
+                    if (!_userService.AnyUserExists_Id(completedUser.Id)) return NotFound();
                     else throw;
                 }
 
                 return RedirectToAction(nameof(Index));
             }
-            return View(user);
+            return View(formUser);
         }
 
 
@@ -164,36 +243,31 @@ namespace CineTrackBE.Areas.Admin.Controllers
         }
 
 
-        private async Task<User?> CompleteUseData(User inputUser)
+        private User? CompleteUseData(UserWithRoles formUser, User defaultUser)
         {
-            if (inputUser == null) throw new NullReferenceException("user is null!");
+            if (formUser == null) throw new ArgumentNullException(nameof(formUser), "inputUser is null!");
+            if (defaultUser == null) throw new ArgumentNullException(nameof(defaultUser), "defaultUser is null!");
 
 
-            var user = await _userService.GetUser(inputUser.Id);
-
-            if (user != null)
+            if (defaultUser != null)
             {
 
-                inputUser.UserName = inputUser.Email;
-                inputUser.NormalizedUserName = inputUser.Email!.ToUpper();
-                inputUser.NormalizedEmail = inputUser.Email!.ToUpper();
+                defaultUser.UserName = formUser.UserName;
+                defaultUser.Email = formUser.UserName;
+                defaultUser.NormalizedUserName = formUser.UserName!.ToUpper();
+                defaultUser.NormalizedEmail = formUser.UserName!.ToUpper();
+                defaultUser.PhoneNumber = formUser.PhoneNumber;
+                defaultUser.EmailConfirmed = formUser.EmailConfirmed;
 
 
-                inputUser.ConcurrencyStamp = user.ConcurrencyStamp;
-                inputUser.SecurityStamp = user.SecurityStamp;
-
-
-                if (inputUser.PasswordHash.Contains("******"))
+                if (!formUser.PasswordHash.Contains("******"))
                 {
-                    inputUser.PasswordHash = user.PasswordHash;
-                }
-                else
-                {
-                    Add_Hash_To_UserPassword(ref inputUser);
+                    defaultUser.PasswordHash = formUser.PasswordHash;
+                    Add_Hash_To_UserPassword(ref defaultUser);
                 }
 
 
-                return inputUser;
+                return defaultUser;
             }
 
             return null;

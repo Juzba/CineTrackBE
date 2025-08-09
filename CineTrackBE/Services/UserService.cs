@@ -1,5 +1,6 @@
 ﻿using CineTrackBE.Data;
-using CineTrackBE.Models;
+using CineTrackBE.Models.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace CineTrackBE.Services
@@ -12,10 +13,14 @@ namespace CineTrackBE.Services
         void RemoveUser(User user);
         Task<IEnumerable<User>> GetUsersList();
         bool AnyUserExists_Id(string id);
-        bool AnyUserExists_Email(string email);
+        bool AnyUserExists_UserName(string userName);
         Task SaveChangesAsync();
 
 
+        Task<bool> AddUserRole(User user, string role);
+        Task<IEnumerable<IdentityRole>> GetRoles_FromUser(User user);
+        Task<IEnumerable<IdentityUserRole<string>>> GetUserRole_List();
+        Task<IEnumerable<IdentityRole<string>>> GetRole_List();
 
 
     }
@@ -80,18 +85,91 @@ namespace CineTrackBE.Services
         }
 
         // ANY USER EXIST? //
-        public bool AnyUserExists_Email(string email)
+        public bool AnyUserExists_UserName(string userName)
         {
-            if (string.IsNullOrWhiteSpace(email)) throw new ArgumentNullException(nameof(email), "email is null or empty!");
+            if (string.IsNullOrWhiteSpace(userName)) throw new ArgumentNullException(nameof(userName), "userName is null or empty!");
 
-            return _context.Users.Any(p => p.NormalizedEmail == email.ToUpper());
+            return _context.Users.Any(p => p.UserName == userName.ToUpper());
         }
+
+        //// ANY USER EXIST? //
+        //public bool AnyUserExists_UserName(string userName)
+        //{
+        //    if (string.IsNullOrWhiteSpace(userName)) throw new ArgumentNullException(nameof(userName), "userName is null or empty!");
+
+        //    return _context.Users.Any(p => p.UserName == userName.ToUpper());
+        //}
 
         // SAVE CHANGES //
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
         }
+
+
+
+
+        // ROLE //
+        // ADD USER ROLE //
+        public async Task<bool> AddUserRole(User user, string role)
+        {
+            if (user == null) throw new ArgumentNullException(nameof(user), "user is null!");
+            if (string.IsNullOrEmpty(role)) throw new ArgumentNullException(nameof(role), "role is null or empty!");
+
+
+            var myRole = await _context.Roles.FirstOrDefaultAsync(p => p.Name == role);
+            if (myRole == null) return false;
+
+            // this role in db?
+            var myUserRole = await _context.UserRoles.Where(p => p.UserId == user.Id).FirstOrDefaultAsync(p => p.RoleId == myRole.Id);
+            if (myUserRole != null) return true; // role is already in db
+
+            var newRole = new IdentityUserRole<string>()
+            {
+                 UserId = user.Id,
+                 RoleId = myRole.Id
+            };
+
+            await _context.UserRoles.AddAsync(newRole);
+
+            return true;
+
+        }
+
+        // GET ROLES FROM USER ID //
+        public async Task<IEnumerable<IdentityRole>> GetRoles_FromUser(User user)
+        {
+            if (user == null) throw new ArgumentNullException(nameof(user), "user is null!");
+
+
+            List<IdentityRole> roles = [];
+
+            var allUserRoles = await _context.UserRoles.ToListAsync();
+            var allRoles = await _context.Roles.ToListAsync();
+
+            var userRoles = allUserRoles.Where(p => p.UserId == user.Id);
+
+
+            foreach (var item in userRoles)
+            {
+                var role = allRoles.FirstOrDefault(p => p.Id == item.RoleId);
+
+                if (role != null) roles.Add(role);
+            }
+
+            return roles;
+        }
+
+
+
+        // GET USER-ROLE LIST //
+        public async Task<IEnumerable<IdentityUserRole<string>>> GetUserRole_List() => await _context.UserRoles.ToListAsync();
+
+        // GET ROLE LIST //
+        public async Task<IEnumerable<IdentityRole<string>>> GetRole_List() => await _context.Roles.ToListAsync();
+
+
+
 
     }
 }

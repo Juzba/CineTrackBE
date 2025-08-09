@@ -3,15 +3,15 @@ using System.ComponentModel.DataAnnotations;
 
 #nullable disable
 
-namespace CineTrackBE.Models;
+namespace CineTrackBE.Models.Entities;
 
 public class User : IdentityUser
 {
     public ICollection<Comment> Comments { get; set; } = [];
 
-    [Required(ErrorMessage = "Email je povinný!")]
-    [MinLength(6, ErrorMessage ="Email musí mít minimálně 6 znaků!")]
-    public override string Email { get => base.Email; set => base.Email = value; }
+    [Required(ErrorMessage = "UserName je povinný!")]
+    [MinLength(6, ErrorMessage ="UserName musí mít minimálně 6 znaků!")]
+    public override string UserName { get => base.UserName; set => base.UserName = value; }
 
 
     [Required(ErrorMessage = "Password je povinný!")]
