@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 
 
 

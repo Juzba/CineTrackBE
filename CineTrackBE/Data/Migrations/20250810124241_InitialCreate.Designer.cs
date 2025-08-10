@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CineTrackBE.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250806192640_InitialCrea")]
-    partial class InitialCrea
+    [Migration("20250810124241_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace CineTrackBE.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("CineTrackBE.Models.Comment", b =>
+            modelBuilder.Entity("CineTrackBE.Models.Entities.Comment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -57,7 +57,7 @@ namespace CineTrackBE.Data.Migrations
                     b.ToTable("Comments");
                 });
 
-            modelBuilder.Entity("CineTrackBE.Models.Film", b =>
+            modelBuilder.Entity("CineTrackBE.Models.Entities.Film", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -82,7 +82,7 @@ namespace CineTrackBE.Data.Migrations
                     b.ToTable("Films");
                 });
 
-            modelBuilder.Entity("CineTrackBE.Models.FilmGenre", b =>
+            modelBuilder.Entity("CineTrackBE.Models.Entities.FilmGenre", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -105,7 +105,7 @@ namespace CineTrackBE.Data.Migrations
                     b.ToTable("FilmGenres");
                 });
 
-            modelBuilder.Entity("CineTrackBE.Models.Genre", b =>
+            modelBuilder.Entity("CineTrackBE.Models.Entities.Genre", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -122,7 +122,7 @@ namespace CineTrackBE.Data.Migrations
                     b.ToTable("Genre");
                 });
 
-            modelBuilder.Entity("CineTrackBE.Models.Rating", b =>
+            modelBuilder.Entity("CineTrackBE.Models.Entities.Rating", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -149,7 +149,7 @@ namespace CineTrackBE.Data.Migrations
                     b.ToTable("Ratings");
                 });
 
-            modelBuilder.Entity("CineTrackBE.Models.User", b =>
+            modelBuilder.Entity("CineTrackBE.Models.Entities.User", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -183,6 +183,7 @@ namespace CineTrackBE.Data.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("PasswordHash")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
@@ -198,6 +199,7 @@ namespace CineTrackBE.Data.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("UserName")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
@@ -428,19 +430,19 @@ namespace CineTrackBE.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("CineTrackBE.Models.Comment", b =>
+            modelBuilder.Entity("CineTrackBE.Models.Entities.Comment", b =>
                 {
-                    b.HasOne("CineTrackBE.Models.User", "Autor")
+                    b.HasOne("CineTrackBE.Models.Entities.User", "Autor")
                         .WithMany("Comments")
                         .HasForeignKey("AutorId");
 
-                    b.HasOne("CineTrackBE.Models.Comment", "ParrentComment")
+                    b.HasOne("CineTrackBE.Models.Entities.Comment", "ParrentComment")
                         .WithMany("Replies")
                         .HasForeignKey("ParrentCommentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("CineTrackBE.Models.Film", "Film")
+                    b.HasOne("CineTrackBE.Models.Entities.Film", "Film")
                         .WithMany("Comments")
                         .HasForeignKey("ParrentCommentId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -453,15 +455,15 @@ namespace CineTrackBE.Data.Migrations
                     b.Navigation("ParrentComment");
                 });
 
-            modelBuilder.Entity("CineTrackBE.Models.FilmGenre", b =>
+            modelBuilder.Entity("CineTrackBE.Models.Entities.FilmGenre", b =>
                 {
-                    b.HasOne("CineTrackBE.Models.Film", "Film")
+                    b.HasOne("CineTrackBE.Models.Entities.Film", "Film")
                         .WithMany("FilmGenres")
                         .HasForeignKey("FilmId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CineTrackBE.Models.Genre", "Genre")
+                    b.HasOne("CineTrackBE.Models.Entities.Genre", "Genre")
                         .WithMany("FilmGenres")
                         .HasForeignKey("GenreId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -472,15 +474,15 @@ namespace CineTrackBE.Data.Migrations
                     b.Navigation("Genre");
                 });
 
-            modelBuilder.Entity("CineTrackBE.Models.Rating", b =>
+            modelBuilder.Entity("CineTrackBE.Models.Entities.Rating", b =>
                 {
-                    b.HasOne("CineTrackBE.Models.Film", "Film")
+                    b.HasOne("CineTrackBE.Models.Entities.Film", "Film")
                         .WithMany("Ratings")
                         .HasForeignKey("FilmId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CineTrackBE.Models.User", "User")
+                    b.HasOne("CineTrackBE.Models.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -502,7 +504,7 @@ namespace CineTrackBE.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("CineTrackBE.Models.User", null)
+                    b.HasOne("CineTrackBE.Models.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -511,7 +513,7 @@ namespace CineTrackBE.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("CineTrackBE.Models.User", null)
+                    b.HasOne("CineTrackBE.Models.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -526,7 +528,7 @@ namespace CineTrackBE.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CineTrackBE.Models.User", null)
+                    b.HasOne("CineTrackBE.Models.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -535,19 +537,19 @@ namespace CineTrackBE.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("CineTrackBE.Models.User", null)
+                    b.HasOne("CineTrackBE.Models.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CineTrackBE.Models.Comment", b =>
+            modelBuilder.Entity("CineTrackBE.Models.Entities.Comment", b =>
                 {
                     b.Navigation("Replies");
                 });
 
-            modelBuilder.Entity("CineTrackBE.Models.Film", b =>
+            modelBuilder.Entity("CineTrackBE.Models.Entities.Film", b =>
                 {
                     b.Navigation("Comments");
 
@@ -556,12 +558,12 @@ namespace CineTrackBE.Data.Migrations
                     b.Navigation("Ratings");
                 });
 
-            modelBuilder.Entity("CineTrackBE.Models.Genre", b =>
+            modelBuilder.Entity("CineTrackBE.Models.Entities.Genre", b =>
                 {
                     b.Navigation("FilmGenres");
                 });
 
-            modelBuilder.Entity("CineTrackBE.Models.User", b =>
+            modelBuilder.Entity("CineTrackBE.Models.Entities.User", b =>
                 {
                     b.Navigation("Comments");
                 });

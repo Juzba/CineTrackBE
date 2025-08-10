@@ -10,9 +10,10 @@ namespace CineTrackBE.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = "Admin")]
-    public class UsersController(IUserService userService) : Controller
+    public class UsersController(IUserService userService, IRoleService roleService) : Controller
     {
         private readonly IUserService _userService = userService;
+        private readonly IRoleService _roleService = roleService;
 
         const string AdminConst = "Admin";
         const string UserConst = "User";
@@ -24,8 +25,8 @@ namespace CineTrackBE.Areas.Admin.Controllers
         public async Task<IActionResult> Index()
         {
             var users = await _userService.GetUsersList();
-            var roles = await _userService.GetRole_List();
-            var userRoles = await _userService.GetUserRole_List();
+            var roles = await _roleService.GetRole_List();
+            var userRoles = await _roleService.GetUserRole_List();
 
 
 
@@ -60,7 +61,7 @@ namespace CineTrackBE.Areas.Admin.Controllers
 
             if (user == null) return NotFound();
 
-            var roles = await _userService.GetRoles_FromUser(user);
+            var roles = await _roleService.GetRoles_FromUser(user);
 
 
             var userWithRoles = new UserWithRoles()
@@ -78,32 +79,38 @@ namespace CineTrackBE.Areas.Admin.Controllers
         }
 
 
-
         // CREATE //
-        //public IActionResult Create() => View();
+        public IActionResult Create() => View();
 
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Create([Bind("Id, Email, PhoneNumber, PasswordHash, EmailConfirmed")] User user)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        // user with this email exist
-        //        if (_userService.AnyUserExists_UserName(user.UserName))
-        //        {
-        //            ModelState.AddModelError("Email", "Zadejte platnou e-mailovou adresu.");
-        //            return View(user);
-        //        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("Id, UserName, PhoneNumber, PasswordHash, EmailConfirmed")] User user, bool roleUser, bool roleAdmin)
+        {
+            if (ModelState.IsValid)
+            {
+                // user with this UserName exist
+                if (_userService.AnyUserExists_UserName(user.UserName))
+                {
+                    ModelState.AddModelError("UserName", "UserName je obsazen!");
+                    return View(user);
+                }
 
-        //        Add_Additional_UserParametrs(ref user);
-        //        Add_Hash_To_UserPassword(ref user);
+                Add_Additional_UserParametrs(ref user);
+                Add_Hash_To_UserPassword(ref user);
 
-        //        await _userService.AddUser(user);
-        //        await _userService.SaveChangesAsync();
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    return View(user);
-        //}
+
+                // add role admin
+                if (roleAdmin) await _roleService.AddUserRole(user, AdminConst);
+                // add  role user
+                if (roleUser) await _roleService.AddUserRole(user, UserConst);
+
+
+                await _userService.AddUser(user);
+                await _userService.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(user);
+        }
 
 
 
@@ -117,7 +124,7 @@ namespace CineTrackBE.Areas.Admin.Controllers
             if (user == null) return NotFound();
 
 
-            var roles = await _userService.GetRoles_FromUser(user);
+            var roles = await _roleService.GetRoles_FromUser(user);
 
 
             var userWithRoles = new UserWithRoles()
@@ -162,16 +169,17 @@ namespace CineTrackBE.Areas.Admin.Controllers
                 if (completedUser == null) return NotFound();
 
 
+                // add or remove role admin
+                if (roleAdmin) await _roleService.AddUserRole(completedUser, AdminConst);
+                else if (await _roleService.UsersInRole_Count(AdminConst) >= 2) await _roleService.RemoveUserRole(completedUser, AdminConst);
 
-                // DODELAT ROLE //
+                // add or remove role user
+                if (roleUser) await _roleService.AddUserRole(completedUser, UserConst);
+                else await _roleService.RemoveUserRole(completedUser, UserConst);
 
-                // add roles
-                if (roleAdmin) await _userService.AddUserRole(completedUser, AdminConst);
-                else { } // remove
-                if (roleUser) await _userService.AddUserRole(completedUser, UserConst);
-                else { } // remove
+                await _roleService.SaveChangesAsync();
 
-                ///       ///
+
 
 
                 try
@@ -226,17 +234,17 @@ namespace CineTrackBE.Areas.Admin.Controllers
 
         private static void Add_Additional_UserParametrs(ref User user)
         {
-            if (user == null) throw new ArgumentNullException("user is null!");
+            ArgumentNullException.ThrowIfNull(user);
 
-            user.UserName = user.Email;
-            user.NormalizedUserName = user.Email!.ToUpper();
-            user.NormalizedEmail = user.Email!.ToUpper();
+            user.Email = user.UserName;
+            user.NormalizedUserName = user.UserName!.ToUpper();
+            user.NormalizedEmail = user.UserName!.ToUpper();
         }
 
 
         private static void Add_Hash_To_UserPassword(ref User user)
         {
-            if (user == null) throw new ArgumentNullException("user is null!");
+            ArgumentNullException.ThrowIfNull(user);
 
             PasswordHasher<User> ph = new();
             user.PasswordHash = ph.HashPassword(null!, user.PasswordHash);
@@ -245,8 +253,8 @@ namespace CineTrackBE.Areas.Admin.Controllers
 
         private User? CompleteUseData(UserWithRoles formUser, User defaultUser)
         {
-            if (formUser == null) throw new ArgumentNullException(nameof(formUser), "inputUser is null!");
-            if (defaultUser == null) throw new ArgumentNullException(nameof(defaultUser), "defaultUser is null!");
+            ArgumentNullException.ThrowIfNull(formUser);
+            ArgumentNullException.ThrowIfNull(defaultUser);
 
 
             if (defaultUser != null)

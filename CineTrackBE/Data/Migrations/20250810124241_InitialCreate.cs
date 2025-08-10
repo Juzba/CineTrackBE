@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CineTrackBE.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreat : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -32,12 +32,12 @@ namespace CineTrackBE.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -288,9 +288,9 @@ namespace CineTrackBE.Data.Migrations
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
                 values: new object[,]
                 {
-                    { "id-Juzba", 0, "", "Juzba@gmail.com", true, false, null, "JUZBA@GMAIL.COM", "JUZBA", "AQAAAAIAAYagAAAAEOadgFzBJnpnkBkmi8SqFcuYgy60qk0ZBrgllZ0PPoVBypQav6KsXimrjBfiPVo6Mw==", null, false, "", false, "Juzba" },
-                    { "id-Karel", 0, "", "Karel@gmail.com", true, false, null, "KAREL@GMAIL.COM", "KAREL", "AQAAAAIAAYagAAAAEI3e/eOUTskYsHiohjGn7iVPezNTxmLT5XjporF7MfKyPsdcioNgrAJkTmk5H1c+IQ==", null, false, "", false, "Karel" },
-                    { "id-Katka", 0, "", "Katka@gmail.com", true, false, null, "KATKA@GMAIL.COM", "KATKA", "AQAAAAIAAYagAAAAEJaTtbyo9uZ+7zhBsqPgOSRVqq81uC1HilQAFs30aTxQs18hzOp3e9o7jZMtt3nTow==", null, false, "", false, "Katka" }
+                    { "id-Juzba", 0, "", "Juzba@gmail.com", true, false, null, "JUZBA@GMAIL.COM", "JUZBA@GMAIL.COM", "AQAAAAIAAYagAAAAEOadgFzBJnpnkBkmi8SqFcuYgy60qk0ZBrgllZ0PPoVBypQav6KsXimrjBfiPVo6Mw==", null, false, "", false, "Juzba@gmail.com" },
+                    { "id-Karel", 0, "", "Karel@gmail.com", true, false, null, "KAREL@GMAIL.COM", "KAREL@GMAIL.COM", "AQAAAAIAAYagAAAAEI3e/eOUTskYsHiohjGn7iVPezNTxmLT5XjporF7MfKyPsdcioNgrAJkTmk5H1c+IQ==", null, false, "", false, "Karel@gmail.com" },
+                    { "id-Katka", 0, "", "Katka@gmail.com", true, false, null, "KATKA@GMAIL.COM", "KATKA@GMAIL.COM", "AQAAAAIAAYagAAAAEJaTtbyo9uZ+7zhBsqPgOSRVqq81uC1HilQAFs30aTxQs18hzOp3e9o7jZMtt3nTow==", null, false, "", false, "Katka@gmail.com" }
                 });
 
             migrationBuilder.InsertData(
