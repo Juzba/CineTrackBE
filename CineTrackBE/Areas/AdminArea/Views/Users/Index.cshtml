@@ -50,13 +50,13 @@
             <td>
                     @foreach(var role in item.Roles)
                     {
-                        <span class="btn btn-outline-warning" style="margin: 5px" > @Html.DisplayFor(modelItem => role) </span>
+                        <span class="badge bg-gradient" style="margin: 5px" > @Html.DisplayFor(modelItem => role) </span>
                     }
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-info">Edit</a> 
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info">Details</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-info">Delete</a>
             </td>
         </tr>
 }

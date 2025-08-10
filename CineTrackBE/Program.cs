@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IFilmService, FilmService>();
 
 
 
@@ -64,8 +65,13 @@ app.MapStaticAssets();
 
 app.MapAreaControllerRoute(
     name: "admin",
-    areaName: "Admin",
-    pattern: "Admin/{controller=Home}/{action=Index}/{id?}");
+    areaName: "AdminArea",
+    pattern: "AdminArea/{controller=Users}/{action=Index}/{id?}");
+
+app.MapAreaControllerRoute(
+    name: "user",
+    areaName: "UserArea",
+    pattern: "UserArea/{controller=Films}/{action=Index}/{id?}");
 
 
 app.MapControllerRoute(

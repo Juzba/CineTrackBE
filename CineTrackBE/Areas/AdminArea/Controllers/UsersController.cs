@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace CineTrackBE.Areas.Admin.Controllers
+namespace CineTrackBE.Areas.AdminArea.Controllers
 {
-    [Area("Admin")]
+    [Area("AdminArea")]
     [Authorize(Roles = "Admin")]
     public class UsersController(IUserService userService, IRoleService roleService) : Controller
     {
