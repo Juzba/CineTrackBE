@@ -26,7 +26,12 @@
                         @if(User.IsInRole("User") || User.IsInRole("Admin")){
                             <li class="nav-item">
                                 <a class="nav-link text-white" asp-area="UserArea" asp-controller="Films" asp-action="Index">Movies</a>
-                            </li>}
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="UserArea" asp-controller="Genres" asp-action="Index">Genres</a>
+                            </li>
+                        
+                        }
 
                         @if(User.IsInRole("Admin")){
                             <li class="nav-item">

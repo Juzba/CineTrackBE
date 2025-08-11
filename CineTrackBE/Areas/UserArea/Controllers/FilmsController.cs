@@ -24,7 +24,7 @@ public class FilmsController(IFilmService filmService) : Controller
     // DETAILS //
     public async Task<IActionResult> Details(string id)
     {
-        if (int.TryParse(id, out int intId)) return NotFound();
+        if (!int.TryParse(id, out int intId)) return NotFound();
 
 
         var film = await _filmService.GetFilm_Id(intId);
@@ -35,6 +35,7 @@ public class FilmsController(IFilmService filmService) : Controller
 
 
     // CREATE //
+    [Authorize(Roles ="Admin")]
     public IActionResult Create() => View();
 
 
@@ -44,99 +45,77 @@ public class FilmsController(IFilmService filmService) : Controller
     {
         if (ModelState.IsValid)
         {
-            _context.Add(film);
-            await _context.SaveChangesAsync();
+            await _filmService.AddFilm(film);
+            await _filmService.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
         return View(film);
     }
 
-    // GET: UserArea/Films/Edit/5
-    public async Task<IActionResult> Edit(int? id)
+    // EDIT //
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Edit(string id)
     {
-        if (id == null)
-        {
-            return NotFound();
-        }
+        if (!int.TryParse(id, out int intId)) return NotFound();
 
-        var film = await _context.Films.FindAsync(id);
-        if (film == null)
-        {
-            return NotFound();
-        }
+        var film = await _filmService.GetFilm_Id(intId);
+        if (film == null) return NotFound();
+
         return View(film);
     }
 
-    // POST: UserArea/Films/Edit/5
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Director,Year")] Film film)
     {
-        if (id != film.Id)
-        {
-            return NotFound();
-        }
+        if (id != film.Id) return NotFound();
+
 
         if (ModelState.IsValid)
         {
             try
             {
-                _context.Update(film);
-                await _context.SaveChangesAsync();
+                _filmService.UpdateFilm(film);
+                await _filmService.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!FilmExists(film.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                if (!_filmService.AnyFilm_Id(film.Id)) return NotFound();
+
+                else throw;
+
             }
             return RedirectToAction(nameof(Index));
         }
         return View(film);
     }
 
-    // GET: UserArea/Films/Delete/5
-    public async Task<IActionResult> Delete(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
-        }
 
-        var film = await _context.Films
-            .FirstOrDefaultAsync(m => m.Id == id);
-        if (film == null)
-        {
-            return NotFound();
-        }
+    // DELETE //
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(string id)
+    {
+        if (!int.TryParse(id, out int intId)) return NotFound();
+
+        var film = await _filmService.GetFilm_Id(intId);
+        if (film == null) return NotFound();
 
         return View(film);
     }
 
-    // POST: UserArea/Films/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var film = await _context.Films.FindAsync(id);
+        var film = await _filmService.GetFilm_Id(id);
         if (film != null)
         {
-            _context.Films.Remove(film);
+            _filmService.RemoveFilm(film);
         }
 
-        await _context.SaveChangesAsync();
+        await _filmService.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
 
-    private bool FilmExists(int id)
-    {
-        return _context.Films.Any(e => e.Id == id);
-    }
 }

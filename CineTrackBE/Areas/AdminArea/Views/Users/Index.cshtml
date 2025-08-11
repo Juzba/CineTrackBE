@@ -11,6 +11,12 @@
 <p>
     <a asp-action="Create" class="btn btn-outline-info">Create New User</a>
 </p>
+
+@if (TempData["info"] != null)
+{
+    <span class="text-danger fs-4" >@TempData["info"]</span>
+}
+
 <table class="table table-dark">
     <thead>
         <tr>

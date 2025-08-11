@@ -172,6 +172,7 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
                 // add or remove role admin
                 if (roleAdmin) await _roleService.AddUserRole(completedUser, AdminConst);
                 else if (await _roleService.UsersInRole_Count(AdminConst) >= 2) await _roleService.RemoveUserRole(completedUser, AdminConst);
+                else TempData["info"] = "Nelze odebrat posledního Admina!!";
 
                 // add or remove role user
                 if (roleUser) await _roleService.AddUserRole(completedUser, UserConst);
@@ -223,6 +224,17 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
             var user = await _userService.GetUser(id);
             if (user != null)
             {
+                var role = await _roleService.GetRoles_FromUser(user);
+                var adminsCount = await _roleService.UsersInRole_Count(AdminConst);
+
+                // Last Admin cannot be removed
+                if (role.Any(p => p.Name == "Admin") && adminsCount <= 1)
+                {
+                    TempData["info"] = "Nelze smazat posledního Admina!!";
+                    return RedirectToAction(nameof(Index));
+                }
+
+
                 _userService.RemoveUser(user);
             }
 
