@@ -1,4 +1,4 @@
-namespace CineTrackBE.Models.Entities
+namespace CineTrackBE.Models.ViewModel
 {
     public class ErrorViewModel
     {
