@@ -1,4 +1,5 @@
-﻿@model CineTrackBE.Models.Entities.Film
+﻿@using CineTrackBE.Models.ViewModel
+@model FilmViewModel
 
 @{
     ViewData["Title"] = "Create";
@@ -13,24 +14,30 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+                <label asp-for="Film.Name" class="control-label"></label>
+                <input asp-for="Film.Name" class="form-control" />
+                <span asp-validation-for="Film.Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
+                <label asp-for="Film.Description" class="control-label"></label>
+                <input asp-for="Film.Description" class="form-control" />
+                <span asp-validation-for="Film.Description" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Director" class="control-label"></label>
-                <input asp-for="Director" class="form-control" />
-                <span asp-validation-for="Director" class="text-danger"></span>
+                <label asp-for="Film.Director" class="control-label"></label>
+                <input asp-for="Film.Director" class="form-control" />
+                <span asp-validation-for="Film.Director" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Year" class="control-label"></label>
-                <input asp-for="Year" class="form-control" />
-                <span asp-validation-for="Year" class="text-danger"></span>
+                <label asp-for="Film.Year" class="control-label"></label>
+                <input asp-for="Film.Year" class="form-control" />
+                <span asp-validation-for="Film.Year" class="text-danger"></span>
+            </div>
+            <div>
+                @foreach(var item in Model.AllGenres)
+                {
+                    <p class="m-3" >@item.Name</p>
+                }
             </div>
             <div class="form-group d-flex my-3">
                 <input type="submit" value="Create" class="btn btn-primary" style="margin-right: 10px"/>

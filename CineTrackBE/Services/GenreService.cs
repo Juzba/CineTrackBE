@@ -33,6 +33,7 @@ public class GenreService(ApplicationDbContext context) : IGenreService
     public async Task<IEnumerable<Genre>> GetGenreList() => await _context.Genre.ToListAsync();
 
 
+
     // ADD GENRE //
     public async Task AddGenre(Genre genre)
     {

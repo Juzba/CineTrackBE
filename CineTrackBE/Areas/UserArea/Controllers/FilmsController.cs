@@ -1,4 +1,5 @@
 ﻿using CineTrackBE.Models.Entities;
+using CineTrackBE.Models.ViewModel;
 using CineTrackBE.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,9 +10,10 @@ namespace CineTrackBE.Areas.UserArea.Controllers;
 
 [Area("UserArea")]
 [Authorize(Roles = "Admin,User")]
-public class FilmsController(IFilmService filmService) : Controller
+public class FilmsController(IFilmService filmService, IGenreService genreService) : Controller
 {
     private readonly IFilmService _filmService = filmService;
+    private readonly IGenreService _genreService = genreService;
 
 
     // INDEX //
@@ -35,9 +37,13 @@ public class FilmsController(IFilmService filmService) : Controller
 
 
     // CREATE //
-    [Authorize(Roles ="Admin")]
-    public IActionResult Create() => View();
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Create()
+    {
+        var allGenres = await _genreService.GetGenreList();
 
+        return View(new FilmViewModel() { AllGenres = [.. allGenres] });
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
