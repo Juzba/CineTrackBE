@@ -49,6 +49,17 @@ namespace CineTrackBE.Data
             );
 
 
+            builder.Entity<Genre>().HasData
+            (
+                new Genre() { Id = 1, Name = "Drama" },
+                new Genre() { Id = 2, Name = "Horror" },
+                new Genre() { Id = 3, Name = "Comedy" },
+                new Genre() { Id = 4, Name = "Action" },
+                new Genre() { Id = 5, Name = "Thriller" }
+            );
+
+            builder.Entity<FilmGenre>()
+                .HasKey(p => new { p.FilmId, p.GenreId });
 
             builder.Entity<FilmGenre>()
                 .HasOne(p => p.Film)

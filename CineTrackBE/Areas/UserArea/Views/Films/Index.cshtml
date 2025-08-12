@@ -30,6 +30,9 @@
 			<th>
 				@Html.DisplayNameFor(model => model.Year)
 			</th>
+			<th>
+				@Html.DisplayNameFor(model => model.FilmGenres)
+			</th>
 			<th></th>
 		</tr>
 	</thead>
@@ -51,6 +54,12 @@
 				</td>
 				<td>
 					@Html.DisplayFor(modelItem => item.Year)
+				</td>
+				<td>
+					@foreach (var filmGenre in item.FilmGenres)
+					{
+						<span class="badge bg-gradient">@filmGenre.Genre.Name</span>
+					}
 				</td>
 				<td>
 					@if (User.IsInRole("Admin"))

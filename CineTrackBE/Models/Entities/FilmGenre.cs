@@ -3,8 +3,6 @@
 #nullable disable
 public class FilmGenre
 {
-    public int Id { get; set; }
-
 
     // Film //
     public int FilmId { get; set; }

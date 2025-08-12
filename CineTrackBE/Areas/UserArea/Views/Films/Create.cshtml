@@ -38,6 +38,7 @@
                 <label asp-for="SelectedGenresId">Genres</label>
                 <select asp-for="SelectedGenresId" asp-items="@(new SelectList(Model.AllGenres, "Id", "Name"))" class="form-control" multiple>
                 </select>
+                <span asp-validation-for="SelectedGenresId" class="text-danger"></span>
             </div>
 
             <div class="form-group d-flex my-3">

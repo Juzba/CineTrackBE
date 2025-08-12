@@ -12,6 +12,7 @@ namespace CineTrackBE.Services
         Task<bool> RemoveUserRoleAsync(User user, string role, CancellationToken cancellationToken = default);
         Task<IQueryable<IdentityRole>> GetRolesFromUserAsync(User user, CancellationToken cancellationToken = default);
         Task<int> CountUserInRoleAsync(string role, CancellationToken cancellationToken = default);
+        Task AddGenresToFilmAsync(Film film, List<int> genreIds, CancellationToken cancellationToken = default);
     }
     public class DataService(ApplicationDbContext context, ILogger<DataService> logger) : IDataService
     {
@@ -96,5 +97,22 @@ namespace CineTrackBE.Services
         }
 
 
+        // ADD LIST OF GENRES TO FILM //
+        public async Task AddGenresToFilmAsync(Film film, List<int> genreIds, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(film);
+
+            if (genreIds == null || genreIds.Count == 0) return;
+
+            // film-genres existing in db //
+            var existsFilmGenres = await _context.FilmGenres.Where(p => p.FilmId == film.Id && genreIds.Contains(p.GenreId)).ToListAsync(cancellationToken);
+
+            // film-genres not existing in db //
+            var genreList = genreIds.Except(existsFilmGenres.Select(p => p.GenreId)).Select(p => new FilmGenre() { GenreId = p, FilmId = film.Id });
+
+            if (genreList == null) return;
+            await _context.AddRangeAsync(genreList, cancellationToken);
+
+        }
     }
 }

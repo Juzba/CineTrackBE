@@ -81,21 +81,13 @@ namespace CineTrackBE.Data.Migrations
 
             modelBuilder.Entity("CineTrackBE.Models.Entities.FilmGenre", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
                     b.Property<int>("FilmId")
                         .HasColumnType("int");
 
                     b.Property<int>("GenreId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("FilmId");
+                    b.HasKey("FilmId", "GenreId");
 
                     b.HasIndex("GenreId");
 
@@ -117,6 +109,33 @@ namespace CineTrackBE.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Genre");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Drama"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Horror"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Comedy"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Action"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Thriller"
+                        });
                 });
 
             modelBuilder.Entity("CineTrackBE.Models.Entities.Rating", b =>

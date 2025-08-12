@@ -252,14 +252,12 @@ namespace CineTrackBE.Data.Migrations
                 name: "FilmGenres",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
                     FilmId = table.Column<int>(type: "int", nullable: false),
                     GenreId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FilmGenres", x => x.Id);
+                    table.PrimaryKey("PK_FilmGenres", x => new { x.FilmId, x.GenreId });
                     table.ForeignKey(
                         name: "FK_FilmGenres_Films_FilmId",
                         column: x => x.FilmId,
@@ -291,6 +289,18 @@ namespace CineTrackBE.Data.Migrations
                     { "id-Juzba", 0, "", "Juzba@gmail.com", true, false, null, "JUZBA@GMAIL.COM", "JUZBA@GMAIL.COM", "AQAAAAIAAYagAAAAEOadgFzBJnpnkBkmi8SqFcuYgy60qk0ZBrgllZ0PPoVBypQav6KsXimrjBfiPVo6Mw==", null, false, "", false, "Juzba@gmail.com" },
                     { "id-Karel", 0, "", "Karel@gmail.com", true, false, null, "KAREL@GMAIL.COM", "KAREL@GMAIL.COM", "AQAAAAIAAYagAAAAEI3e/eOUTskYsHiohjGn7iVPezNTxmLT5XjporF7MfKyPsdcioNgrAJkTmk5H1c+IQ==", null, false, "", false, "Karel@gmail.com" },
                     { "id-Katka", 0, "", "Katka@gmail.com", true, false, null, "KATKA@GMAIL.COM", "KATKA@GMAIL.COM", "AQAAAAIAAYagAAAAEJaTtbyo9uZ+7zhBsqPgOSRVqq81uC1HilQAFs30aTxQs18hzOp3e9o7jZMtt3nTow==", null, false, "", false, "Katka@gmail.com" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Genre",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Drama" },
+                    { 2, "Horror" },
+                    { 3, "Comedy" },
+                    { 4, "Action" },
+                    { 5, "Thriller" }
                 });
 
             migrationBuilder.InsertData(
@@ -351,11 +361,6 @@ namespace CineTrackBE.Data.Migrations
                 name: "IX_Comments_ParrentCommentId",
                 table: "Comments",
                 column: "ParrentCommentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_FilmGenres_FilmId",
-                table: "FilmGenres",
-                column: "FilmId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FilmGenres_GenreId",

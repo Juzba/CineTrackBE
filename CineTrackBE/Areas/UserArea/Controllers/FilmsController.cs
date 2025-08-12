@@ -4,21 +4,24 @@ using CineTrackBE.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace CineTrackBE.Areas.UserArea.Controllers;
 
 [Area("UserArea")]
 [Authorize(Roles = "Admin,User")]
-public class FilmsController(IRepository<Film> filmRepository, IRepository<Genre> genreRepository) : Controller
+public class FilmsController(IRepository<Film> filmRepository, IRepository<Genre> genreRepository, IDataService dataService) : Controller
 {
 
     private readonly IRepository<Film> _filmRepository = filmRepository;
     private readonly IRepository<Genre> _genreRepository = genreRepository;
+    private readonly IDataService _dataService = dataService;
+
 
     // INDEX //
     public async Task<IActionResult> Index()
     {
-        return View(await _filmRepository.GetList().ToListAsync());
+        return View(await _filmRepository.GetList().Include(p=>p.FilmGenres).ThenInclude(p=>p.Genre).ToListAsync());
     }
 
     // DETAILS //
@@ -47,20 +50,16 @@ public class FilmsController(IRepository<Film> filmRepository, IRepository<Genre
     {
         if (ModelState.IsValid)
         {
+            if(filmViewModel.SelectedGenresId.Count > 3) ModelState.is
+
+
             await _filmRepository.AddAsync(filmViewModel.Film);
             await _filmRepository.SaveChangesAsync();
 
 
-            // tady pridat pridani zanru na zaklade id!!!
-
-
-
-
-
-
-
-
-
+            
+            await _dataService.AddGenresToFilmAsync(filmViewModel.Film, filmViewModel.SelectedGenresId);
+            await _filmRepository.SaveChangesAsync();
 
 
             return RedirectToAction(nameof(Index));
