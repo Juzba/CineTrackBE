@@ -4,9 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace CineTrackBE.Areas.UserArea.Controllers
+namespace CineTrackBE.Controllers
 {
-    [Area("UserArea")]
     [Authorize(Roles = "Admin,User")]
     public class GenresController(IRepository<Genre> genreRepository) : Controller
     {

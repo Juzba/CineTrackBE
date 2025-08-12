@@ -6,9 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace CineTrackBE.Areas.AdminArea.Controllers
+namespace CineTrackBE.Controllers
 {
-    [Area("AdminArea")]
     [Authorize(Roles = "Admin")]
     public class UsersController( IRepository<User> userRepository, IRepository<IdentityRole> roleRepository, IRepository<IdentityUserRole<string>> userRoleRepository, IDataService dataService) : Controller
     {

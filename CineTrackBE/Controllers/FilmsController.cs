@@ -6,9 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
-namespace CineTrackBE.Areas.UserArea.Controllers;
+namespace CineTrackBE.Controllers;
 
-[Area("UserArea")]
 [Authorize(Roles = "Admin,User")]
 public class FilmsController(IRepository<Film> filmRepository, IRepository<Genre> genreRepository, IDataService dataService) : Controller
 {
@@ -50,7 +49,9 @@ public class FilmsController(IRepository<Film> filmRepository, IRepository<Genre
     {
         if (ModelState.IsValid)
         {
-            if(filmViewModel.SelectedGenresId.Count > 3) ModelState.is
+
+            // ZDE omezit model maximalne na tri genre //
+            //if(filmViewModel.SelectedGenresId.Count > 3) ModelState.is
 
 
             await _filmRepository.AddAsync(filmViewModel.Film);

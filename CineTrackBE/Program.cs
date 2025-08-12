@@ -61,16 +61,6 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
-app.MapAreaControllerRoute(
-    name: "admin",
-    areaName: "AdminArea",
-    pattern: "AdminArea/{controller=Users}/{action=Index}/{id?}");
-
-app.MapAreaControllerRoute(
-    name: "user",
-    areaName: "UserArea",
-    pattern: "UserArea/{controller=Films}/{action=Index}/{id?}");
-
 
 app.MapControllerRoute(
     name: "default",
