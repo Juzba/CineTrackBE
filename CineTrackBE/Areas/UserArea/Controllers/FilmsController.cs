@@ -43,15 +43,29 @@ public class FilmsController(IRepository<Film> filmRepository, IRepository<Genre
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,Name,Description,Director,Year")] Film film)
+    public async Task<IActionResult> Create(FilmViewModel filmViewModel)
     {
         if (ModelState.IsValid)
         {
-            await _filmRepository.AddAsync(film);
+            await _filmRepository.AddAsync(filmViewModel.Film);
             await _filmRepository.SaveChangesAsync();
+
+
+            // tady pridat pridani zanru na zaklade id!!!
+
+
+
+
+
+
+
+
+
+
+
             return RedirectToAction(nameof(Index));
         }
-        return View(film);
+        return View(filmViewModel);
     }
 
     // EDIT //
