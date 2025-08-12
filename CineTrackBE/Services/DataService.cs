@@ -5,28 +5,30 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CineTrackBE.Services
 {
-    public interface IRoleService
+    public interface IDataService
     {
-
+        Task<bool> AnyUserExistsByUserNameAsync(string userName, CancellationToken cancellationToken = default);
         Task<bool> AddUserRoleAsync(User user, string role, CancellationToken cancellationToken = default);
         Task<bool> RemoveUserRoleAsync(User user, string role, CancellationToken cancellationToken = default);
         Task<IQueryable<IdentityRole>> GetRolesFromUserAsync(User user, CancellationToken cancellationToken = default);
         Task<int> CountUserInRoleAsync(string role, CancellationToken cancellationToken = default);
-        IQueryable<IdentityUserRole<string>> GetUserRoleList();
-        IQueryable<IdentityRole> GetRoleList();
-        Task SaveChangesAsync(CancellationToken cancellationToken = default);
-
     }
-    public class RoleService : IRoleService
+    public class DataService(ApplicationDbContext context, ILogger<DataService> logger) : IDataService
     {
-        private readonly ApplicationDbContext _context;
-        private readonly ILogger<RoleService> _logger;
+        private readonly ApplicationDbContext _context = context;
+        private readonly ILogger<DataService> _logger = logger;
 
 
-        public RoleService(ApplicationDbContext context, ILogger<RoleService> logger)
+
+
+
+
+        // ANY USER EXIST? //
+        public async Task<bool> AnyUserExistsByUserNameAsync(string userName, CancellationToken cancellationToken = default)
         {
-            _context = context;
-            _logger = logger;
+            ArgumentException.ThrowIfNullOrWhiteSpace(userName, nameof(userName));
+
+            return await _context.Users.AnyAsync(p => p.UserName == userName.ToUpper(), cancellationToken);
         }
 
 
@@ -38,6 +40,11 @@ namespace CineTrackBE.Services
 
             var roleEntity = await _context.Roles.FirstOrDefaultAsync(r => r.Name == role, cancellationToken);
             if (roleEntity == null) return false;
+
+            // any user-role in db? //
+            var anyExist = await _context.UserRoles.AnyAsync(p => p.UserId == user.Id && p.RoleId == roleEntity.Id);
+            if (anyExist) return true;
+
 
             var userRole = new IdentityUserRole<string> { UserId = user.Id, RoleId = roleEntity.Id };
             await _context.UserRoles.AddAsync(userRole, cancellationToken);
@@ -88,15 +95,6 @@ namespace CineTrackBE.Services
             return await _context.UserRoles.CountAsync(ur => ur.RoleId == roleEntity.Id, cancellationToken);
         }
 
-        // GET USER-ROLE LIST //
-        public IQueryable<IdentityUserRole<string>> GetUserRoleList() => _context.UserRoles.AsQueryable();
 
-
-        // GET ROLE LIST//
-        public IQueryable<IdentityRole> GetRoleList() => _context.Roles.AsQueryable();
-
-
-        // SAVE CHANGES //
-        public async Task SaveChangesAsync(CancellationToken cancellationToken = default) => await _context.SaveChangesAsync(cancellationToken);
     }
 }

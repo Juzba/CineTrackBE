@@ -10,13 +10,13 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
 {
     [Area("AdminArea")]
     [Authorize(Roles = "Admin")]
-    public class UsersController(IUserService userService, IRepository<User> userRepository, IRepository<IdentityRole> roleRepository, IRepository<IdentityUserRole<string>> userRoleRepository, IRoleService roleService) : Controller
+    public class UsersController( IRepository<User> userRepository, IRepository<IdentityRole> roleRepository, IRepository<IdentityUserRole<string>> userRoleRepository, IDataService dataService) : Controller
     {
         private readonly IRepository<User> _userRepository = userRepository;
         private readonly IRepository<IdentityRole> _roleRepository = roleRepository;
         private readonly IRepository<IdentityUserRole<string>> _userRoleRepository = userRoleRepository;
-        private readonly IUserService _userService = userService;
-        private readonly IRoleService _roleService = roleService;
+        private readonly IDataService _dataService = dataService;
+
 
         const string AdminConst = "Admin";
         const string UserConst = "User";
@@ -64,7 +64,7 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
 
             if (user == null) return NotFound();
 
-            var roles = await _roleService.GetRolesFromUserAsync(user);
+            var roles = await _dataService.GetRolesFromUserAsync(user);
 
 
             var userWithRoles = new UserWithRoles()
@@ -92,7 +92,7 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
             if (ModelState.IsValid)
             {
                 // user with this UserName exist
-                if (await _userService.AnyUserExistsByUserNameAsync(user.UserName))
+                if (await _dataService.AnyUserExistsByUserNameAsync(user.UserName))
                 {
                     ModelState.AddModelError("UserName", "UserName je obsazen!");
                     return View(user);
@@ -103,9 +103,9 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
 
 
                 // add role admin
-                if (roleAdmin) await _roleService.AddUserRoleAsync(user, AdminConst);
+                if (roleAdmin) await _dataService.AddUserRoleAsync(user, AdminConst);
                 // add  role user
-                if (roleUser) await _roleService.AddUserRoleAsync(user, UserConst);
+                if (roleUser) await _dataService.AddUserRoleAsync(user, UserConst);
 
 
                 await _userRepository.AddAsync(user);
@@ -126,7 +126,7 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
 
             if (user == null) return NotFound();
 
-            var roles = await _roleService.GetRolesFromUserAsync(user);
+            var roles = await _dataService.GetRolesFromUserAsync(user);
 
             var userWithRoles = new UserWithRoles()
             {
@@ -153,7 +153,7 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
                 if (defaultUser == null) return NotFound();
 
                 // user with this UserName exist?
-                if (defaultUser.UserName != formUser.UserName && await _userService.AnyUserExistsByUserNameAsync(formUser.UserName))
+                if (defaultUser.UserName != formUser.UserName && await _dataService.AnyUserExistsByUserNameAsync(formUser.UserName))
                 {
                     ModelState.AddModelError("UserName", "User je obsazen.");
                     return View(formUser);
@@ -163,13 +163,13 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
                 if (completedUser == null) return NotFound();
 
                 // add or remove role admin
-                if (roleAdmin) await _roleService.AddUserRoleAsync(completedUser, AdminConst);
-                else if (await _roleService.CountUserInRoleAsync(AdminConst) >= 2) await _roleService.RemoveUserRoleAsync(completedUser, AdminConst);
+                if (roleAdmin) await _dataService.AddUserRoleAsync(completedUser, AdminConst);
+                else if (await _dataService.CountUserInRoleAsync(AdminConst) >= 2) await _dataService.RemoveUserRoleAsync(completedUser, AdminConst);
                 else TempData["info"] = "Nelze odebrat posledního Admina!!";
 
                 // add or remove role user
-                if (roleUser) await _roleService.AddUserRoleAsync(completedUser, UserConst);
-                else await _roleService.RemoveUserRoleAsync(completedUser, UserConst);
+                if (roleUser) await _dataService.AddUserRoleAsync(completedUser, UserConst);
+                else await _dataService.RemoveUserRoleAsync(completedUser, UserConst);
 
                 await _userRepository.SaveChangesAsync();
 
@@ -213,8 +213,8 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
             var user = await _userRepository.GetAsync_Id(id);
             if (user != null)
             {
-                var roles = await _roleService.GetRolesFromUserAsync(user);
-                var adminsCount = await _roleService.CountUserInRoleAsync(AdminConst);
+                var roles = await _dataService.GetRolesFromUserAsync(user);
+                var adminsCount = await _dataService.CountUserInRoleAsync(AdminConst);
 
                 // Last Admin cannot be removed
                 if (roles.Any(p => p.Name == "Admin") && adminsCount <= 1)

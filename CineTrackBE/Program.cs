@@ -7,10 +7,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IRoleService, RoleService>();
-builder.Services.AddScoped<IFilmService, FilmService>();
-builder.Services.AddScoped<IGenreService, GenreService>();
+builder.Services.AddScoped<IDataService, DataService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 

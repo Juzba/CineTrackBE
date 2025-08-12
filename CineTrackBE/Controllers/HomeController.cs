@@ -1,7 +1,5 @@
-using CineTrackBE.Data;
 using CineTrackBE.Models.Entities;
 using CineTrackBE.Models.ViewModel;
-using CineTrackBE.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -42,6 +40,6 @@ namespace CineTrackBE.Controllers
         }
 
 
-      
+
     }
 }

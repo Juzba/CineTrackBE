@@ -8,15 +8,14 @@ namespace CineTrackBE.Areas.UserArea.Controllers
 {
     [Area("UserArea")]
     [Authorize(Roles = "Admin,User")]
-    public class GenresController(IGenreService genreService) : Controller
+    public class GenresController(IRepository<Genre> genreRepository) : Controller
     {
-        private readonly IGenreService _genreService = genreService;
+        private readonly IRepository<Genre> _genreRepository = genreRepository;
 
         // INDEX //
         public async Task<IActionResult> Index()
         {
-            var genres = await _genreService.GetGenreList();
-            return View(await genres.ToListAsync());
+            return View(await _genreRepository.GetList().ToListAsync());
         }
 
         // DETAILS //
@@ -24,7 +23,7 @@ namespace CineTrackBE.Areas.UserArea.Controllers
         {
             if (!int.TryParse(id, out int intId)) return NotFound();
 
-            var genre = await _genreService.GetGenreByIdAsync(intId);
+            var genre = await _genreRepository.GetAsync_Id(intId);
             if (genre == null) return NotFound();
 
             return View(genre);
@@ -40,8 +39,8 @@ namespace CineTrackBE.Areas.UserArea.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _genreService.AddGenreAsync(genre);
-                await _genreService.SaveChangesAsync();
+                await _genreRepository.AddAsync(genre);
+                await _genreRepository.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(genre);
@@ -53,7 +52,7 @@ namespace CineTrackBE.Areas.UserArea.Controllers
         {
             if (!int.TryParse(id, out int intId)) return NotFound();
 
-            var genre = await _genreService.GetGenreByIdAsync(intId);
+            var genre = await _genreRepository.GetAsync_Id(intId);
             if (genre == null) return NotFound();
 
             return View(genre);
@@ -69,12 +68,12 @@ namespace CineTrackBE.Areas.UserArea.Controllers
             {
                 try
                 {
-                    await _genreService.UpdateGenreAsync(genre);
-                    await _genreService.SaveChangesAsync();
+                    _genreRepository.Update(genre);
+                    await _genreRepository.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!await _genreService.AnyGenreExistsAsync(genre.Id)) return NotFound();
+                    if (!await _genreRepository.AnyExistsAsync(genre.Id)) return NotFound();
                     else throw;
                 }
                 return RedirectToAction(nameof(Index));
@@ -88,7 +87,7 @@ namespace CineTrackBE.Areas.UserArea.Controllers
         {
             if (!int.TryParse(id, out int intId)) return NotFound();
 
-            var genre = await _genreService.GetGenreByIdAsync(intId);
+            var genre = await _genreRepository.GetAsync_Id(intId);
             if (genre == null) return NotFound();
 
             return View(genre);
@@ -98,13 +97,13 @@ namespace CineTrackBE.Areas.UserArea.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var genre = await _genreService.GetGenreByIdAsync(id);
+            var genre = await _genreRepository.GetAsync_Id(id);
             if (genre != null)
             {
-                await _genreService.RemoveGenre(genre);
+                _genreRepository.Remove(genre);
             }
 
-            await _genreService.SaveChangesAsync();
+            await _genreRepository.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
     }

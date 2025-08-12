@@ -9,16 +9,16 @@ namespace CineTrackBE.Areas.UserArea.Controllers;
 
 [Area("UserArea")]
 [Authorize(Roles = "Admin,User")]
-public class FilmsController(IFilmService filmService, IGenreService genreService) : Controller
+public class FilmsController(IRepository<Film> filmRepository, IRepository<Genre> genreRepository) : Controller
 {
-    private readonly IFilmService _filmService = filmService;
-    private readonly IGenreService _genreService = genreService;
+
+    private readonly IRepository<Film> _filmRepository = filmRepository;
+    private readonly IRepository<Genre> _genreRepository = genreRepository;
 
     // INDEX //
     public async Task<IActionResult> Index()
     {
-        var films = await _filmService.GetFilmList();
-        return View(await films.ToListAsync());
+        return View(await _filmRepository.GetList().ToListAsync());
     }
 
     // DETAILS //
@@ -26,7 +26,7 @@ public class FilmsController(IFilmService filmService, IGenreService genreServic
     {
         if (!int.TryParse(id, out int intId)) return NotFound();
 
-        var film = await _filmService.GetFilmByIdAsync(intId);
+        var film = await _filmRepository.GetAsync_Id(intId);
         if (film == null) return NotFound();
 
         return View(film);
@@ -36,9 +36,9 @@ public class FilmsController(IFilmService filmService, IGenreService genreServic
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create()
     {
-        var allGenres = await _genreService.GetGenreList();
+        var allGenres = await _genreRepository.GetList().ToListAsync();
 
-        return View(new FilmViewModel() { AllGenres = await allGenres.ToListAsync() });
+        return View(new FilmViewModel() { AllGenres = allGenres });
     }
 
     [HttpPost]
@@ -47,8 +47,8 @@ public class FilmsController(IFilmService filmService, IGenreService genreServic
     {
         if (ModelState.IsValid)
         {
-            await _filmService.AddFilmAsync(film);
-            await _filmService.SaveChangesAsync();
+            await _filmRepository.AddAsync(film);
+            await _filmRepository.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
         return View(film);
@@ -60,7 +60,7 @@ public class FilmsController(IFilmService filmService, IGenreService genreServic
     {
         if (!int.TryParse(id, out int intId)) return NotFound();
 
-        var film = await _filmService.GetFilmByIdAsync(intId);
+        var film = await _filmRepository.GetAsync_Id(intId);
         if (film == null) return NotFound();
 
         return View(film);
@@ -76,12 +76,12 @@ public class FilmsController(IFilmService filmService, IGenreService genreServic
         {
             try
             {
-                await _filmService.UpdateFilmAsync(film);
-                await _filmService.SaveChangesAsync();
+                _filmRepository.Update(film);
+                await _filmRepository.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await _filmService.AnyFilmExistsAsync(film.Id)) return NotFound();
+                if (!await _filmRepository.AnyExistsAsync(film.Id)) return NotFound();
                 else throw;
             }
             return RedirectToAction(nameof(Index));
@@ -95,7 +95,7 @@ public class FilmsController(IFilmService filmService, IGenreService genreServic
     {
         if (!int.TryParse(id, out int intId)) return NotFound();
 
-        var film = await _filmService.GetFilmByIdAsync(intId);
+        var film = await _filmRepository.GetAsync_Id(intId);
         if (film == null) return NotFound();
 
         return View(film);
@@ -105,13 +105,13 @@ public class FilmsController(IFilmService filmService, IGenreService genreServic
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var film = await _filmService.GetFilmByIdAsync(id);
+        var film = await _filmRepository.GetAsync_Id(id);
         if (film != null)
         {
-            await _filmService.RemoveFilm(film);
+            _filmRepository.Remove(film);
         }
 
-        await _filmService.SaveChangesAsync();
+        await _filmRepository.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
 }
