@@ -6,40 +6,40 @@ namespace CineTrackBE.Services;
 
 public interface IGenreService
 {
-
-    Task<IEnumerable<Genre>> GetGenreList();
-    Task AddGenre(Genre genre);
+    IQueryable<Genre> GetGenreList();
+    Task<Genre> AddGenreAsync(Genre genre, CancellationToken cancellationToken = default);
     void RemoveGenre(Genre genre);
-
     void UpdateGenre(Genre genre);
-    Task<Genre?> GetGenre_Id(int id);
-    bool AnyGenre_Id(int id);
-    Task SaveChangesAsync();
+    Task<Genre?> GetGenreByIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<bool> AnyGenreExistsAsync(int id, CancellationToken cancellationToken = default);
+    Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 
-
-
-
-
-public class GenreService(ApplicationDbContext context) : IGenreService
+public class GenreService : IGenreService
 {
+    private readonly ApplicationDbContext _context;
+    private readonly ILogger<GenreService> _logger;
 
-    private readonly ApplicationDbContext _context = context;
+    public GenreService(ApplicationDbContext context, ILogger<GenreService> logger)
+    {
+        _context = context;
+        _logger = logger;
+    }
 
 
 
-
-    // GET GENRE LIST //
-    public async Task<IEnumerable<Genre>> GetGenreList() => await _context.Genre.ToListAsync();
-
+    // GET GENRE //
+    public IQueryable<Genre> GetGenreList() => _context.Genre.AsQueryable();
 
 
     // ADD GENRE //
-    public async Task AddGenre(Genre genre)
+    public async Task<Genre> AddGenreAsync(Genre genre, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(genre);
 
-        await _context.AddAsync(genre);
+        await _context.AddAsync(genre, cancellationToken);
+        _logger.LogInformation("Genre {GenreName} added", genre.Name);
+        return genre;
     }
 
 
@@ -49,7 +49,9 @@ public class GenreService(ApplicationDbContext context) : IGenreService
         ArgumentNullException.ThrowIfNull(genre);
 
         _context.Genre.Remove(genre);
+        _logger.LogInformation("Genre {GenreName} removed", genre.Name);
     }
+
 
     // UPDATE GENRE //
     public void UpdateGenre(Genre genre)
@@ -61,23 +63,21 @@ public class GenreService(ApplicationDbContext context) : IGenreService
         if (local != null) _context.Entry(local).State = EntityState.Detached;
 
         _context.Update(genre);
+        _logger.LogInformation("Genre {GenreName} updated", genre.Name);
     }
 
 
     // GET GENRE BY ID //
-    public async Task<Genre?> GetGenre_Id(int id) => await _context.Genre.FindAsync(id);
+    public async Task<Genre?> GetGenreByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Genre.FindAsync([id], cancellationToken);
+    }
 
 
-    // ANY GENRE EXIST //
-    public bool AnyGenre_Id(int id) => _context.Genre.Any(e => e.Id == id);
+    // ANY GENRE EXIST? //
+    public async Task<bool> AnyGenreExistsAsync(int id, CancellationToken cancellationToken = default) => await _context.Genre.AnyAsync(e => e.Id == id, cancellationToken);
 
 
     // SAVE CHANGES //
-    public async Task SaveChangesAsync() => await _context.SaveChangesAsync();
-
-
-
-
-
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default) => await _context.SaveChangesAsync(cancellationToken);
 }
-

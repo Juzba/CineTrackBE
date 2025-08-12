@@ -8,120 +8,95 @@ namespace CineTrackBE.Services
     public interface IRoleService
     {
 
-        Task<bool> AddUserRole(User user, string role);
-        Task<bool> RemoveUserRole(User user, string role);
-        Task<IEnumerable<IdentityRole>> GetRoles_FromUser(User user);
-        Task<IEnumerable<IdentityUserRole<string>>> GetUserRole_List();
-        Task<IEnumerable<IdentityRole<string>>> GetRole_List();
-        Task<int> UsersInRole_Count(string role);
-        Task SaveChangesAsync();
-
-
-
+        Task<bool> AddUserRoleAsync(User user, string role, CancellationToken cancellationToken = default);
+        Task<bool> RemoveUserRoleAsync(User user, string role, CancellationToken cancellationToken = default);
+        Task<IQueryable<IdentityRole>> GetRolesFromUserAsync(User user, CancellationToken cancellationToken = default);
+        Task<int> CountUserInRoleAsync(string role, CancellationToken cancellationToken = default);
+        IQueryable<IdentityUserRole<string>> GetUserRoleList();
+        IQueryable<IdentityRole> GetRoleList();
+        Task SaveChangesAsync(CancellationToken cancellationToken = default);
 
     }
-    public class RoleService(ApplicationDbContext context) : IRoleService
+    public class RoleService : IRoleService
     {
-        private readonly ApplicationDbContext _context = context;
+        private readonly ApplicationDbContext _context;
+        private readonly ILogger<RoleService> _logger;
 
 
-        public async Task<bool> AddUserRole(User user, string role)
+        public RoleService(ApplicationDbContext context, ILogger<RoleService> logger)
         {
-            if (user == null) throw new ArgumentNullException(nameof(user), "user is null!");
-            if (string.IsNullOrEmpty(role)) throw new ArgumentNullException(nameof(role), "role is null or empty!");
-
-
-            var myRole = await _context.Roles.FirstOrDefaultAsync(p => p.Name == role);
-            if (myRole == null) return false;
-
-            // this role in db?
-            var myUserRole = await _context.UserRoles.Where(p => p.UserId == user.Id).FirstOrDefaultAsync(p => p.RoleId == myRole.Id);
-            if (myUserRole != null) return true; // role is already in db
-
-            var newRole = new IdentityUserRole<string>()
-            {
-                UserId = user.Id,
-                RoleId = myRole.Id
-            };
-
-            await _context.UserRoles.AddAsync(newRole);
-            return true;
+            _context = context;
+            _logger = logger;
         }
 
-        // REMOVE USER-ROLE //
-        public async Task<bool> RemoveUserRole(User user, string role)
+
+        // ADD USER ROLE //
+        public async Task<bool> AddUserRoleAsync(User user, string role, CancellationToken cancellationToken = default)
         {
-            if (user == null) throw new ArgumentNullException(nameof(user), "user is null!");
-            if (string.IsNullOrEmpty(role)) throw new ArgumentNullException(nameof(role), "role is null or empty!");
+            ArgumentNullException.ThrowIfNull(user);
+            ArgumentException.ThrowIfNullOrWhiteSpace(role);
 
+            var roleEntity = await _context.Roles.FirstOrDefaultAsync(r => r.Name == role, cancellationToken);
+            if (roleEntity == null) return false;
 
-            var myRole = await _context.Roles.FirstOrDefaultAsync(p => p.Name == role);
-            if (myRole == null) return false;
+            var userRole = new IdentityUserRole<string> { UserId = user.Id, RoleId = roleEntity.Id };
+            await _context.UserRoles.AddAsync(userRole, cancellationToken);
+            _logger.LogInformation("Role {Role} added to user {UserName}", role, user.UserName);
 
-            // this role in db?
-            var myUserRole = await _context.UserRoles.Where(p => p.UserId == user.Id).FirstOrDefaultAsync(p => p.RoleId == myRole.Id);
-            if (myUserRole == null) return true; // role is not in db
-
-            _context.UserRoles.Remove(myUserRole);
 
             return true;
         }
 
 
-
-
-
-        // GET ROLES FROM USER ID //
-        public async Task<IEnumerable<IdentityRole>> GetRoles_FromUser(User user)
+        // REMOVE USER ROLE //
+        public async Task<bool> RemoveUserRoleAsync(User user, string role, CancellationToken cancellationToken = default)
         {
-            if (user == null) throw new ArgumentNullException(nameof(user), "user is null!");
+            ArgumentNullException.ThrowIfNull(user);
+            ArgumentException.ThrowIfNullOrWhiteSpace(role);
 
+            var roleEntity = await _context.Roles.FirstOrDefaultAsync(r => r.Name == role, cancellationToken);
+            if (roleEntity == null) return false;
 
-            List<IdentityRole> roles = [];
+            var userRole = await _context.UserRoles.FirstOrDefaultAsync(ur => ur.UserId == user.Id && ur.RoleId == roleEntity.Id, cancellationToken);
+            if (userRole == null) return false;
 
-            var allUserRoles = await _context.UserRoles.ToListAsync();
-            var allRoles = await _context.Roles.ToListAsync();
+            _context.UserRoles.Remove(userRole);
+            _logger.LogInformation("Role {Role} removed from user {UserName}", role, user.UserName);
 
-            var userRoles = allUserRoles.Where(p => p.UserId == user.Id);
-
-
-            foreach (var item in userRoles)
-            {
-                var role = allRoles.FirstOrDefault(p => p.Id == item.RoleId);
-
-                if (role != null) roles.Add(role);
-            }
-
-            return roles;
-        }
-
-        // ROLE ADMIN COUNT //
-        public async Task<int> UsersInRole_Count(string role)
-        {
-            if (string.IsNullOrEmpty(role)) throw new ArgumentNullException(nameof(role), "role is null or empty!");
-
-
-            var myRole = await _context.Roles.FirstOrDefaultAsync(p => p.Name == role);
-            if (myRole == null) return 0;
-
-            return _context.UserRoles.Count(p => p.RoleId == myRole.Id);
+            return true;
         }
 
 
+        // GET ROLES FROM USER //
+        public async Task<IQueryable<IdentityRole>> GetRolesFromUserAsync(User user, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(user);
+
+            var userRoles = await _context.UserRoles.Where(ur => ur.UserId == user.Id).Select(ur => ur.RoleId).ToListAsync(cancellationToken);
+            return _context.Roles.Where(r => userRoles.Contains(r.Id)).AsQueryable();
+        }
+
+
+        // COUNT USER IN ROLE //
+        public async Task<int> CountUserInRoleAsync(string role, CancellationToken cancellationToken = default)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(role);
+
+            var roleEntity = await _context.Roles.FirstOrDefaultAsync(r => r.Name == role, cancellationToken);
+            if (roleEntity == null) return 0;
+
+            return await _context.UserRoles.CountAsync(ur => ur.RoleId == roleEntity.Id, cancellationToken);
+        }
 
         // GET USER-ROLE LIST //
-        public async Task<IEnumerable<IdentityUserRole<string>>> GetUserRole_List() => await _context.UserRoles.ToListAsync();
+        public IQueryable<IdentityUserRole<string>> GetUserRoleList() => _context.UserRoles.AsQueryable();
 
-        // GET ROLE LIST //
-        public async Task<IEnumerable<IdentityRole<string>>> GetRole_List() => await _context.Roles.ToListAsync();
+
+        // GET ROLE LIST//
+        public IQueryable<IdentityRole> GetRoleList() => _context.Roles.AsQueryable();
 
 
         // SAVE CHANGES //
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
-
-
+        public async Task SaveChangesAsync(CancellationToken cancellationToken = default) => await _context.SaveChangesAsync(cancellationToken);
     }
 }

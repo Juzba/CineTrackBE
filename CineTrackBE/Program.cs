@@ -11,7 +11,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IFilmService, FilmService>();
 builder.Services.AddScoped<IGenreService, GenreService>();
-
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 
 // Add services to the container.

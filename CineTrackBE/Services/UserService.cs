@@ -7,17 +7,8 @@ namespace CineTrackBE.Services
 {
     public interface IUserService
     {
-        Task AddUser(User user);
-        Task<User?> GetUser(string id);
-        void UpdateUser(User user);
-        void RemoveUser(User user);
-        Task<IEnumerable<User>> GetUsersList();
-        bool AnyUserExists_Id(string id);
-        bool AnyUserExists_UserName(string userName);
-        Task SaveChangesAsync();
-
+        Task<bool> AnyUserExistsByUserNameAsync(string userName, CancellationToken cancellationToken = default);
     }
-
 
 
     public class UserService(ApplicationDbContext context) : IUserService
@@ -25,73 +16,51 @@ namespace CineTrackBE.Services
         private readonly ApplicationDbContext _context = context;
 
 
-        // ADD USER //
-        public async Task AddUser(User user)
-        {
-            if (user == null) throw new ArgumentNullException(nameof(user), "user is null!");
+        //// UPDATE USER //
+        //public async Task UpdateUserAsync(User user, CancellationToken cancellationToken = default)
+        //{
+        //    if (user == null) throw new ArgumentException(nameof(user), "user is null!");
 
-            await _context.AddAsync(user);
-        }
+        //    var local = _context.Users.Local.FirstOrDefault(p => p.Id == user.Id);
 
+        //    if (local != null) _context.Entry(local).State = EntityState.Detached;
 
-
-        // GET USER //
-        public async Task<User?> GetUser(string id)
-        {
-            if (string.IsNullOrWhiteSpace(id)) throw new ArgumentNullException(nameof(id), "id is null or empty!");
-
-            return await _context.Users.FindAsync(id);
-        }
-
-        // UPDATE USER //
-        public void UpdateUser(User user)
-        {
-            if (user == null) throw new ArgumentException(nameof(user), "user is null!");
-
-            var local = _context.Users.Local.FirstOrDefault(p => p.Id == user.Id);
-
-            if (local != null) _context.Entry(local).State = EntityState.Detached;
-
-            _context.Update(user);
-        }
+        //    _context.Update(user);
+        //    await _context.SaveChangesAsync(cancellationToken);
+        //}
 
 
-        // REMOVE USER //
-        public void RemoveUser(User user)
-        {
-            if (user == null) throw new ArgumentException(nameof(user), "user is null!");
+        //// REMOVE USER //
+        //public async Task RemoveUserAsync(User user, CancellationToken cancellationToken = default)
+        //{
+        //    if (user == null) throw new ArgumentException(nameof(user), "user is null!");
 
-            _context.Users.Remove(user);
-        }
+        //    _context.Users.Remove(user);
+        //}
 
 
-        // GET USERS LIST //
-        public async Task<IEnumerable<User>> GetUsersList() => await _context.Users.ToListAsync();
+        //// GET USERS LIST //
+        //public async Task<IQueryable<User>> GetUsersListAsync(CancellationToken cancellationToken = default) => await Task.FromResult(_context.Users.AsQueryable());
+
+
+        //// ANY USER EXIST? //
+        //public async Task<bool> AnyUserExistsAsync(string id, CancellationToken cancellationToken = default)
+        //{
+        //    if (string.IsNullOrWhiteSpace(id)) throw new ArgumentNullException(nameof(id), "id is null or empty!");
+
+        //    return await _context.Users.AnyAsync(e => e.Id == id, cancellationToken);
+        //}
 
 
         // ANY USER EXIST? //
-        public bool AnyUserExists_Id(string id)
-        {
-            if (string.IsNullOrWhiteSpace(id)) throw new ArgumentNullException(nameof(id), "id is null or empty!");
-
-            return _context.Users.Any(e => e.Id == id);
-        }
-
-        // ANY USER EXIST? //
-        public bool AnyUserExists_UserName(string userName)
+        public async Task<bool> AnyUserExistsByUserNameAsync(string userName, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(userName)) throw new ArgumentNullException(nameof(userName), "userName is null or empty!");
 
-            return _context.Users.Any(p => p.UserName == userName.ToUpper());
+            return await _context.Users.AnyAsync(p => p.UserName == userName.ToUpper(), cancellationToken);
         }
 
 
-        // SAVE CHANGES //
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
-
-
+  
     }
 }

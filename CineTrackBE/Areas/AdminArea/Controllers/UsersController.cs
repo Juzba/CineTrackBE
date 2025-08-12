@@ -10,8 +10,11 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
 {
     [Area("AdminArea")]
     [Authorize(Roles = "Admin")]
-    public class UsersController(IUserService userService, IRoleService roleService) : Controller
+    public class UsersController(IUserService userService, IRepository<User> userRepository, IRepository<IdentityRole> roleRepository, IRepository<IdentityUserRole<string>> userRoleRepository, IRoleService roleService) : Controller
     {
+        private readonly IRepository<User> _userRepository = userRepository;
+        private readonly IRepository<IdentityRole> _roleRepository = roleRepository;
+        private readonly IRepository<IdentityUserRole<string>> _userRoleRepository = userRoleRepository;
         private readonly IUserService _userService = userService;
         private readonly IRoleService _roleService = roleService;
 
@@ -24,9 +27,9 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
         // INDEX //
         public async Task<IActionResult> Index()
         {
-            var users = await _userService.GetUsersList();
-            var roles = await _roleService.GetRole_List();
-            var userRoles = await _roleService.GetUserRole_List();
+            var users = await _userRepository.GetList().ToListAsync();
+            var roles = await _roleRepository.GetList().ToListAsync();
+            var userRoles = await _userRoleRepository.GetList().ToListAsync();
 
 
 
@@ -57,11 +60,11 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
         {
             if (id == null) return NotFound();
 
-            var user = await _userService.GetUser(id);
+            var user = await _userRepository.GetAsync_Id(id);
 
             if (user == null) return NotFound();
 
-            var roles = await _roleService.GetRoles_FromUser(user);
+            var roles = await _roleService.GetRolesFromUserAsync(user);
 
 
             var userWithRoles = new UserWithRoles()
@@ -89,7 +92,7 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
             if (ModelState.IsValid)
             {
                 // user with this UserName exist
-                if (_userService.AnyUserExists_UserName(user.UserName))
+                if (await _userService.AnyUserExistsByUserNameAsync(user.UserName))
                 {
                     ModelState.AddModelError("UserName", "UserName je obsazen!");
                     return View(user);
@@ -100,13 +103,13 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
 
 
                 // add role admin
-                if (roleAdmin) await _roleService.AddUserRole(user, AdminConst);
+                if (roleAdmin) await _roleService.AddUserRoleAsync(user, AdminConst);
                 // add  role user
-                if (roleUser) await _roleService.AddUserRole(user, UserConst);
+                if (roleUser) await _roleService.AddUserRoleAsync(user, UserConst);
 
 
-                await _userService.AddUser(user);
-                await _userService.SaveChangesAsync();
+                await _userRepository.AddAsync(user);
+                await _userRepository.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(user);
@@ -119,13 +122,11 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
         {
             if (string.IsNullOrEmpty(id)) return NotFound();
 
-            var user = await _userService.GetUser(id);
+            var user = await _userRepository.GetAsync_Id(id);
 
             if (user == null) return NotFound();
 
-
-            var roles = await _roleService.GetRoles_FromUser(user);
-
+            var roles = await _roleService.GetRolesFromUserAsync(user);
 
             var userWithRoles = new UserWithRoles()
             {
@@ -137,9 +138,6 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
                 Roles = roles.Select(p => p.Name).ToList()
             };
 
-
-
-
             return View(userWithRoles);
         }
 
@@ -149,48 +147,40 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
         {
             if (id != formUser.Id) return NotFound();
 
-
-
             if (ModelState.IsValid)
             {
-                var defaultUser = await _userService.GetUser(id);
+                var defaultUser = await _userRepository.GetAsync_Id(id);
                 if (defaultUser == null) return NotFound();
 
-
                 // user with this UserName exist?
-                if (defaultUser.UserName != formUser.UserName && _userService.AnyUserExists_UserName(formUser.UserName))
+                if (defaultUser.UserName != formUser.UserName && await _userService.AnyUserExistsByUserNameAsync(formUser.UserName))
                 {
                     ModelState.AddModelError("UserName", "User je obsazen.");
                     return View(formUser);
                 }
 
-
                 var completedUser = CompleteUseData(formUser, defaultUser);
                 if (completedUser == null) return NotFound();
 
-
                 // add or remove role admin
-                if (roleAdmin) await _roleService.AddUserRole(completedUser, AdminConst);
-                else if (await _roleService.UsersInRole_Count(AdminConst) >= 2) await _roleService.RemoveUserRole(completedUser, AdminConst);
+                if (roleAdmin) await _roleService.AddUserRoleAsync(completedUser, AdminConst);
+                else if (await _roleService.CountUserInRoleAsync(AdminConst) >= 2) await _roleService.RemoveUserRoleAsync(completedUser, AdminConst);
                 else TempData["info"] = "Nelze odebrat posledního Admina!!";
 
                 // add or remove role user
-                if (roleUser) await _roleService.AddUserRole(completedUser, UserConst);
-                else await _roleService.RemoveUserRole(completedUser, UserConst);
+                if (roleUser) await _roleService.AddUserRoleAsync(completedUser, UserConst);
+                else await _roleService.RemoveUserRoleAsync(completedUser, UserConst);
 
-                await _roleService.SaveChangesAsync();
-
-
-
+                await _userRepository.SaveChangesAsync();
 
                 try
                 {
-                    _userService.UpdateUser(completedUser);
-                    await _userService.SaveChangesAsync();
+                    _userRepository.Update(completedUser);
+                    await _userRepository.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!_userService.AnyUserExists_Id(completedUser.Id)) return NotFound();
+                    if (!await _userRepository.AnyExistsAsync(completedUser.Id)) return NotFound();
                     else throw;
                 }
 
@@ -206,10 +196,9 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
         {
             if (id == null) return NotFound();
 
-            var user = await _userService.GetUser(id);
+            var user = await _userRepository.GetAsync_Id(id);
 
             if (user == null) return NotFound();
-
 
             return View(user);
         }
@@ -221,24 +210,23 @@ namespace CineTrackBE.Areas.AdminArea.Controllers
         {
             if (string.IsNullOrEmpty(id)) return NotFound();
 
-            var user = await _userService.GetUser(id);
+            var user = await _userRepository.GetAsync_Id(id);
             if (user != null)
             {
-                var role = await _roleService.GetRoles_FromUser(user);
-                var adminsCount = await _roleService.UsersInRole_Count(AdminConst);
+                var roles = await _roleService.GetRolesFromUserAsync(user);
+                var adminsCount = await _roleService.CountUserInRoleAsync(AdminConst);
 
                 // Last Admin cannot be removed
-                if (role.Any(p => p.Name == "Admin") && adminsCount <= 1)
+                if (roles.Any(p => p.Name == "Admin") && adminsCount <= 1)
                 {
                     TempData["info"] = "Nelze smazat posledního Admina!!";
                     return RedirectToAction(nameof(Index));
                 }
 
-
-                _userService.RemoveUser(user);
+                 _userRepository.Remove(user);
             }
 
-            await _userService.SaveChangesAsync();
+            await _userRepository.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
