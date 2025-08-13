@@ -1,4 +1,4 @@
-﻿@model CineTrackBE.Models.Entities.Film
+﻿@model CineTrackBE.Models.ViewModel.FilmViewModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -12,27 +12,36 @@
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Film.Id" />
             <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+                <label asp-for="Film.Name" class="control-label"></label>
+                <input asp-for="Film.Name" class="form-control" />
+                <span asp-validation-for="Film.Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
+                <label asp-for="Film.Description" class="control-label"></label>
+                <input asp-for="Film.Description" class="form-control" />
+                <span asp-validation-for="Film.Description" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Director" class="control-label"></label>
-                <input asp-for="Director" class="form-control" />
-                <span asp-validation-for="Director" class="text-danger"></span>
+                <label asp-for="Film.Director" class="control-label"></label>
+                <input asp-for="Film.Director" class="form-control" />
+                <span asp-validation-for="Film.Director" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Year" class="control-label"></label>
-                <input asp-for="Year" class="form-control" />
-                <span asp-validation-for="Year" class="text-danger"></span>
+                <label asp-for="Film.Year" class="control-label"></label>
+                <input asp-for="Film.Year" class="form-control" />
+                <span asp-validation-for="Film.Year" class="text-danger"></span>
             </div>
+
+            <div class="form-group">
+                <label asp-for="SelectedGenresId">Genres</label>
+                <select asp-for="SelectedGenresId" asp-items="@(new SelectList(Model.AllGenres, "Id", "Name"))" class="form-control" multiple id="genreSelect">
+                </select>
+                <span asp-validation-for="SelectedGenresId" class="text-danger"></span>
+            </div>
+
+
             <div class="form-group d-flex my-3">
                 <input type="submit" value="Save" class="btn btn-primary" />
                 <a asp-action="Index" class="btn btn-outline-info mx-2"  >Back to List</a>

@@ -4,7 +4,6 @@ using CineTrackBE.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace CineTrackBE.Controllers;
 
@@ -20,7 +19,7 @@ public class FilmsController(IRepository<Film> filmRepository, IRepository<Genre
     // INDEX //
     public async Task<IActionResult> Index()
     {
-        return View(await _filmRepository.GetList().Include(p=>p.FilmGenres).ThenInclude(p=>p.Genre).ToListAsync());
+        return View(await _filmRepository.GetList().Include(p => p.FilmGenres).ThenInclude(p => p.Genre).ToListAsync());
     }
 
     // DETAILS //
@@ -28,7 +27,7 @@ public class FilmsController(IRepository<Film> filmRepository, IRepository<Genre
     {
         if (!int.TryParse(id, out int intId)) return NotFound();
 
-        var film = await _filmRepository.GetAsync_Id(intId);
+        var film = await _dataService.GetFilmAsync_InclFilmGenres(intId);
         if (film == null) return NotFound();
 
         return View(film);
@@ -50,23 +49,21 @@ public class FilmsController(IRepository<Film> filmRepository, IRepository<Genre
         if (ModelState.IsValid)
         {
 
-            // ZDE omezit model maximalne na tri genre //
-            //if(filmViewModel.SelectedGenresId.Count > 3) ModelState.is
-
-
             await _filmRepository.AddAsync(filmViewModel.Film);
             await _filmRepository.SaveChangesAsync();
 
-
-            
             await _dataService.AddGenresToFilmAsync(filmViewModel.Film, filmViewModel.SelectedGenresId);
             await _filmRepository.SaveChangesAsync();
 
 
             return RedirectToAction(nameof(Index));
         }
+
+        filmViewModel.AllGenres = await _genreRepository.GetList().ToListAsync();
+
         return View(filmViewModel);
     }
+
 
     // EDIT //
     [Authorize(Roles = "Admin")]
@@ -74,33 +71,52 @@ public class FilmsController(IRepository<Film> filmRepository, IRepository<Genre
     {
         if (!int.TryParse(id, out int intId)) return NotFound();
 
-        var film = await _filmRepository.GetAsync_Id(intId);
+
+        var allGenres = await _genreRepository.GetList().ToListAsync();
+        var film = await _dataService.GetFilmAsync_InclFilmGenres(intId);
         if (film == null) return NotFound();
 
-        return View(film);
+
+        var filmViewModel = new FilmViewModel()
+        {
+            Film = film,
+            AllGenres = allGenres,
+            SelectedGenresId = [.. film.FilmGenres.Select(p => p.GenreId)]
+        };
+
+
+        return View(filmViewModel);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Director,Year")] Film film)
+    public async Task<IActionResult> Edit(int id, FilmViewModel filmViewModel)
     {
-        if (id != film.Id) return NotFound();
+        if (id != filmViewModel.Film.Id) return NotFound();
+
 
         if (ModelState.IsValid)
         {
+            await _dataService.RemoveFilmGenres(id);
+            await _filmRepository.SaveChangesAsync();
+            await _dataService.AddGenresToFilmAsync(filmViewModel.Film, filmViewModel.SelectedGenresId);
+
             try
             {
-                _filmRepository.Update(film);
+                _filmRepository.Update(filmViewModel.Film);
                 await _filmRepository.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await _filmRepository.AnyExistsAsync(film.Id)) return NotFound();
+                if (!await _filmRepository.AnyExistsAsync(filmViewModel.Film.Id)) return NotFound();
                 else throw;
             }
             return RedirectToAction(nameof(Index));
         }
-        return View(film);
+
+        filmViewModel.AllGenres = await _genreRepository.GetList().ToListAsync();
+
+        return View(filmViewModel);
     }
 
     // DELETE //

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 #nullable disable
 
@@ -8,6 +9,8 @@ public class Film
 {
 
     public int Id { get; set; }
+
+    [Required(ErrorMessage = "Chybí název!")]
     public string Name { get; set; }
     public string Description { get; set; }
     public string Director { get; set; }
