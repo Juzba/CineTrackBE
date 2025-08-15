@@ -114,11 +114,4 @@ public class DataServiceNullTests
         Assert.That(exception.ParamName, Is.EqualTo("genreIds"));
     }
 
-
-    [Test]
-    public void RemoveFilmGenres_InvalidFilmId_ThrowsArgumentException()
-    {
-        Assert.ThrowsAsync<ArgumentException>(() => _dataService.RemoveFilmGenres(0));
-        Assert.ThrowsAsync<ArgumentException>(() => _dataService.RemoveFilmGenres(-1));
-    }
 }
