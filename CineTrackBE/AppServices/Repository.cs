@@ -39,7 +39,7 @@ namespace CineTrackBE.Services
         // GET ENTITY - id string //
         public async Task<T?> GetAsync_Id(string id, CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNullOrWhiteSpace(id);
+            ArgumentException.ThrowIfNullOrWhiteSpace(id);
 
             return await _context.Set<T>().FindAsync([id], cancellationToken);
         }

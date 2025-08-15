@@ -3,7 +3,7 @@ using CineTrackBE.Models.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace CineTrackBE.Services
+namespace CineTrackBE.AppServices
 {
     public interface IDataService
     {
@@ -29,7 +29,7 @@ namespace CineTrackBE.Services
         // ANY USER EXIST? //
         public async Task<bool> AnyUserExistsByUserNameAsync(string userName, CancellationToken cancellationToken = default)
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(userName, nameof(userName));
+            ArgumentException.ThrowIfNullOrWhiteSpace(userName);
 
             return await _context.Users.AnyAsync(p => p.UserName == userName.ToUpper(), cancellationToken);
         }
@@ -103,8 +103,9 @@ namespace CineTrackBE.Services
         public async Task AddGenresToFilmAsync(Film film, List<int> genreIds, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(film);
+            ArgumentNullException.ThrowIfNull(genreIds);
 
-            if (genreIds == null || genreIds.Count == 0) return;
+            if (genreIds.Count == 0) return;
 
             // film-genres existing in db //
             var existsFilmGenres = await _context.FilmGenres.Where(p => p.FilmId == film.Id && genreIds.Contains(p.GenreId)).ToListAsync(cancellationToken);

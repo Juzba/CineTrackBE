@@ -1,8 +1,10 @@
+using CineTrackBE.AppServices;
 using CineTrackBE.Data;
 using CineTrackBE.Models.Entities;
 using CineTrackBE.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,7 +37,11 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddSwaggerGen();
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.PropertyNamingPolicy = null;
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+}); ;
 
 
 var app = builder.Build();

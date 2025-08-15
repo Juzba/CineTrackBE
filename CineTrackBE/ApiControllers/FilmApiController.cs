@@ -1,4 +1,5 @@
-﻿using CineTrackBE.Models.Entities;
+﻿using CineTrackBE.Models.DTO;
+using CineTrackBE.Models.Entities;
 using CineTrackBE.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,10 +20,22 @@ namespace CineTrackBE.ApiControllers
         }
 
         [HttpGet]
-        [Route("GetAll")]
-        public async Task<IEnumerable<string>> GetFilms()
+        [Route("Test")]
+        public async Task<IEnumerable<FilmDTO>> GetTest()
         {
-            return await _filmRepository.GetList().Select(p => p.Name).ToListAsync();
+            var films = await _filmRepository.GetList().ToListAsync();
+
+            var filmsDTO = films.Select(p => new FilmDTO()
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Director = p.Director,
+                Description = p.Description,
+                Year = p.Year,
+                Genres = [.. p.FilmGenres.Select(g => g.Genre.Name)]
+            });
+
+            return filmsDTO;
         }
 
         // GET api/<FilmApiController>/5

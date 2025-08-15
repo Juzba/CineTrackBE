@@ -1,4 +1,5 @@
-﻿using CineTrackBE.Models.Entities;
+﻿using CineTrackBE.AppServices;
+using CineTrackBE.Models.Entities;
 using CineTrackBE.Models.ViewModel;
 using CineTrackBE.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -52,8 +53,12 @@ public class FilmsController(IRepository<Film> filmRepository, IRepository<Genre
             await _filmRepository.AddAsync(filmViewModel.Film);
             await _filmRepository.SaveChangesAsync();
 
-            await _dataService.AddGenresToFilmAsync(filmViewModel.Film, filmViewModel.SelectedGenresId);
-            await _filmRepository.SaveChangesAsync();
+
+            if (filmViewModel.Film != null && filmViewModel.SelectedGenresId != null && filmViewModel.SelectedGenresId.Count > 0)
+            {
+                await _dataService.AddGenresToFilmAsync(filmViewModel.Film, filmViewModel.SelectedGenresId);
+                await _filmRepository.SaveChangesAsync();
+            }
 
 
             return RedirectToAction(nameof(Index));
