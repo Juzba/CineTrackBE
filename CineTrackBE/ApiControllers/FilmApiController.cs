@@ -19,8 +19,10 @@ namespace CineTrackBE.ApiControllers
             return await _filmRepository.GetList().Select(p => p.Name).ToListAsync();
         }
 
+
+        // Top 5 Latest Films //
         [HttpGet]
-        [Route("NewFilms")]
+        [Route("LatestFilms")]
         public async Task<IEnumerable<FilmDTO>> GetTest()
         {
             var films = await _filmRepository.GetList().OrderBy(p=>p.ReleaseDate).Take(5).ToListAsync();
