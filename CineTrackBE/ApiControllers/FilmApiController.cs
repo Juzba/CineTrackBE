@@ -20,10 +20,10 @@ namespace CineTrackBE.ApiControllers
         }
 
         [HttpGet]
-        [Route("Test")]
+        [Route("NewFilms")]
         public async Task<IEnumerable<FilmDTO>> GetTest()
         {
-            var films = await _filmRepository.GetList().ToListAsync();
+            var films = await _filmRepository.GetList().OrderBy(p=>p.ReleaseDate).Take(5).ToListAsync();
 
             var filmsDTO = films.Select(p => new FilmDTO()
             {
@@ -31,7 +31,7 @@ namespace CineTrackBE.ApiControllers
                 Name = p.Name,
                 Director = p.Director,
                 Description = p.Description,
-                Year = p.Year,
+                ReleaseDate = p.ReleaseDate,
                 Genres = [.. p.FilmGenres.Select(g => g.Genre.Name)]
             });
 
