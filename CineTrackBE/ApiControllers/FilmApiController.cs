@@ -8,19 +8,22 @@ namespace CineTrackBE.ApiControllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class FilmApiController(IRepository<Film> filmRepository) : ControllerBase
+    public class FilmApiController(IRepository<Film> filmRepository, IRepository<Genre> genreRepository) : ControllerBase
     {
         private readonly IRepository<Film> _filmRepository = filmRepository;
+        private readonly IRepository<Genre> _genreRepository = genreRepository;
 
 
         // Top 5 Latest Films //
         [HttpGet]
         [Route("LatestFilms")]
-        public async Task<IEnumerable<FilmDTO>> GetLatestFilms()
+        public async Task<ActionResult<IEnumerable<FilmDto>>> GetLatestFilms()
         {
-            var films = await _filmRepository.GetList().OrderByDescending(p=>p.ReleaseDate).Take(5).ToListAsync();
+            var films = await _filmRepository.GetList().OrderByDescending(p => p.ReleaseDate).Take(5).ToListAsync();
 
-            var filmsDTO = films.Select(p => new FilmDTO()
+            if(films == null || films.Count == 0) return NotFound();
+
+            var filmsDTO = films.Select(p => new FilmDto()
             {
                 Id = p.Id,
                 Name = p.Name,
@@ -31,18 +34,20 @@ namespace CineTrackBE.ApiControllers
                 Genres = [.. p.FilmGenres.Select(g => g.Genre.Name)]
             });
 
-            return filmsDTO;
+            return Ok(filmsDTO);
         }
 
 
         // Get all Films //
         [HttpGet]
         [Route("AllFilms")]
-        public async Task<IEnumerable<FilmDTO>> GetTest()
+        public async Task<ActionResult<IEnumerable<FilmDto>>> GetAllFilms()
         {
             var films = await _filmRepository.GetList().ToListAsync();
 
-            var filmsDTO = films.Select(p => new FilmDTO()
+            if(films == null || films.Count == 0) return NotFound();
+
+            var filmsDTO = films.Select(p => new FilmDto()
             {
                 Id = p.Id,
                 Name = p.Name,
@@ -53,9 +58,51 @@ namespace CineTrackBE.ApiControllers
                 Genres = [.. p.FilmGenres.Select(g => g.Genre.Name)]
             });
 
-            return filmsDTO;
+            return Ok(filmsDTO);
         }
 
+
+        // Get all genres //
+        [HttpGet]
+        [Route("AllGenres")]
+        public async Task<ActionResult<IEnumerable<GenreDto>>> GetAllGenres()
+        {
+            var genres = await _genreRepository.GetList().ToListAsync();
+
+            if (genres == null || genres.Count == 0) return NotFound();
+
+            var genresDto = genres.Select(p => new GenreDto()
+            {
+                Id = p.Id,
+                Name = p.Name
+            });
+
+            return Ok(genresDto);
+        }
+
+
+        // POST api/<FilmApiController>
+        [HttpPost]
+        [Route("CatalogSearch")]
+        public async Task<ActionResult<IEnumerable<Film>>> CatalogPost([FromBody] string value)
+        {
+            var films = await _filmRepository.GetList().ToListAsync();
+
+            if (films == null || films.Count == 0) return NotFound();
+
+            var filmsDTO = films.Select(p => new FilmDto()
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Director = p.Director,
+                ImageFileName = p.ImageFileName,
+                Description = p.Description,
+                ReleaseDate = p.ReleaseDate,
+                Genres = [.. p.FilmGenres.Select(g => g.Genre.Name)]
+            });
+
+            return Ok(filmsDTO);
+        }
 
 
 
@@ -64,12 +111,6 @@ namespace CineTrackBE.ApiControllers
         public string Get(int id)
         {
             return "value";
-        }
-
-        // POST api/<FilmApiController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
         }
 
         // PUT api/<FilmApiController>/5

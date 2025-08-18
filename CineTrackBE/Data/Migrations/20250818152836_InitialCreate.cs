@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace CineTrackBE.Data.Migrations
+namespace CineTrackBE.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -306,7 +306,17 @@ namespace CineTrackBE.Data.Migrations
                     { 7, "Příběh Forresta Gumpa, muže s nízkým IQ, který se nevědomky účastní mnoha historických událostí ve 20. století.", "Robert Zemeckis", "ForrestGump.jpg", "Forrest Gump", new DateTime(1994, 7, 6, 0, 0, 0, 0, DateTimeKind.Unspecified) },
                     { 8, "Programátor počítačů objeví šokující pravdu o realitě a svém místě v ní.", "The Wachowskis", "Matrix.jpg", "The Matrix", new DateTime(1999, 3, 31, 0, 0, 0, 0, DateTimeKind.Unspecified) },
                     { 9, "V německy okupovaném Polsku během 2. světové války se Oskar Schindler postupně stává svědomitým a zachraňuje životy více než tisíce židovských uprchlíků.", "Steven Spielberg", "SchindlersList.jpg", "Schindler's List", new DateTime(1993, 12, 15, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 10, "Příběh Henryho Hilla a jeho života v mafii, který pokrývá jeho vztah s jeho ženou Karen Hill a jeho partnery v zločinu Jimmy Conwayem a Tommy DeVitem.", "Martin Scorsese", "Goodfellas.jpg", "Goodfellas", new DateTime(1990, 9, 19, 0, 0, 0, 0, DateTimeKind.Unspecified) }
+                    { 10, "Příběh Henryho Hilla a jeho života v mafii, který pokrývá jeho vztah s jeho ženou Karen Hill a jeho partnery v zločinu Jimmy Conwayem a Tommy DeVitem.", "Martin Scorsese", "Goodfellas.jpg", "Goodfellas", new DateTime(1990, 9, 19, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 11, "Epický příběh mafiánské rodiny Corleonů, který sleduje vzestup Michaela Corleona z neochotného outsidera na nemilosrdného mafiánského bosse.", "Francis Ford Coppola", "Godfather.jpg", "The Godfather", new DateTime(1972, 3, 24, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 12, "Paleontologové jsou pozváni do úžasného tematického parku obydleného vzkříšenými dinosaury, ale brzy zjistí, že bezpečnostní systémy selhávají.", "Steven Spielberg", "JurassicPark.jpg", "Jurassic Park", new DateTime(1993, 6, 11, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 13, "Mladá agentka FBI hledá pomoc uvězněného kanibala, aby chytila sériového vraha, který stahuje své oběti z kůže.", "Jonathan Demme", "SilenceOfTheLambs.jpg", "The Silence of the Lambs", new DateTime(1991, 2, 14, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 14, "Epický milostný příběh zasazený do pozadí tragické plavby luxusního parníku Titanic na jeho první a poslední cestě.", "James Cameron", "Titanic.jpg", "Titanic", new DateTime(1997, 12, 19, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 15, "Mladý hobbit a jeho přátelé se vydávají na nebezpečnou cestu, aby zničili mocný prsten a zachránili Středozem před temným pánem Sauronem.", "Peter Jackson", "LordOfTheRings.jpg", "The Lord of the Rings", new DateTime(2001, 12, 19, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 16, "Nespokojený úředník vytvoří podzemní bojový klub jako radikální formu psychoterapie, ale věci se vymknou kontrole.", "David Fincher", "FightClub.jpg", "Fight Club", new DateTime(1999, 10, 15, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 17, "Tým superhrdinů se musí spojit, aby zachránili Zemi před invazí mimozemšťanů vedenou Lokiho armádou.", "Joss Whedon", "Avengers.jpg", "The Avengers", new DateTime(2012, 5, 4, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 18, "Bývalý římský generál se snaží pomstít vraždu své rodiny tím, že se stane gladiátorem a vyzve zkorumpovaného císaře.", "Ridley Scott", "Gladiator.jpg", "Gladiator", new DateTime(2000, 5, 5, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 19, "Život dozorců na cele smrti je ovlivněn příchodem záhadného vězně s nadpřirozenými schopnostmi léčit.", "Frank Darabont", "GreenMile.jpg", "The Green Mile", new DateTime(1999, 12, 10, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 20, "Tým průzkumníků cestuje červí dírou ve vesmíru v pokusu zajistit přežití lidstva.", "Christopher Nolan", "Interstellar.jpg", "Interstellar", new DateTime(2014, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified) }
                 });
 
             migrationBuilder.InsertData(
@@ -354,7 +364,27 @@ namespace CineTrackBE.Data.Migrations
                     { 8, 6 },
                     { 9, 1 },
                     { 10, 1 },
-                    { 10, 5 }
+                    { 10, 5 },
+                    { 11, 1 },
+                    { 11, 5 },
+                    { 12, 4 },
+                    { 12, 6 },
+                    { 13, 1 },
+                    { 13, 5 },
+                    { 14, 1 },
+                    { 14, 3 },
+                    { 15, 4 },
+                    { 15, 6 },
+                    { 16, 1 },
+                    { 16, 5 },
+                    { 17, 4 },
+                    { 17, 6 },
+                    { 18, 1 },
+                    { 18, 4 },
+                    { 19, 1 },
+                    { 19, 6 },
+                    { 20, 1 },
+                    { 20, 6 }
                 });
 
             migrationBuilder.CreateIndex(

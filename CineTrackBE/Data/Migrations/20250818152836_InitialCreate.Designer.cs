@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace CineTrackBE.Data.Migrations
+namespace CineTrackBE.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250818103624_UpdateSeed")]
-    partial class UpdateSeed
+    [Migration("20250818152836_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -218,7 +218,7 @@ namespace CineTrackBE.Data.Migrations
                             Description = "Mladý hobbit a jeho přátelé se vydávají na nebezpečnou cestu, aby zničili mocný prsten a zachránili Středozem před temným pánem Sauronem.",
                             Director = "Peter Jackson",
                             ImageFileName = "LordOfTheRings.jpg",
-                            Name = "The Lord of the Rings: The Fellowship of the Ring",
+                            Name = "The Lord of the Rings",
                             ReleaseDate = new DateTime(2001, 12, 19, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
