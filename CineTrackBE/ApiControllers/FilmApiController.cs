@@ -38,28 +38,28 @@ namespace CineTrackBE.ApiControllers
         }
 
 
-        // Get all Films //
-        [HttpGet]
-        [Route("AllFilms")]
-        public async Task<ActionResult<IEnumerable<FilmDto>>> GetAllFilms()
-        {
-            var films = await _filmRepository.GetList().ToListAsync();
+        //// Get all Films //
+        //[HttpGet]
+        //[Route("AllFilms")]
+        //public async Task<ActionResult<IEnumerable<FilmDto>>> GetAllFilms()
+        //{
+        //    var films = await _filmRepository.GetList().ToListAsync();
 
-            if(films == null || films.Count == 0) return NotFound();
+        //    if(films == null || films.Count == 0) return NotFound();
 
-            var filmsDTO = films.Select(p => new FilmDto()
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Director = p.Director,
-                ImageFileName = p.ImageFileName,
-                Description = p.Description,
-                ReleaseDate = p.ReleaseDate,
-                Genres = [.. p.FilmGenres.Select(g => g.Genre.Name)]
-            });
+        //    var filmsDTO = films.Select(p => new FilmDto()
+        //    {
+        //        Id = p.Id,
+        //        Name = p.Name,
+        //        Director = p.Director,
+        //        ImageFileName = p.ImageFileName,
+        //        Description = p.Description,
+        //        ReleaseDate = p.ReleaseDate,
+        //        Genres = [.. p.FilmGenres.Select(g => g.Genre.Name)]
+        //    });
 
-            return Ok(filmsDTO);
-        }
+        //    return Ok(filmsDTO);
+        //}
 
 
         // Get all genres //
@@ -81,7 +81,6 @@ namespace CineTrackBE.ApiControllers
         }
 
 
-        // POST api/<FilmApiController>
         [HttpPost]
         [Route("CatalogSearch")]
         public async Task<ActionResult<IEnumerable<Film>>> CatalogPost([FromBody] string value)
