@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CineTrackBE.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250817201048_InitCreate")]
-    partial class InitCreate
+    [Migration("20250818064325_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -71,6 +71,9 @@ namespace CineTrackBE.Data.Migrations
                     b.Property<string>("Director")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ImageFileName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -81,6 +84,98 @@ namespace CineTrackBE.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Films");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Sledujeme mladé rekruty v boji proti mimozemským pavoukům, zatímco režisér Paul Verhoeven chytře kritizuje militarismus a propagandu.",
+                            Director = "Paul Verhoeven",
+                            ImageFileName = "StarshipTroopers.jpg",
+                            Name = "Hvězdná pěchota",
+                            ReleaseDate = new DateTime(1997, 7, 9, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Bývalý nájemný vrah John Wick rozpoutá krvavou cestu pomsty poté, co mu ruští gangsteři ukradnou auto a zabijí jeho milovaného psa, poslední dar od jeho zesnulé ženy.",
+                            Director = "Chad Stahelski",
+                            ImageFileName = "JohnWick.jpg",
+                            Name = "John Wick",
+                            ReleaseDate = new DateTime(2014, 12, 21, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Dom Cobb je zručný zloděj, který krade tajemství z podvědomí během snění. Dostává nabídku na poslední job, který by mu mohl vrátit jeho starý život.",
+                            Director = "Christopher Nolan",
+                            ImageFileName = "Inception.jpg",
+                            Name = "Inception",
+                            ReleaseDate = new DateTime(2010, 7, 16, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Kultovní film Quentina Tarantina propojuje několik příběhů zločinců v Los Angeles.",
+                            Director = "Quentin Tarantino",
+                            ImageFileName = "PulpFiction.jpg",
+                            Name = "Pulp Fiction",
+                            ReleaseDate = new DateTime(1994, 10, 14, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Dva uvěznění muži během několika let najdou útěchu a případné vykoupení skrze činy obyčejné slušnosti.",
+                            Director = "Frank Darabont",
+                            ImageFileName = "ShawshankRedemption.jpg",
+                            Name = "The Shawshank Redemption",
+                            ReleaseDate = new DateTime(1994, 9, 23, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "Batman, Gordon a Harvey Dent jsou nuceni čelit chaosu rozpoutanému v Gothamu anarchistickým kriminálním géniem známým jako Joker.",
+                            Director = "Christopher Nolan",
+                            ImageFileName = "DarkKnight.jpg",
+                            Name = "The Dark Knight",
+                            ReleaseDate = new DateTime(2008, 7, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Description = "Příběh Forresta Gumpa, muže s nízkým IQ, který se nevědomky účastní mnoha historických událostí ve 20. století.",
+                            Director = "Robert Zemeckis",
+                            ImageFileName = "ForrestGump.jpg",
+                            Name = "Forrest Gump",
+                            ReleaseDate = new DateTime(1994, 7, 6, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Description = "Programátor počítačů objeví šokující pravdu o realitě a svém místě v ní.",
+                            Director = "The Wachowskis",
+                            ImageFileName = "Matrix.jpg",
+                            Name = "The Matrix",
+                            ReleaseDate = new DateTime(1999, 3, 31, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Description = "V německy okupovaném Polsku během 2. světové války se Oskar Schindler postupně stává svědomitým a zachraňuje životy více než tisíce židovských uprchlíků.",
+                            Director = "Steven Spielberg",
+                            ImageFileName = "SchindlersList.jpg",
+                            Name = "Schindler's List",
+                            ReleaseDate = new DateTime(1993, 12, 15, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Description = "Příběh Henryho Hilla a jeho života v mafii, který pokrývá jeho vztah s jeho ženou Karen Hill a jeho partnery v zločinu Jimmy Conwayem a Tommy DeVitem.",
+                            Director = "Martin Scorsese",
+                            ImageFileName = "Goodfellas.jpg",
+                            Name = "Goodfellas",
+                            ReleaseDate = new DateTime(1990, 9, 19, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
                 });
 
             modelBuilder.Entity("CineTrackBE.Models.Entities.FilmGenre", b =>
@@ -96,6 +191,98 @@ namespace CineTrackBE.Data.Migrations
                     b.HasIndex("GenreId");
 
                     b.ToTable("FilmGenres");
+
+                    b.HasData(
+                        new
+                        {
+                            FilmId = 1,
+                            GenreId = 4
+                        },
+                        new
+                        {
+                            FilmId = 1,
+                            GenreId = 6
+                        },
+                        new
+                        {
+                            FilmId = 2,
+                            GenreId = 4
+                        },
+                        new
+                        {
+                            FilmId = 2,
+                            GenreId = 5
+                        },
+                        new
+                        {
+                            FilmId = 3,
+                            GenreId = 4
+                        },
+                        new
+                        {
+                            FilmId = 3,
+                            GenreId = 6
+                        },
+                        new
+                        {
+                            FilmId = 4,
+                            GenreId = 1
+                        },
+                        new
+                        {
+                            FilmId = 4,
+                            GenreId = 3
+                        },
+                        new
+                        {
+                            FilmId = 5,
+                            GenreId = 1
+                        },
+                        new
+                        {
+                            FilmId = 6,
+                            GenreId = 4
+                        },
+                        new
+                        {
+                            FilmId = 6,
+                            GenreId = 1
+                        },
+                        new
+                        {
+                            FilmId = 7,
+                            GenreId = 1
+                        },
+                        new
+                        {
+                            FilmId = 7,
+                            GenreId = 3
+                        },
+                        new
+                        {
+                            FilmId = 8,
+                            GenreId = 4
+                        },
+                        new
+                        {
+                            FilmId = 8,
+                            GenreId = 6
+                        },
+                        new
+                        {
+                            FilmId = 9,
+                            GenreId = 1
+                        },
+                        new
+                        {
+                            FilmId = 10,
+                            GenreId = 1
+                        },
+                        new
+                        {
+                            FilmId = 10,
+                            GenreId = 5
+                        });
                 });
 
             modelBuilder.Entity("CineTrackBE.Models.Entities.Genre", b =>
@@ -139,6 +326,11 @@ namespace CineTrackBE.Data.Migrations
                         {
                             Id = 5,
                             Name = "Thriller"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Sci-fi"
                         });
                 });
 

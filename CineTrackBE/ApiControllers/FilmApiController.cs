@@ -13,25 +13,19 @@ namespace CineTrackBE.ApiControllers
         private readonly IRepository<Film> _filmRepository = filmRepository;
 
 
-        [HttpGet]
-        public async Task<IEnumerable<string>> Get()
-        {
-            return await _filmRepository.GetList().Select(p => p.Name).ToListAsync();
-        }
-
-
         // Top 5 Latest Films //
         [HttpGet]
         [Route("LatestFilms")]
-        public async Task<IEnumerable<FilmDTO>> GetTest()
+        public async Task<IEnumerable<FilmDTO>> GetLatestFilms()
         {
-            var films = await _filmRepository.GetList().OrderBy(p=>p.ReleaseDate).Take(5).ToListAsync();
+            var films = await _filmRepository.GetList().OrderByDescending(p=>p.ReleaseDate).Take(5).ToListAsync();
 
             var filmsDTO = films.Select(p => new FilmDTO()
             {
                 Id = p.Id,
                 Name = p.Name,
                 Director = p.Director,
+                ImageFileName = p.ImageFileName,
                 Description = p.Description,
                 ReleaseDate = p.ReleaseDate,
                 Genres = [.. p.FilmGenres.Select(g => g.Genre.Name)]
@@ -39,6 +33,31 @@ namespace CineTrackBE.ApiControllers
 
             return filmsDTO;
         }
+
+
+        // Get all Films //
+        [HttpGet]
+        [Route("AllFilms")]
+        public async Task<IEnumerable<FilmDTO>> GetTest()
+        {
+            var films = await _filmRepository.GetList().ToListAsync();
+
+            var filmsDTO = films.Select(p => new FilmDTO()
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Director = p.Director,
+                ImageFileName = p.ImageFileName,
+                Description = p.Description,
+                ReleaseDate = p.ReleaseDate,
+                Genres = [.. p.FilmGenres.Select(g => g.Genre.Name)]
+            });
+
+            return filmsDTO;
+        }
+
+
+
 
         // GET api/<FilmApiController>/5
         [HttpGet("{id}")]

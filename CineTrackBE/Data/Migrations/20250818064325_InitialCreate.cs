@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CineTrackBE.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitCreate : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -61,6 +61,7 @@ namespace CineTrackBE.Data.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Director = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ImageFileName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ReleaseDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -292,6 +293,23 @@ namespace CineTrackBE.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Films",
+                columns: new[] { "Id", "Description", "Director", "ImageFileName", "Name", "ReleaseDate" },
+                values: new object[,]
+                {
+                    { 1, "Sledujeme mladé rekruty v boji proti mimozemským pavoukům, zatímco režisér Paul Verhoeven chytře kritizuje militarismus a propagandu.", "Paul Verhoeven", "StarshipTroopers.jpg", "Hvězdná pěchota", new DateTime(1997, 7, 9, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 2, "Bývalý nájemný vrah John Wick rozpoutá krvavou cestu pomsty poté, co mu ruští gangsteři ukradnou auto a zabijí jeho milovaného psa, poslední dar od jeho zesnulé ženy.", "Chad Stahelski", "JohnWick.jpg", "John Wick", new DateTime(2014, 12, 21, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 3, "Dom Cobb je zručný zloděj, který krade tajemství z podvědomí během snění. Dostává nabídku na poslední job, který by mu mohl vrátit jeho starý život.", "Christopher Nolan", "Inception.jpg", "Inception", new DateTime(2010, 7, 16, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 4, "Kultovní film Quentina Tarantina propojuje několik příběhů zločinců v Los Angeles.", "Quentin Tarantino", "PulpFiction.jpg", "Pulp Fiction", new DateTime(1994, 10, 14, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 5, "Dva uvěznění muži během několika let najdou útěchu a případné vykoupení skrze činy obyčejné slušnosti.", "Frank Darabont", "ShawshankRedemption.jpg", "The Shawshank Redemption", new DateTime(1994, 9, 23, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 6, "Batman, Gordon a Harvey Dent jsou nuceni čelit chaosu rozpoutanému v Gothamu anarchistickým kriminálním géniem známým jako Joker.", "Christopher Nolan", "DarkKnight.jpg", "The Dark Knight", new DateTime(2008, 7, 18, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 7, "Příběh Forresta Gumpa, muže s nízkým IQ, který se nevědomky účastní mnoha historických událostí ve 20. století.", "Robert Zemeckis", "ForrestGump.jpg", "Forrest Gump", new DateTime(1994, 7, 6, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 8, "Programátor počítačů objeví šokující pravdu o realitě a svém místě v ní.", "The Wachowskis", "Matrix.jpg", "The Matrix", new DateTime(1999, 3, 31, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 9, "V německy okupovaném Polsku během 2. světové války se Oskar Schindler postupně stává svědomitým a zachraňuje životy více než tisíce židovských uprchlíků.", "Steven Spielberg", "SchindlersList.jpg", "Schindler's List", new DateTime(1993, 12, 15, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 10, "Příběh Henryho Hilla a jeho života v mafii, který pokrývá jeho vztah s jeho ženou Karen Hill a jeho partnery v zločinu Jimmy Conwayem a Tommy DeVitem.", "Martin Scorsese", "Goodfellas.jpg", "Goodfellas", new DateTime(1990, 9, 19, 0, 0, 0, 0, DateTimeKind.Unspecified) }
+                });
+
+            migrationBuilder.InsertData(
                 table: "Genre",
                 columns: new[] { "Id", "Name" },
                 values: new object[,]
@@ -300,7 +318,8 @@ namespace CineTrackBE.Data.Migrations
                     { 2, "Horror" },
                     { 3, "Comedy" },
                     { 4, "Action" },
-                    { 5, "Thriller" }
+                    { 5, "Thriller" },
+                    { 6, "Sci-fi" }
                 });
 
             migrationBuilder.InsertData(
@@ -311,6 +330,31 @@ namespace CineTrackBE.Data.Migrations
                     { "AdminRoleId-51sa9-sdd18", "id-Juzba" },
                     { "UserRoleId-54sa9-sda87", "id-Karel" },
                     { "AdminRoleId-51sa9-sdd18", "id-Katka" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "FilmGenres",
+                columns: new[] { "FilmId", "GenreId" },
+                values: new object[,]
+                {
+                    { 1, 4 },
+                    { 1, 6 },
+                    { 2, 4 },
+                    { 2, 5 },
+                    { 3, 4 },
+                    { 3, 6 },
+                    { 4, 1 },
+                    { 4, 3 },
+                    { 5, 1 },
+                    { 6, 1 },
+                    { 6, 4 },
+                    { 7, 1 },
+                    { 7, 3 },
+                    { 8, 4 },
+                    { 8, 6 },
+                    { 9, 1 },
+                    { 10, 1 },
+                    { 10, 5 }
                 });
 
             migrationBuilder.CreateIndex(

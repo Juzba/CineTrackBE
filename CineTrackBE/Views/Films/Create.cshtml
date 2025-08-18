@@ -31,6 +31,11 @@
                 <span asp-validation-for="Film.Director" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="Film.ImageFileName" class="control-label"></label>
+                <input asp-for="Film.ImageFileName" class="form-control" />
+                <span asp-validation-for="Film.ImageFileName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <label asp-for="Film.ReleaseDate" class="control-label"></label>
                 <input asp-for="Film.ReleaseDate" class="form-control" />
                 <span asp-validation-for="Film.ReleaseDate" class="text-danger"></span>

@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\" />
     <Folder Include="AppServices\" />
     <Folder Include="Controllers\" />
     <Folder Include="Views\" />
