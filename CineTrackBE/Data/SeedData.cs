@@ -138,7 +138,97 @@ namespace CineTrackBE.Data
                       Director = "Martin Scorsese",
                       ReleaseDate = new DateTime(1990, 09, 19),
                       ImageFileName = "Goodfellas.jpg"
-                  }
+                  },
+                   new Film()
+                   {
+                       Id = 11,
+                       Name = "The Godfather",
+                       Description = "Epický příběh mafiánské rodiny Corleonů, který sleduje vzestup Michaela Corleona z neochotného outsidera na nemilosrdného mafiánského bosse.",
+                       Director = "Francis Ford Coppola",
+                       ReleaseDate = new DateTime(1972, 03, 24),
+                       ImageFileName = "Godfather.jpg"
+                   },
+            new Film()
+            {
+                Id = 12,
+                Name = "Jurassic Park",
+                Description = "Paleontologové jsou pozváni do úžasného tematického parku obydleného vzkříšenými dinosaury, ale brzy zjistí, že bezpečnostní systémy selhávají.",
+                Director = "Steven Spielberg",
+                ReleaseDate = new DateTime(1993, 06, 11),
+                ImageFileName = "JurassicPark.jpg"
+            },
+            new Film()
+            {
+                Id = 13,
+                Name = "The Silence of the Lambs",
+                Description = "Mladá agentka FBI hledá pomoc uvězněného kanibala, aby chytila sériového vraha, který stahuje své oběti z kůže.",
+                Director = "Jonathan Demme",
+                ReleaseDate = new DateTime(1991, 02, 14),
+                ImageFileName = "SilenceOfTheLambs.jpg"
+            },
+            new Film()
+            {
+                Id = 14,
+                Name = "Titanic",
+                Description = "Epický milostný příběh zasazený do pozadí tragické plavby luxusního parníku Titanic na jeho první a poslední cestě.",
+                Director = "James Cameron",
+                ReleaseDate = new DateTime(1997, 12, 19),
+                ImageFileName = "Titanic.jpg"
+            },
+            new Film()
+            {
+                Id = 15,
+                Name = "The Lord of the Rings",
+                Description = "Mladý hobbit a jeho přátelé se vydávají na nebezpečnou cestu, aby zničili mocný prsten a zachránili Středozem před temným pánem Sauronem.",
+                Director = "Peter Jackson",
+                ReleaseDate = new DateTime(2001, 12, 19),
+                ImageFileName = "LordOfTheRings.jpg"
+            },
+            new Film()
+            {
+                Id = 16,
+                Name = "Fight Club",
+                Description = "Nespokojený úředník vytvoří podzemní bojový klub jako radikální formu psychoterapie, ale věci se vymknou kontrole.",
+                Director = "David Fincher",
+                ReleaseDate = new DateTime(1999, 10, 15),
+                ImageFileName = "FightClub.jpg"
+            },
+            new Film()
+            {
+                Id = 17,
+                Name = "The Avengers",
+                Description = "Tým superhrdinů se musí spojit, aby zachránili Zemi před invazí mimozemšťanů vedenou Lokiho armádou.",
+                Director = "Joss Whedon",
+                ReleaseDate = new DateTime(2012, 05, 04),
+                ImageFileName = "Avengers.jpg"
+            },
+            new Film()
+            {
+                Id = 18,
+                Name = "Gladiator",
+                Description = "Bývalý římský generál se snaží pomstít vraždu své rodiny tím, že se stane gladiátorem a vyzve zkorumpovaného císaře.",
+                Director = "Ridley Scott",
+                ReleaseDate = new DateTime(2000, 05, 05),
+                ImageFileName = "Gladiator.jpg"
+            },
+            new Film()
+            {
+                Id = 19,
+                Name = "The Green Mile",
+                Description = "Život dozorců na cele smrti je ovlivněn příchodem záhadného vězně s nadpřirozenými schopnostmi léčit.",
+                Director = "Frank Darabont",
+                ReleaseDate = new DateTime(1999, 12, 10),
+                ImageFileName = "GreenMile.jpg"
+            },
+            new Film()
+            {
+                Id = 20,
+                Name = "Interstellar",
+                Description = "Tým průzkumníků cestuje červí dírou ve vesmíru v pokusu zajistit přežití lidstva.",
+                Director = "Christopher Nolan",
+                ReleaseDate = new DateTime(2014, 11, 07),
+                ImageFileName = "Interstellar.jpg"
+            }
             );
 
 
@@ -161,7 +251,27 @@ namespace CineTrackBE.Data
                 new FilmGenre() { FilmId = 8, GenreId = 6 },
                 new FilmGenre() { FilmId = 9, GenreId = 1 },
                 new FilmGenre() { FilmId = 10, GenreId = 1 },
-                new FilmGenre() { FilmId = 10, GenreId = 5 }
+                new FilmGenre() { FilmId = 10, GenreId = 5 },
+                new FilmGenre() { FilmId = 11, GenreId = 1 },
+                new FilmGenre() { FilmId = 11, GenreId = 5 },
+                new FilmGenre() { FilmId = 12, GenreId = 4 },
+                new FilmGenre() { FilmId = 12, GenreId = 6 },
+                new FilmGenre() { FilmId = 13, GenreId = 1 },
+                new FilmGenre() { FilmId = 13, GenreId = 5 },
+                new FilmGenre() { FilmId = 14, GenreId = 1 },
+                new FilmGenre() { FilmId = 14, GenreId = 3 },
+                new FilmGenre() { FilmId = 15, GenreId = 4 },
+                new FilmGenre() { FilmId = 15, GenreId = 6 },
+                new FilmGenre() { FilmId = 16, GenreId = 1 },
+                new FilmGenre() { FilmId = 16, GenreId = 5 },
+                new FilmGenre() { FilmId = 17, GenreId = 4 },
+                new FilmGenre() { FilmId = 17, GenreId = 6 },
+                new FilmGenre() { FilmId = 18, GenreId = 1 },
+                new FilmGenre() { FilmId = 18, GenreId = 4 },
+                new FilmGenre() { FilmId = 19, GenreId = 1 },
+                new FilmGenre() { FilmId = 19, GenreId = 6 },
+                new FilmGenre() { FilmId = 20, GenreId = 1 },
+                new FilmGenre() { FilmId = 20, GenreId = 6 }
                 );
 
 
