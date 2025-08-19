@@ -1,6 +1,8 @@
-﻿using CineTrackBE.Models.DTO;
+﻿using CineTrackBE.AppServices;
+using CineTrackBE.Models.DTO;
 using CineTrackBE.Models.Entities;
 using CineTrackBE.Services;
+using CineTrackFE.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,10 +10,11 @@ namespace CineTrackBE.ApiControllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class FilmApiController(IRepository<Film> filmRepository, IRepository<Genre> genreRepository) : ControllerBase
+    public class FilmApiController(IRepository<Film> filmRepository, IRepository<Genre> genreRepository, IDataService dataService) : ControllerBase
     {
         private readonly IRepository<Film> _filmRepository = filmRepository;
         private readonly IRepository<Genre> _genreRepository = genreRepository;
+        private readonly IDataService _dataService = dataService;
 
 
         // Top 5 Latest Films //
@@ -21,7 +24,7 @@ namespace CineTrackBE.ApiControllers
         {
             var films = await _filmRepository.GetList().OrderByDescending(p => p.ReleaseDate).Take(5).ToListAsync();
 
-            if(films == null || films.Count == 0) return NotFound();
+            if (films == null || films.Count == 0) return NotFound();
 
             var filmsDTO = films.Select(p => new FilmDto()
             {
@@ -36,30 +39,6 @@ namespace CineTrackBE.ApiControllers
 
             return Ok(filmsDTO);
         }
-
-
-        //// Get all Films //
-        //[HttpGet]
-        //[Route("AllFilms")]
-        //public async Task<ActionResult<IEnumerable<FilmDto>>> GetAllFilms()
-        //{
-        //    var films = await _filmRepository.GetList().ToListAsync();
-
-        //    if(films == null || films.Count == 0) return NotFound();
-
-        //    var filmsDTO = films.Select(p => new FilmDto()
-        //    {
-        //        Id = p.Id,
-        //        Name = p.Name,
-        //        Director = p.Director,
-        //        ImageFileName = p.ImageFileName,
-        //        Description = p.Description,
-        //        ReleaseDate = p.ReleaseDate,
-        //        Genres = [.. p.FilmGenres.Select(g => g.Genre.Name)]
-        //    });
-
-        //    return Ok(filmsDTO);
-        //}
 
 
         // Get all genres //
@@ -83,24 +62,54 @@ namespace CineTrackBE.ApiControllers
 
         [HttpPost]
         [Route("CatalogSearch")]
-        public async Task<ActionResult<IEnumerable<Film>>> CatalogPost([FromBody] string value)
+        public async Task<ActionResult<IEnumerable<Film>>> CatalogPost([FromBody] SearchParametrsDto? searchParams)
         {
-            var films = await _filmRepository.GetList().ToListAsync();
 
-            if (films == null || films.Count == 0) return NotFound();
-
-            var filmsDTO = films.Select(p => new FilmDto()
+            if (searchParams == null)
             {
-                Id = p.Id,
-                Name = p.Name,
-                Director = p.Director,
-                ImageFileName = p.ImageFileName,
-                Description = p.Description,
-                ReleaseDate = p.ReleaseDate,
-                Genres = [.. p.FilmGenres.Select(g => g.Genre.Name)]
-            });
 
-            return Ok(filmsDTO);
+                var films = await _filmRepository.GetList().OrderByDescending(p => p.Id).ToListAsync();
+
+                if (films == null || films.Count == 0) return NotFound();
+
+                var filmsDTO = films.Select(p => new FilmDto()
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Director = p.Director,
+                    ImageFileName = p.ImageFileName,
+                    Description = p.Description,
+                    ReleaseDate = p.ReleaseDate,
+                    Genres = [.. p.FilmGenres.Select(g => g.Genre.Name)]
+                });
+
+                return Ok(filmsDTO);
+
+
+            }
+            else
+            {
+
+                var films = _dataService.GetFilmListAsync_InclFilmGenres().Where(p => p.Name.Contains(searchParams.SearchText ?? ""));
+
+                if (searchParams.SearchByYear != null && searchParams.SearchByYear > 0)
+                {
+                    films = films.Where(p => p.ReleaseDate.Year == searchParams.SearchByYear);
+                }
+
+
+
+                //if (searchParams.GenreId != null && searchParams.GenreId > 0)
+                //{
+                //    films = films.Where(p => p.FilmGenres);
+                //}
+
+
+
+
+
+                return Ok();
+            }
         }
 
 
