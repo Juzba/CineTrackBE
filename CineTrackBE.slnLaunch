@@ -1,0 +1,32 @@
+[
+  {
+    "Name": "Fe+Be (All Debug)",
+    "Projects": [
+      {
+        "Path": "CineTrackBE\\CineTrackBE.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      },
+      {
+        "Path": "..\\CineTrackFE\\CineTrackFE\\CineTrackFE.csproj",
+        "Action": "Start",
+        "DebugTarget": "CineTrackFE"
+      }
+    ]
+  },
+  {
+    "Name": "Fe+Be (Only Fe Debug)",
+    "Projects": [
+      {
+        "Path": "CineTrackBE\\CineTrackBE.csproj",
+        "Action": "StartWithoutDebugging",
+        "DebugTarget": "https"
+      },
+      {
+        "Path": "..\\CineTrackFE\\CineTrackFE\\CineTrackFE.csproj",
+        "Action": "Start",
+        "DebugTarget": "CineTrackFE"
+      }
+    ]
+  }
+]

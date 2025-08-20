@@ -59,7 +59,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Gen
         return Ok(genresDto);
     }
 
-
+    // SEARCH FILMS BY PARAMETERS //
     [HttpPost]
     [Route("CatalogSearch")]
     public async Task<ActionResult<IEnumerable<Film>>> CatalogPost([FromBody] SearchParametrsDto? searchParams)
@@ -123,13 +123,24 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Gen
     }
 
 
-
-    // GET api/<FilmApiController>/5
+    // GET FILM DETAILS BY ID //
     [HttpGet("{id}")]
-    public string Get(int id)
+    [Route("FilmDetails/{id}")]
+    public async Task<ActionResult<FilmDto>> GetFilm(int id)
     {
-        return "value";
+        if (id <= 0) return BadRequest("Film ID must be greater than 0.");
+
+        var result = await _filmRepository.GetList().Include(p => p.FilmGenres).ThenInclude(p => p.Genre).FirstOrDefaultAsync(p => p.Id == id);
+
+        if (result == null) return NotFound($"Film with ID {id} not found.");
+
+
+        return Ok(result);
     }
+
+
+
+
 
     // PUT api/<FilmApiController>/5
     [HttpPut("{id}")]
