@@ -15,6 +15,8 @@ namespace CineTrackBE.ApiControllers
         private readonly IJwtService _jwtService = jwtService;
 
 
+        [HttpPost]
+        [Route("login")]
         public async Task<IActionResult> LoginAsync([FromBody] LoginDto loginDto)
         {
             if (string.IsNullOrWhiteSpace(loginDto.UserName) || string.IsNullOrWhiteSpace(loginDto.Password))
