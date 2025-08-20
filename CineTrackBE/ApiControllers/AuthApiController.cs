@@ -1,4 +1,6 @@
-﻿using CineTrackBE.AppServices;
+﻿
+
+using CineTrackBE.AppServices;
 using CineTrackBE.Models.DTO;
 using CineTrackBE.Models.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -37,22 +39,5 @@ namespace CineTrackBE.ApiControllers
 
             return Ok(new { Token = token });
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 }

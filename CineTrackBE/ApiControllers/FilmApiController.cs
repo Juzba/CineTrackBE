@@ -124,7 +124,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Gen
 
 
     // GET FILM DETAILS BY ID //
-    [HttpGet("{id}")]
+    [HttpGet]
     [Route("FilmDetails/{id}")]
     public async Task<ActionResult<FilmDto>> GetFilm(int id)
     {

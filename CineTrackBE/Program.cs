@@ -40,8 +40,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
-
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.PropertyNamingPolicy = null;
@@ -88,8 +88,9 @@ else
 app.UseHttpsRedirection();
 app.UseRouting();
 
-app.UseAuthorization();
 
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapStaticAssets();
 
 
