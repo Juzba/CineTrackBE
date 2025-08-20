@@ -12,7 +12,7 @@ namespace CineTrackBE.Models.Entities
 
         // User - Autor //
         public string AutorId { get; set; }
-        public User Autor { get; set; }
+        public ApplicationUser Autor { get; set; }
 
 
         // Parrent Comment //

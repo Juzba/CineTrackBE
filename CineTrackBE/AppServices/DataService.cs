@@ -8,9 +8,9 @@ namespace CineTrackBE.AppServices
     public interface IDataService
     {
         Task<bool> AnyUserExistsByUserNameAsync(string userName, CancellationToken cancellationToken = default);
-        Task<bool> AddUserRoleAsync(User user, string role, CancellationToken cancellationToken = default);
-        Task<bool> RemoveUserRoleAsync(User user, string role, CancellationToken cancellationToken = default);
-        Task<IQueryable<IdentityRole>> GetRolesFromUserAsync(User user, CancellationToken cancellationToken = default);
+        Task<bool> AddUserRoleAsync(ApplicationUser user, string role, CancellationToken cancellationToken = default);
+        Task<bool> RemoveUserRoleAsync(ApplicationUser user, string role, CancellationToken cancellationToken = default);
+        Task<IQueryable<IdentityRole>> GetRolesFromUserAsync(ApplicationUser user, CancellationToken cancellationToken = default);
         Task<int> CountUserInRoleAsync(string role, CancellationToken cancellationToken = default);
         Task AddGenresToFilmAsync(Film film, List<int> genreIds, CancellationToken cancellationToken = default);
         Task<Film?> GetFilmAsync_InclFilmGenres(int filmId, CancellationToken cancellationToken = default);
@@ -37,7 +37,7 @@ namespace CineTrackBE.AppServices
 
 
         // ADD USER ROLE //
-        public async Task<bool> AddUserRoleAsync(User user, string role, CancellationToken cancellationToken = default)
+        public async Task<bool> AddUserRoleAsync(ApplicationUser user, string role, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(user);
             ArgumentException.ThrowIfNullOrWhiteSpace(role);
@@ -60,7 +60,7 @@ namespace CineTrackBE.AppServices
 
 
         // REMOVE USER ROLE //
-        public async Task<bool> RemoveUserRoleAsync(User user, string role, CancellationToken cancellationToken = default)
+        public async Task<bool> RemoveUserRoleAsync(ApplicationUser user, string role, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(user);
             ArgumentException.ThrowIfNullOrWhiteSpace(role);
@@ -79,7 +79,7 @@ namespace CineTrackBE.AppServices
 
 
         // GET ROLES FROM USER //
-        public async Task<IQueryable<IdentityRole>> GetRolesFromUserAsync(User user, CancellationToken cancellationToken = default)
+        public async Task<IQueryable<IdentityRole>> GetRolesFromUserAsync(ApplicationUser user, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(user);
 

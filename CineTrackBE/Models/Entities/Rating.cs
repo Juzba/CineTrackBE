@@ -16,7 +16,7 @@ namespace CineTrackBE.Models.Entities
 
         // User //
         public string UserId { get; set; } = null!;
-        public User User { get; set; } = null!;
+        public ApplicationUser User { get; set; } = null!;
 
     }
 }

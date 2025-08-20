@@ -51,7 +51,7 @@ public class DataServiceNullTests
     public void AddUserRoleAsync_NullOrEmptyRole_ThrowsArgumentException()
     {
         // Arrange
-        var user = new User();
+        var user = new ApplicationUser();
 
         // Act & Assert
         var exception = Assert.ThrowsAsync<ArgumentNullException>(() => _dataService.AddUserRoleAsync(user, null!));
@@ -71,7 +71,7 @@ public class DataServiceNullTests
     [Test]
     public void RemoveUserRoleAsync_NullOrEmptyRole_ThrowsArgumentException()
     {
-        var user = new User();
+        var user = new ApplicationUser();
 
         var exception = Assert.ThrowsAsync<ArgumentNullException>(() => _dataService.RemoveUserRoleAsync(user, null!));
         Assert.ThrowsAsync<ArgumentException>(() => _dataService.RemoveUserRoleAsync(user, ""));

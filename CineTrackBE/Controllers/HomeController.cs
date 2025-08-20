@@ -6,10 +6,10 @@ using System.Diagnostics;
 
 namespace CineTrackBE.Controllers
 {
-    public class HomeController(ILogger<HomeController> logger, UserManager<User> userManager) : Controller
+    public class HomeController(ILogger<HomeController> logger, UserManager<ApplicationUser> userManager) : Controller
     {
         private readonly ILogger<HomeController> _logger = logger;
-        private readonly UserManager<User> _userManager = userManager;
+        private readonly UserManager<ApplicationUser> _userManager = userManager;
 
         public IActionResult Index()
         {
@@ -20,7 +20,7 @@ namespace CineTrackBE.Controllers
         public IActionResult Index(string input1)
         {
 
-            PasswordHasher<User> hasher = new();
+            PasswordHasher<ApplicationUser> hasher = new();
             var hashPass = hasher.HashPassword(null!, "123456");
 
 

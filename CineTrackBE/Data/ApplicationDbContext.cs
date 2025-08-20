@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CineTrackBE.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<User, IdentityRole, string>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
     {
 
         public DbSet<Comment> Comments { get; set; }

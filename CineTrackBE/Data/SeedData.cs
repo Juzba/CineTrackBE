@@ -19,12 +19,12 @@ namespace CineTrackBE.Data
                 new IdentityRole() { Id = "UserRoleId-54sa9-sda87", Name = "User", NormalizedName = "USER" }
             );
 
-            builder.Entity<User>().HasData
+            builder.Entity<ApplicationUser>().HasData
             (
 
-                 new User() { Id = "id-Juzba", UserName = "Juzba@gmail.com", NormalizedUserName = "JUZBA@GMAIL.COM", Email = "Juzba@gmail.com", NormalizedEmail = "JUZBA@GMAIL.COM", PasswordHash = "AQAAAAIAAYagAAAAEOadgFzBJnpnkBkmi8SqFcuYgy60qk0ZBrgllZ0PPoVBypQav6KsXimrjBfiPVo6Mw==", EmailConfirmed = true, ConcurrencyStamp = "", SecurityStamp = "" },
-                 new User() { Id = "id-Katka", UserName = "Katka@gmail.com", NormalizedUserName = "KATKA@GMAIL.COM", Email = "Katka@gmail.com", NormalizedEmail = "KATKA@GMAIL.COM", PasswordHash = "AQAAAAIAAYagAAAAEJaTtbyo9uZ+7zhBsqPgOSRVqq81uC1HilQAFs30aTxQs18hzOp3e9o7jZMtt3nTow==", EmailConfirmed = true, ConcurrencyStamp = "", SecurityStamp = "" },
-                 new User() { Id = "id-Karel", UserName = "Karel@gmail.com", NormalizedUserName = "KAREL@GMAIL.COM", Email = "Karel@gmail.com", NormalizedEmail = "KAREL@GMAIL.COM", PasswordHash = "AQAAAAIAAYagAAAAEI3e/eOUTskYsHiohjGn7iVPezNTxmLT5XjporF7MfKyPsdcioNgrAJkTmk5H1c+IQ==", EmailConfirmed = true, ConcurrencyStamp = "", SecurityStamp = "" }
+                 new ApplicationUser() { Id = "id-Juzba", UserName = "Juzba@gmail.com", NormalizedUserName = "JUZBA@GMAIL.COM", Email = "Juzba@gmail.com", NormalizedEmail = "JUZBA@GMAIL.COM", PasswordHash = "AQAAAAIAAYagAAAAEOadgFzBJnpnkBkmi8SqFcuYgy60qk0ZBrgllZ0PPoVBypQav6KsXimrjBfiPVo6Mw==", EmailConfirmed = true, ConcurrencyStamp = "", SecurityStamp = "" },
+                 new ApplicationUser() { Id = "id-Katka", UserName = "Katka@gmail.com", NormalizedUserName = "KATKA@GMAIL.COM", Email = "Katka@gmail.com", NormalizedEmail = "KATKA@GMAIL.COM", PasswordHash = "AQAAAAIAAYagAAAAEJaTtbyo9uZ+7zhBsqPgOSRVqq81uC1HilQAFs30aTxQs18hzOp3e9o7jZMtt3nTow==", EmailConfirmed = true, ConcurrencyStamp = "", SecurityStamp = "" },
+                 new ApplicationUser() { Id = "id-Karel", UserName = "Karel@gmail.com", NormalizedUserName = "KAREL@GMAIL.COM", Email = "Karel@gmail.com", NormalizedEmail = "KAREL@GMAIL.COM", PasswordHash = "AQAAAAIAAYagAAAAEI3e/eOUTskYsHiohjGn7iVPezNTxmLT5XjporF7MfKyPsdcioNgrAJkTmk5H1c+IQ==", EmailConfirmed = true, ConcurrencyStamp = "", SecurityStamp = "" }
 
             );
 

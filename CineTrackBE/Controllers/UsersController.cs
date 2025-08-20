@@ -10,9 +10,9 @@ using Microsoft.EntityFrameworkCore;
 namespace CineTrackBE.Controllers
 {
     [Authorize(Roles = "Admin")]
-    public class UsersController( IRepository<User> userRepository, IRepository<IdentityRole> roleRepository, IRepository<IdentityUserRole<string>> userRoleRepository, IDataService dataService) : Controller
+    public class UsersController( IRepository<ApplicationUser> userRepository, IRepository<IdentityRole> roleRepository, IRepository<IdentityUserRole<string>> userRoleRepository, IDataService dataService) : Controller
     {
-        private readonly IRepository<User> _userRepository = userRepository;
+        private readonly IRepository<ApplicationUser> _userRepository = userRepository;
         private readonly IRepository<IdentityRole> _roleRepository = roleRepository;
         private readonly IRepository<IdentityUserRole<string>> _userRoleRepository = userRoleRepository;
         private readonly IDataService _dataService = dataService;
@@ -87,7 +87,7 @@ namespace CineTrackBE.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id, UserName, PhoneNumber, PasswordHash, EmailConfirmed")] User user, bool roleUser, bool roleAdmin)
+        public async Task<IActionResult> Create([Bind("Id, UserName, PhoneNumber, PasswordHash, EmailConfirmed")] ApplicationUser user, bool roleUser, bool roleAdmin)
         {
             if (ModelState.IsValid)
             {
@@ -232,7 +232,7 @@ namespace CineTrackBE.Controllers
 
 
 
-        private static void Add_Additional_UserParametrs(ref User user)
+        private static void Add_Additional_UserParametrs(ref ApplicationUser user)
         {
             ArgumentNullException.ThrowIfNull(user);
 
@@ -242,16 +242,16 @@ namespace CineTrackBE.Controllers
         }
 
 
-        private static void Add_Hash_To_UserPassword(ref User user)
+        private static void Add_Hash_To_UserPassword(ref ApplicationUser user)
         {
             ArgumentNullException.ThrowIfNull(user);
 
-            PasswordHasher<User> ph = new();
+            PasswordHasher<ApplicationUser> ph = new();
             user.PasswordHash = ph.HashPassword(null!, user.PasswordHash);
         }
 
 
-        private User? CompleteUseData(UserWithRoles formUser, User defaultUser)
+        private ApplicationUser? CompleteUseData(UserWithRoles formUser, ApplicationUser defaultUser)
         {
             ArgumentNullException.ThrowIfNull(formUser);
             ArgumentNullException.ThrowIfNull(defaultUser);

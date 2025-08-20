@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CineTrackBE.Models.Entities;
 
-public class User : IdentityUser
+public class ApplicationUser : IdentityUser
 {
     public ICollection<Comment> Comments { get; set; } = [];
 
