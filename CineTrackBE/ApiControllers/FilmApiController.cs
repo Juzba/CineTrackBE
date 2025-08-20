@@ -134,8 +134,18 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Gen
 
         if (result == null) return NotFound($"Film with ID {id} not found.");
 
+        var filmsDTO = new FilmDto()
+        {
+            Id = result.Id,
+            Name = result.Name,
+            Director = result.Director,
+            ImageFileName = result.ImageFileName,
+            Description = result.Description,
+            ReleaseDate = result.ReleaseDate,
+            Genres = [.. result.FilmGenres.Select(g => g.Genre.Name)]
+        };
 
-        return Ok(result);
+        return Ok(filmsDTO);
     }
 
 
