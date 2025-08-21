@@ -3,6 +3,8 @@ using CineTrackBE.Models.DTO;
 using CineTrackBE.Models.Entities;
 using CineTrackBE.Services;
 using CineTrackFE.Models.DTO;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +12,7 @@ namespace CineTrackBE.ApiControllers;
 
 [Route("api/[controller]")]
 [ApiController]
+
 public class FilmApiController(IRepository<Film> filmRepository, IRepository<Genre> genreRepository, IDataService dataService) : ControllerBase
 {
     private readonly IRepository<Film> _filmRepository = filmRepository;
@@ -19,6 +22,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Gen
 
     // Top 5 Latest Films //
     [HttpGet]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("LatestFilms")]
     public async Task<ActionResult<IEnumerable<FilmDto>>> GetLatestFilms()
     {

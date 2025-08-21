@@ -37,6 +37,8 @@ public class AuthApiController(UserManager<ApplicationUser> userManager, SignInM
         var roles = await _userManager.GetRolesAsync(user);
         var token = _jwtService.GenerateToken(user, roles);
 
-        return Ok(new { Token = token });
+        var userDto = new UserDto { UserName = user.UserName, Email = user.Email ?? "", Roles = roles };
+
+        return Ok(new { Token = token, User = userDto });
     }
 }
