@@ -43,6 +43,8 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddSwaggerGen();
 
+
+// proti zacykleni modelu
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.PropertyNamingPolicy = null;
