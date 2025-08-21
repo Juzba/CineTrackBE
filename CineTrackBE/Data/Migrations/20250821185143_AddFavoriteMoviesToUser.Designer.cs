@@ -4,6 +4,7 @@ using CineTrackBE.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CineTrackBE.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250821185143_AddFavoriteMoviesToUser")]
+    partial class AddFavoriteMoviesToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,9 +43,6 @@ namespace CineTrackBE.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
-
-                    b.PrimitiveCollection<string>("FavoriteMovies")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -99,7 +99,6 @@ namespace CineTrackBE.Migrations
                             ConcurrencyStamp = "",
                             Email = "Juzba@gmail.com",
                             EmailConfirmed = true,
-                            FavoriteMovies = "[]",
                             LockoutEnabled = false,
                             NormalizedEmail = "JUZBA@GMAIL.COM",
                             NormalizedUserName = "JUZBA@GMAIL.COM",
@@ -116,7 +115,6 @@ namespace CineTrackBE.Migrations
                             ConcurrencyStamp = "",
                             Email = "Katka@gmail.com",
                             EmailConfirmed = true,
-                            FavoriteMovies = "[]",
                             LockoutEnabled = false,
                             NormalizedEmail = "KATKA@GMAIL.COM",
                             NormalizedUserName = "KATKA@GMAIL.COM",
@@ -133,7 +131,6 @@ namespace CineTrackBE.Migrations
                             ConcurrencyStamp = "",
                             Email = "Karel@gmail.com",
                             EmailConfirmed = true,
-                            FavoriteMovies = "[]",
                             LockoutEnabled = false,
                             NormalizedEmail = "KAREL@GMAIL.COM",
                             NormalizedUserName = "KAREL@GMAIL.COM",
@@ -150,7 +147,6 @@ namespace CineTrackBE.Migrations
                             ConcurrencyStamp = "",
                             Email = "Test@gmail.com",
                             EmailConfirmed = true,
-                            FavoriteMovies = "[]",
                             LockoutEnabled = false,
                             NormalizedEmail = "TEST@GMAIL.COM",
                             NormalizedUserName = "TEST@GMAIL.COM",
@@ -202,6 +198,9 @@ namespace CineTrackBE.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
@@ -219,6 +218,8 @@ namespace CineTrackBE.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
 
                     b.ToTable("Films");
 
@@ -882,6 +883,13 @@ namespace CineTrackBE.Migrations
                     b.Navigation("ParrentComment");
                 });
 
+            modelBuilder.Entity("CineTrackBE.Models.Entities.Film", b =>
+                {
+                    b.HasOne("CineTrackBE.Models.Entities.ApplicationUser", null)
+                        .WithMany("FavoriteMovies")
+                        .HasForeignKey("ApplicationUserId");
+                });
+
             modelBuilder.Entity("CineTrackBE.Models.Entities.FilmGenre", b =>
                 {
                     b.HasOne("CineTrackBE.Models.Entities.Film", "Film")
@@ -974,6 +982,8 @@ namespace CineTrackBE.Migrations
             modelBuilder.Entity("CineTrackBE.Models.Entities.ApplicationUser", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("FavoriteMovies");
                 });
 
             modelBuilder.Entity("CineTrackBE.Models.Entities.Comment", b =>

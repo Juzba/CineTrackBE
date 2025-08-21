@@ -4,6 +4,7 @@ using CineTrackBE.Models.Entities;
 using CineTrackBE.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,11 +14,12 @@ namespace CineTrackBE.ApiControllers;
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 [ApiController]
 
-public class FilmApiController(IRepository<Film> filmRepository, IRepository<Genre> genreRepository, IDataService dataService) : ControllerBase
+public class FilmApiController(IRepository<Film> filmRepository, IRepository<ApplicationUser> userRepository, IRepository<Genre> genreRepository, IDataService dataService) : ControllerBase
 {
     private readonly IRepository<Film> _filmRepository = filmRepository;
     private readonly IRepository<Genre> _genreRepository = genreRepository;
     private readonly IDataService _dataService = dataService;
+    private readonly IRepository<ApplicationUser> _userRepository = userRepository;
 
 
     // Top 5 Latest Films //
@@ -137,6 +139,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Gen
 
         if (result == null) return NotFound($"Film with ID {id} not found.");
 
+
         var filmsDTO = new FilmDto()
         {
             Id = result.Id,
@@ -149,6 +152,44 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Gen
         };
 
         return Ok(filmsDTO);
+    }
+
+
+    //// ADD OR REMOVE FILM FROM FAVORITES //
+    //[HttpGet]
+    //[Route("ToggleFavorite/{filmId}")]
+    //public async Task<ActionResult<bool>> ToggleFavorite(int filmId)
+    //{
+    //    if (filmId <= 0) return BadRequest("Film ID must be greater than 0.");
+
+    //    // ziskat id z tokenu
+    //    if (User?.Identity?.IsAuthenticated != true) return Unauthorized("User is not authenticated or does not exist.");
+            
+
+         
+
+
+
+
+    //    var user = await _userRepository.GetAsync_Id(User.id)
+
+    //    if (user == null) return Unauthorized("User not found.");
+
+    //    if (user.FavoriteMovies.Any(p => p == filmId))
+    //    {
+    //        _userManager.
+    //        //await _userManager.Users.FirstOrDefaultAsync(p => p.Id == user.Id)
+
+                
+    //    }
+
+
+
+    //    //var result = await _dataService.ToggleFavoriteFilmAsync(filmId);
+
+
+    //    if (result == null) return NotFound($"Film with ID {filmId} not found.");
+    //    return Ok(result);
     }
 
 

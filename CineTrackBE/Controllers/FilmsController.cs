@@ -3,18 +3,20 @@ using CineTrackBE.Models.Entities;
 using CineTrackBE.Models.ViewModel;
 using CineTrackBE.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CineTrackBE.Controllers;
 
 [Authorize(Roles = "Admin,User")]
-public class FilmsController(IRepository<Film> filmRepository, IRepository<Genre> genreRepository, IDataService dataService) : Controller
+public class FilmsController(UserManager<ApplicationUser> userManager,IRepository<Film> filmRepository, IRepository<Genre> genreRepository, IDataService dataService) : Controller
 {
 
     private readonly IRepository<Film> _filmRepository = filmRepository;
     private readonly IRepository<Genre> _genreRepository = genreRepository;
     private readonly IDataService _dataService = dataService;
+    private readonly UserManager<ApplicationUser> _userManager = userManager;
 
 
     // INDEX //
@@ -30,6 +32,17 @@ public class FilmsController(IRepository<Film> filmRepository, IRepository<Genre
 
         var film = await _dataService.GetFilmAsync_InclFilmGenres(intId);
         if (film == null) return NotFound();
+
+        var user = await _userManager.GetUserAsync(User);
+
+        if(user?.FavoriteMovies != null && user.FavoriteMovies.Any(p => p == film.Id))
+        {
+            ViewBag.IsFavorite = true;
+        }
+        else
+        {
+            ViewBag.IsFavorite = false;
+        }
 
         return View(film);
     }

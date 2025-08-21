@@ -26,7 +26,6 @@ namespace CineTrackBE.AppServices
 
 
 
-
         // ANY USER EXIST? //
         public async Task<bool> AnyUserExistsByUserNameAsync(string userName, CancellationToken cancellationToken = default)
         {
@@ -142,6 +141,11 @@ namespace CineTrackBE.AppServices
 
             _context.RemoveRange(filmGenres);
         }
+
+
+
+
+
 
 
     }

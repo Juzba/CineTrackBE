@@ -40,6 +40,16 @@
 		<dd class="col-sm-10">
 			@Html.DisplayFor(model => model.ReleaseDate)
 		</dd>
+		@if (ViewBag.IsFavorite != null)
+		{
+
+			<dt class="col-sm-2">
+			<span>MyFavorite:</span>
+			</dt>
+			<dd class="col-sm-10">
+				@ViewBag.IsFavorite
+			</dd>
+		}
 		<dt class="col-sm-2">
 			@Html.DisplayNameFor(model => model.FilmGenres)
 		</dt>

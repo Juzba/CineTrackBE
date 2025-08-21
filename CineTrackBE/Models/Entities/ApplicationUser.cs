@@ -18,4 +18,8 @@ public class ApplicationUser : IdentityUser
     [MinLength(6, ErrorMessage = "Password musí mít minimálně 6 znaků!")]
     public override string PasswordHash { get => base.PasswordHash; set => base.PasswordHash = value; }
 
+
+    public ICollection<int> FavoriteMovies { get; set; } = [];
+
+
 }
