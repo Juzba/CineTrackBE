@@ -1,4 +1,4 @@
-﻿namespace CineTrackFE.Models.DTO;
+﻿namespace CineTrackBE.Models.DTO;
 
 public class SearchParametrsDto
 {

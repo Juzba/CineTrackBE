@@ -41,4 +41,33 @@ public class AuthApiController(UserManager<ApplicationUser> userManager, SignInM
 
         return Ok(new { Token = token, User = userDto });
     }
+
+    [HttpPost]
+    [Route("register")]
+    public async Task<IActionResult> RegisterAsync([FromBody] RegisterDto registerData)
+    {
+        if (string.IsNullOrWhiteSpace(registerData.UserName) || string.IsNullOrWhiteSpace(registerData.Password))
+        {
+            return BadRequest("UserName and Password are required!");
+        }
+
+        var user = await _userManager.FindByNameAsync(registerData.UserName);
+
+        if (user != null) return Conflict("User with this UserName already exists!");
+
+        user = new ApplicationUser
+        {
+            UserName = registerData.UserName,
+            Email = registerData.UserName,
+            NormalizedEmail = registerData.UserName.ToUpper(),
+            NormalizedUserName = registerData.UserName.ToUpper(),
+            PhoneNumber = null,
+            PasswordHash = _userManager.PasswordHasher.HashPassword(new ApplicationUser(), registerData.Password),
+        };
+
+        _userManager.CreateAsync(user).GetAwaiter().GetResult();
+
+        return Created("User registered successfully!", null);
+    }
+
 }
