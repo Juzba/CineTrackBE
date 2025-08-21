@@ -1,7 +1,7 @@
 ﻿using CineTrackBE.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace CineTrackBE.Services
+namespace CineTrackBE.AppServices
 {
     public interface IRepository<T> where T : class
     {
@@ -14,7 +14,7 @@ namespace CineTrackBE.Services
         Task<bool> AnyExistsAsync(int id, CancellationToken cancellationToken = default);
         Task<bool> AnyExistsAsync(string id, CancellationToken cancellationToken = default);
 
-        Task SaveChangesAsync(CancellationToken cancellationToken = default);
+        Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 
 
@@ -88,7 +88,7 @@ namespace CineTrackBE.Services
         // ANY ENTITY EXIST? - id string //
         public async Task<bool> AnyExistsAsync(string id, CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNullOrWhiteSpace(id);
+            ArgumentException.ThrowIfNullOrWhiteSpace(id);
 
             return await _context.Set<T>().FindAsync([id], cancellationToken) != null;
         }
@@ -106,9 +106,16 @@ namespace CineTrackBE.Services
 
 
         // SAVE CHANGES //
-        public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+        public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            await _context.SaveChangesAsync(cancellationToken);
+            try
+            {
+                return await _context.SaveChangesAsync(cancellationToken) > 0;
+            }
+            catch (DbUpdateException)
+            {
+                return false;
+            }
         }
     }
 }

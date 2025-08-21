@@ -1,7 +1,6 @@
 using CineTrackBE.AppServices;
 using CineTrackBE.Data;
 using CineTrackBE.Models.Entities;
-using CineTrackBE.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

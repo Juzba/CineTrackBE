@@ -1,12 +1,11 @@
 ﻿using CineTrackBE.AppServices;
 using CineTrackBE.Models.DTO;
 using CineTrackBE.Models.Entities;
-using CineTrackBE.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CineTrackBE.ApiControllers;
 
@@ -93,16 +92,16 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<App
         // order
         switch (searchParams?.SearchOrder)
         {
-            case ("NameDesc"):
+            case "NameDesc":
                 films = films.OrderByDescending(p => p.Name);
                 break;
-            case ("NameAsc"):
+            case "NameAsc":
                 films = films.OrderBy(p => p.Name);
                 break;
-            case ("YearDesc"):
+            case "YearDesc":
                 films = films.OrderByDescending(p => p.ReleaseDate);
                 break;
-            case ("YearAsc"):
+            case "YearAsc":
                 films = films.OrderBy(p => p.ReleaseDate);
                 break;
             default:
@@ -155,41 +154,37 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<App
     }
 
 
-    //// ADD OR REMOVE FILM FROM FAVORITES //
-    //[HttpGet]
-    //[Route("ToggleFavorite/{filmId}")]
-    //public async Task<ActionResult<bool>> ToggleFavorite(int filmId)
-    //{
-    //    if (filmId <= 0) return BadRequest("Film ID must be greater than 0.");
-
-    //    // ziskat id z tokenu
-    //    if (User?.Identity?.IsAuthenticated != true) return Unauthorized("User is not authenticated or does not exist.");
-            
-
-         
+    // ADD OR REMOVE FILM FROM FAVORITES //
+    [HttpGet]
+    [Route("ToggleFavorite/{filmId}")]
+    public async Task<ActionResult<bool>> ToggleFavorite(int filmId)
+    {
+        if (filmId <= 0) return BadRequest("Film ID must be greater than 0.");
 
 
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+        if (string.IsNullOrWhiteSpace(userId)) return Unauthorized("User not authenticated.");
 
-    //    var user = await _userRepository.GetAsync_Id(User.id)
+        var user = await _userRepository.GetAsync_Id(userId);
 
-    //    if (user == null) return Unauthorized("User not found.");
+        if (user == null) return Unauthorized("User not found.");
 
-    //    if (user.FavoriteMovies.Any(p => p == filmId))
-    //    {
-    //        _userManager.
-    //        //await _userManager.Users.FirstOrDefaultAsync(p => p.Id == user.Id)
+        if (user.FavoriteMovies.Any(p => p == filmId))
+        {
+            user.FavoriteMovies.Remove(filmId);
+        }
+        else
+        {
+            user.FavoriteMovies.Add(filmId);
+        }
 
-                
-    //    }
+        _userRepository.Update(user);
 
+        var result = await _userRepository.SaveChangesAsync();
 
-
-    //    //var result = await _dataService.ToggleFavoriteFilmAsync(filmId);
-
-
-    //    if (result == null) return NotFound($"Film with ID {filmId} not found.");
-    //    return Ok(result);
+        if (!result) return NotFound($"Film with ID {filmId} not found.");
+        return Ok(result);
     }
 
 

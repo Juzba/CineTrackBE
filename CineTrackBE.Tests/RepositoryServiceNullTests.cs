@@ -1,6 +1,6 @@
-﻿using CineTrackBE.Data;
+﻿using CineTrackBE.AppServices;
+using CineTrackBE.Data;
 using CineTrackBE.Models.Entities;
-using CineTrackBE.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace CineTrackBE.Tests

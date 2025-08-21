@@ -1,7 +1,6 @@
 ﻿using CineTrackBE.AppServices;
 using CineTrackBE.Models.Entities;
 using CineTrackBE.Models.ViewModel;
-using CineTrackBE.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
