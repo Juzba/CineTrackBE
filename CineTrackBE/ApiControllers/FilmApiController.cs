@@ -3,7 +3,6 @@ using CineTrackBE.Models.DTO;
 using CineTrackBE.Models.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -31,8 +30,6 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
     {
         var films = await _filmRepository.GetList().OrderByDescending(p => p.ReleaseDate).Take(5).ToListAsync();
 
-        if (films == null || films.Count == 0) return NotFound();
-
         var filmsDTO = films.Select(p => new FilmDto()
         {
             Id = p.Id,
@@ -54,8 +51,6 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
     public async Task<ActionResult<IEnumerable<GenreDto>>> GetAllGenres()
     {
         var genres = await _genreRepository.GetList().ToListAsync();
-
-        if (genres == null || genres.Count == 0) return NotFound();
 
         var genresDto = genres.Select(p => new GenreDto()
         {
@@ -213,29 +208,60 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
         if (userId == null) return Unauthorized("User not found.");
 
 
-        var newComment = new Comment
-        {
-            AutorId = userId,
-            FilmId = comment.FilmId,
-            SendDate = DateTime.Now,
-            Text = comment.Text,
-        };
 
-        var newRating = new Rating
-        {
-            FilmId = comment.FilmId,
-            UserId = userId,
-            UserRating = comment.Rating
-        };
+        // probles ukladanim do databaze je potreba vyresit a popripade doladit modely
 
-        await _commentRepository.AddAsync(newComment);
-        await _ratingRepository.AddAsync(newRating);
+
+
+        //var newComment = new Comment
+        //{
+        //    AutorId = userId,
+        //    FilmId = comment.FilmId,
+        //    SendDate = DateTime.Now,
+        //    Text = comment.Text,
+            
+        //};
+
+       
+
+        //await _commentRepository.AddAsync(newComment);
+        //await _ratingRepository.AddAsync(newRating);
 
         var isSave = await _commentRepository.SaveChangesAsync();
         if (!isSave) return StatusCode(StatusCodes.Status500InternalServerError);
 
         return Ok(isSave);
     }
+
+
+    // GET COMMENTS FOR FILM //
+    [HttpGet]
+    [Route("GetComments/{filmId}")]
+    public async Task<ActionResult<IEnumerable<GenreDto>>> GetAllGenres(int filmId)
+    {
+        if (filmId <= 0) return BadRequest("Film ID must be greater than 0.");
+
+        var comments = await _commentRepository.GetList()
+            .Where(p => p.FilmId == filmId)
+            .Include(p => p.Autor)
+            .Include(p => p.Rating)
+            .OrderByDescending(p => p.SendDate)
+            .ToListAsync();
+   
+        var commentDto = comments.Select(p => new CommentDto
+        {
+            Id = p.Id,
+            SendDate = p.SendDate,
+            Text = p.Text,
+            AuthorName = p.Autor.UserName,
+            Rating = p.Rating.UserRating
+        });
+
+        return Ok(commentDto);
+    }
+
+
+
 
 
 

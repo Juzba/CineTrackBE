@@ -114,6 +114,7 @@ namespace CineTrackBE.AppServices
             }
             catch (DbUpdateException)
             {
+                //throw new ArgumentException(ex.Message);
                 return false;
             }
         }

@@ -22,4 +22,5 @@ public class ApplicationUser : IdentityUser
     public ICollection<int> FavoriteMovies { get; set; } = [];
 
 
+
 }

@@ -16,7 +16,11 @@ namespace CineTrackBE.Models.Entities
 
         // Film //
         public int FilmId { get; set; }
-        public Film Film { get; set; }
+
+        // Rating //
+        public int RatingId { get; set; }
+        public Rating Rating { get; set; }
+       
 
 
     }

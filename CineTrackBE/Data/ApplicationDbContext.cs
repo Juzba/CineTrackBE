@@ -28,6 +28,10 @@ namespace CineTrackBE.Data
             // Seed initial data //
             SeedData.Seed(builder);
 
+
+
+
+
             builder.Entity<FilmGenre>()
                 .HasKey(p => new { p.FilmId, p.GenreId });
 

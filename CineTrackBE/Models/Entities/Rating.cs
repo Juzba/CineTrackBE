@@ -1,22 +1,15 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿namespace CineTrackBE.Models.Entities;
+#nullable disable
 
-namespace CineTrackBE.Models.Entities
+
+public class Rating
 {
-    public class Rating
-    {
-        public int Id { get; set; }
-        public int UserRating { get; set; }
+    public int Id { get; set; }
+    public int UserRating { get; set; }
 
 
+    // Comment
+    public int CommentId { get; set; }
+    public Comment Comment { get; set; }
 
-        // Film //
-        public int FilmId { get; set; }
-        public Film Film { get; set; } = null!;
-
-
-        // User //
-        public string UserId { get; set; } = null!;
-        public ApplicationUser User { get; set; } = null!;
-
-    }
 }
