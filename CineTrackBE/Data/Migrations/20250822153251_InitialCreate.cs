@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace CineTrackBE.Migrations
+namespace CineTrackBE.Data.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -34,6 +34,7 @@ namespace CineTrackBE.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FavoriteMovies = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -197,7 +198,6 @@ namespace CineTrackBE.Migrations
                     Text = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SendDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     AutorId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    ParrentCommentId = table.Column<int>(type: "int", nullable: false),
                     FilmId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -209,17 +209,11 @@ namespace CineTrackBE.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Comments_Comments_ParrentCommentId",
-                        column: x => x.ParrentCommentId,
-                        principalTable: "Comments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Comments_Films_ParrentCommentId",
-                        column: x => x.ParrentCommentId,
+                        name: "FK_Comments_Films_FilmId",
+                        column: x => x.FilmId,
                         principalTable: "Films",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -284,12 +278,13 @@ namespace CineTrackBE.Migrations
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
-                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
+                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "FavoriteMovies", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
                 values: new object[,]
                 {
-                    { "id-Juzba", 0, "", "Juzba@gmail.com", true, false, null, "JUZBA@GMAIL.COM", "JUZBA@GMAIL.COM", "AQAAAAIAAYagAAAAEOadgFzBJnpnkBkmi8SqFcuYgy60qk0ZBrgllZ0PPoVBypQav6KsXimrjBfiPVo6Mw==", null, false, "", false, "Juzba@gmail.com" },
-                    { "id-Karel", 0, "", "Karel@gmail.com", true, false, null, "KAREL@GMAIL.COM", "KAREL@GMAIL.COM", "AQAAAAIAAYagAAAAEI3e/eOUTskYsHiohjGn7iVPezNTxmLT5XjporF7MfKyPsdcioNgrAJkTmk5H1c+IQ==", null, false, "", false, "Karel@gmail.com" },
-                    { "id-Katka", 0, "", "Katka@gmail.com", true, false, null, "KATKA@GMAIL.COM", "KATKA@GMAIL.COM", "AQAAAAIAAYagAAAAEJaTtbyo9uZ+7zhBsqPgOSRVqq81uC1HilQAFs30aTxQs18hzOp3e9o7jZMtt3nTow==", null, false, "", false, "Katka@gmail.com" }
+                    { "id-Juzba", 0, "", "Juzba@gmail.com", true, "[]", false, null, "JUZBA@GMAIL.COM", "JUZBA@GMAIL.COM", "AQAAAAIAAYagAAAAEOadgFzBJnpnkBkmi8SqFcuYgy60qk0ZBrgllZ0PPoVBypQav6KsXimrjBfiPVo6Mw==", null, false, "", false, "Juzba@gmail.com" },
+                    { "id-Karel", 0, "", "Karel@gmail.com", true, "[]", false, null, "KAREL@GMAIL.COM", "KAREL@GMAIL.COM", "AQAAAAIAAYagAAAAEI3e/eOUTskYsHiohjGn7iVPezNTxmLT5XjporF7MfKyPsdcioNgrAJkTmk5H1c+IQ==", null, false, "", false, "Karel@gmail.com" },
+                    { "id-Katka", 0, "", "Katka@gmail.com", true, "[]", false, null, "KATKA@GMAIL.COM", "KATKA@GMAIL.COM", "AQAAAAIAAYagAAAAEJaTtbyo9uZ+7zhBsqPgOSRVqq81uC1HilQAFs30aTxQs18hzOp3e9o7jZMtt3nTow==", null, false, "", false, "Katka@gmail.com" },
+                    { "id-Test", 0, "", "Test@gmail.com", true, "[]", false, null, "TEST@GMAIL.COM", "TEST@GMAIL.COM", "AQAAAAIAAYagAAAAEBvAv3CvOSPyH4EJPSccHhl/yxgkUq0IjtRpyhwgHEnj4u855YIIotXad9BCghJ4nQ==", null, false, "", false, "Test@gmail.com" }
                 });
 
             migrationBuilder.InsertData(
@@ -339,7 +334,8 @@ namespace CineTrackBE.Migrations
                 {
                     { "AdminRoleId-51sa9-sdd18", "id-Juzba" },
                     { "UserRoleId-54sa9-sda87", "id-Karel" },
-                    { "AdminRoleId-51sa9-sdd18", "id-Katka" }
+                    { "AdminRoleId-51sa9-sdd18", "id-Katka" },
+                    { "AdminRoleId-51sa9-sdd18", "id-Test" }
                 });
 
             migrationBuilder.InsertData(
@@ -432,9 +428,9 @@ namespace CineTrackBE.Migrations
                 column: "AutorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Comments_ParrentCommentId",
+                name: "IX_Comments_FilmId",
                 table: "Comments",
-                column: "ParrentCommentId");
+                column: "FilmId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FilmGenres_GenreId",

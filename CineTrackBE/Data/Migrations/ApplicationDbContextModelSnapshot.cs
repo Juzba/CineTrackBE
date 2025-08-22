@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace CineTrackBE.Migrations
+namespace CineTrackBE.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -176,9 +176,6 @@ namespace CineTrackBE.Migrations
                     b.Property<int>("FilmId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ParrentCommentId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("SendDate")
                         .HasColumnType("datetime2");
 
@@ -189,7 +186,7 @@ namespace CineTrackBE.Migrations
 
                     b.HasIndex("AutorId");
 
-                    b.HasIndex("ParrentCommentId");
+                    b.HasIndex("FilmId");
 
                     b.ToTable("Comments");
                 });
@@ -863,23 +860,15 @@ namespace CineTrackBE.Migrations
                         .WithMany("Comments")
                         .HasForeignKey("AutorId");
 
-                    b.HasOne("CineTrackBE.Models.Entities.Comment", "ParrentComment")
-                        .WithMany("Replies")
-                        .HasForeignKey("ParrentCommentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("CineTrackBE.Models.Entities.Film", "Film")
                         .WithMany("Comments")
-                        .HasForeignKey("ParrentCommentId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasForeignKey("FilmId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Autor");
 
                     b.Navigation("Film");
-
-                    b.Navigation("ParrentComment");
                 });
 
             modelBuilder.Entity("CineTrackBE.Models.Entities.FilmGenre", b =>
@@ -974,11 +963,6 @@ namespace CineTrackBE.Migrations
             modelBuilder.Entity("CineTrackBE.Models.Entities.ApplicationUser", b =>
                 {
                     b.Navigation("Comments");
-                });
-
-            modelBuilder.Entity("CineTrackBE.Models.Entities.Comment", b =>
-                {
-                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("CineTrackBE.Models.Entities.Film", b =>

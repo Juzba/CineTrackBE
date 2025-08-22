@@ -3,6 +3,7 @@ using CineTrackBE.Models.DTO;
 using CineTrackBE.Models.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -13,12 +14,14 @@ namespace CineTrackBE.ApiControllers;
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 [ApiController]
 
-public class FilmApiController(IRepository<Film> filmRepository, IRepository<ApplicationUser> userRepository, IRepository<Genre> genreRepository, IDataService dataService) : ControllerBase
+public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rating> ratingRepository, IRepository<Comment> CommentRepository, IRepository<ApplicationUser> userRepository, IRepository<Genre> genreRepository, IDataService dataService) : ControllerBase
 {
     private readonly IRepository<Film> _filmRepository = filmRepository;
     private readonly IRepository<Genre> _genreRepository = genreRepository;
-    private readonly IDataService _dataService = dataService;
     private readonly IRepository<ApplicationUser> _userRepository = userRepository;
+    private readonly IRepository<Comment> _commentRepository = CommentRepository;
+    private readonly IRepository<Rating> _ratingRepository = ratingRepository;
+    private readonly IDataService _dataService = dataService;
 
 
     // Top 5 Latest Films //
@@ -167,7 +170,6 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<App
     // ADD OR REMOVE FILM FROM FAVORITES //
     [HttpGet]
     [Route("ToggleFavorite/{filmId}")]
-    //[AllowAnonymous]
     public async Task<ActionResult<bool>> ToggleFavorite(int filmId)
     {
         if (filmId <= 0) return BadRequest("Film ID must be greater than 0.");
@@ -199,6 +201,41 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<App
     }
 
 
+    // ADD COMMENT //
+    [HttpPost]
+    [Route("AddComment")]
+    public async Task<ActionResult<bool>> AddComment([FromBody] CommentWithRatingDto comment)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized("User not found.");
+
+
+        var newComment = new Comment
+        {
+            AutorId = userId,
+            FilmId = comment.FilmId,
+            SendDate = DateTime.Now,
+            Text = comment.Text,
+        };
+
+        var newRating = new Rating
+        {
+            FilmId = comment.FilmId,
+            UserId = userId,
+            UserRating = comment.Rating
+        };
+
+        await _commentRepository.AddAsync(newComment);
+        await _ratingRepository.AddAsync(newRating);
+
+        var isSave = await _commentRepository.SaveChangesAsync();
+        if (!isSave) return StatusCode(StatusCodes.Status500InternalServerError);
+
+        return Ok(isSave);
+    }
 
 
 

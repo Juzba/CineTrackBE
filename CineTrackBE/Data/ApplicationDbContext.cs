@@ -42,19 +42,6 @@ namespace CineTrackBE.Data
                 .WithMany(p => p.FilmGenres)
                 .HasForeignKey(p => p.GenreId);
 
-            builder.Entity<Comment>()
-                .HasOne(p => p.ParrentComment)
-                .WithMany(p => p.Replies)
-                .HasForeignKey(p => p.ParrentCommentId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<Comment>()
-                .HasOne(p => p.Film)
-                .WithMany(p => p.Comments)
-                .HasForeignKey(p => p.ParrentCommentId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-
 
             base.OnModelCreating(builder);
         }

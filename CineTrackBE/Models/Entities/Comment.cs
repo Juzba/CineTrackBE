@@ -14,16 +14,6 @@ namespace CineTrackBE.Models.Entities
         public string AutorId { get; set; }
         public ApplicationUser Autor { get; set; }
 
-
-        // Parrent Comment //
-        public int ParrentCommentId { get; set; }
-        public Comment ParrentComment { get; set; }
-
-
-        // Replies //
-        public ICollection<Comment> Replies { get; set; } = [];
-
-
         // Film //
         public int FilmId { get; set; }
         public Film Film { get; set; }
