@@ -134,20 +134,30 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<App
     {
         if (id <= 0) return BadRequest("Film ID must be greater than 0.");
 
-        var result = await _filmRepository.GetList().Include(p => p.FilmGenres).ThenInclude(p => p.Genre).FirstOrDefaultAsync(p => p.Id == id);
+        // get film from db
+        var film = await _filmRepository.GetList().Include(p => p.FilmGenres).ThenInclude(p => p.Genre).FirstOrDefaultAsync(p => p.Id == id);
+        if (film == null) return NotFound($"Film with ID {id} not found.");
 
-        if (result == null) return NotFound($"Film with ID {id} not found.");
+        // is film user farorite?
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized("User not authenticated!");
+
+        var user = await _userRepository.GetAsync_Id(userId);
+        if (user == null) return Unauthorized("User not authenticated!");
+
+        var isFavoriteFilm = user.FavoriteMovies.Any(p => p == film.Id);
 
 
         var filmsDTO = new FilmDto()
         {
-            Id = result.Id,
-            Name = result.Name,
-            Director = result.Director,
-            ImageFileName = result.ImageFileName,
-            Description = result.Description,
-            ReleaseDate = result.ReleaseDate,
-            Genres = [.. result.FilmGenres.Select(g => g.Genre.Name)]
+            Id = film.Id,
+            Name = film.Name,
+            Director = film.Director,
+            ImageFileName = film.ImageFileName,
+            Description = film.Description,
+            ReleaseDate = film.ReleaseDate,
+            IsMyFavorite = isFavoriteFilm,
+            Genres = [.. film.FilmGenres.Select(g => g.Genre.Name)]
         };
 
         return Ok(filmsDTO);
@@ -157,6 +167,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<App
     // ADD OR REMOVE FILM FROM FAVORITES //
     [HttpGet]
     [Route("ToggleFavorite/{filmId}")]
+    //[AllowAnonymous]
     public async Task<ActionResult<bool>> ToggleFavorite(int filmId)
     {
         if (filmId <= 0) return BadRequest("Film ID must be greater than 0.");
