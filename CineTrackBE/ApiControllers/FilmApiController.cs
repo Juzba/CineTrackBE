@@ -285,6 +285,78 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
 
 
 
+    // GET USER PROFIL DATA AND STATISTICS //
+    [HttpGet]
+    [Route("UserProfilData")]
+    public async Task<ActionResult<UserProfilDataDto>> GetUserProfilData()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized("User not found.");
+        var user = await _userRepository.GetAsync_Id(userId);
+        if (user == null) return Unauthorized("User not found.");
+
+        // get all user favorite films
+        var allFavoriteFilms = _filmRepository.GetList().OrderDescending()
+            .Where(p => user.FavoriteMovies.Contains(p.Id));
+
+        // user favorite film count
+        var favoriteFilmsCount = allFavoriteFilms.Count();
+
+        // get 20 favorite films
+        var favoriteFilms = await allFavoriteFilms.Take(20).ToListAsync();
+
+        // last favorite film
+        var lastFavoritefilm = await _filmRepository.GetList().FirstOrDefaultAsync(p => user.FavoriteMovies.LastOrDefault() == p.Id);
+
+
+        var favoriteFilmsDto = favoriteFilms.Select(p => new FavoriteFilms
+        {
+            Id = p.Id,
+            Title = p.Name,
+            ImagePath = p.ImageFileName,
+        }).ToList();
+
+        // get all user comments
+        var comments = _commentRepository.GetList()
+            .Where(p => p.AutorId == userId)
+            .Include(p => p.Film)
+            .Include(p => p.Rating)
+            .OrderByDescending(p => p.SendDate);
+
+        // user total comments
+        var totalUserComments = comments.Count();
+
+        // get top rating
+        var topRating = await comments.AnyAsync() ? await comments.MaxAsync(p => p.Rating.UserRating) : 0;
+
+        // get user average rating
+        var myAvgRating = await comments.AnyAsync() ? ((int)await comments.Select(p => p.Rating.UserRating).AverageAsync()) : 0;
+
+        // get latest comments
+        var latestComments = await comments.Take(10).ToListAsync();
+
+        var latestCommentsDto = latestComments.Select(p => new LatestComment
+        {
+            Id = p.Id,
+            FilmTitle = p.Film.Name,
+            CommentDate = p.SendDate,
+            CommentText = p.Text,
+            Rating = p.Rating.UserRating
+        }).ToList();
+
+        var userProfilData = new UserProfilDataDto
+        {
+            FavoriteFilms = favoriteFilmsDto,
+            LatestComments = latestCommentsDto,
+            AvgRating = myAvgRating,
+            FavoriteFilmsCount = favoriteFilmsCount,
+            LastFavoriteFilmTitle = lastFavoritefilm?.Name ?? "",
+            TopRating = topRating,
+            TotalComments = totalUserComments
+
+        };
+        return Ok(userProfilData);
+    }
 
 
 
