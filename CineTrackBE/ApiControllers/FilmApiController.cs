@@ -145,6 +145,19 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
 
         var isFavoriteFilm = user.FavoriteMovies.Any(p => p == film.Id);
 
+        //Get avg rating
+        var comments = await _commentRepository
+            .GetList()
+            .Where(p => p.FilmId == film.Id)
+            .Include(p => p.Rating)
+            .ToListAsync();
+
+
+        double avgRating;
+        if (comments.Count > 0) avgRating = comments.Select(p => p.Rating.UserRating).Average();
+        else avgRating = 0;
+
+
 
         var filmsDTO = new FilmDto()
         {
@@ -155,6 +168,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
             Description = film.Description,
             ReleaseDate = film.ReleaseDate,
             IsMyFavorite = isFavoriteFilm,
+            AvgRating = avgRating,
             Genres = [.. film.FilmGenres.Select(g => g.Genre.Name)]
         };
 
@@ -208,29 +222,38 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
         if (userId == null) return Unauthorized("User not found.");
 
 
+        var newComment = new Comment
+        {
+            AutorId = userId,
+            FilmId = comment.FilmId,
+            SendDate = DateTime.Now,
+            Text = comment.Text,
 
-        // probles ukladanim do databaze je potreba vyresit a popripade doladit modely
+
+        };
+
+        await _commentRepository.AddAsync(newComment);
+        var commentSaved = await _commentRepository.SaveChangesAsync();
+        if (!commentSaved) return StatusCode(StatusCodes.Status500InternalServerError, "Failed to save comment");
 
 
+        var newRating = new Rating
+        {
+            UserRating = comment.Rating,
+            CommentId = newComment.Id
+        };
 
-        //var newComment = new Comment
-        //{
-        //    AutorId = userId,
-        //    FilmId = comment.FilmId,
-        //    SendDate = DateTime.Now,
-        //    Text = comment.Text,
-            
-        //};
+        // Přidáme Rating
+        await _ratingRepository.AddAsync(newRating);
+        var ratingSaved = await _ratingRepository.SaveChangesAsync();
+        if (!ratingSaved)
+        {
+            _commentRepository.Remove(newComment);
+            await _commentRepository.SaveChangesAsync();
+            return StatusCode(StatusCodes.Status500InternalServerError, "Failed to save rating");
+        }
 
-       
-
-        //await _commentRepository.AddAsync(newComment);
-        //await _ratingRepository.AddAsync(newRating);
-
-        var isSave = await _commentRepository.SaveChangesAsync();
-        if (!isSave) return StatusCode(StatusCodes.Status500InternalServerError);
-
-        return Ok(isSave);
+        return Ok(true);
     }
 
 
@@ -247,7 +270,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
             .Include(p => p.Rating)
             .OrderByDescending(p => p.SendDate)
             .ToListAsync();
-   
+
         var commentDto = comments.Select(p => new CommentDto
         {
             Id = p.Id,

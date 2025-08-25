@@ -29,6 +29,11 @@ namespace CineTrackBE.Data
             SeedData.Seed(builder);
 
 
+            builder.Entity<Comment>()
+                .HasOne(p => p.Rating)
+                .WithOne(p => p.Comment)
+                .HasForeignKey<Rating>(p => p.CommentId)
+                .IsRequired();
 
 
 

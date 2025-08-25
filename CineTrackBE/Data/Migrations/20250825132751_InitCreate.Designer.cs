@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CineTrackBE.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250822153251_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250825132751_InitCreate")]
+    partial class InitCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -669,21 +669,21 @@ namespace CineTrackBE.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("FilmId")
+                    b.Property<int>("CommentId")
                         .HasColumnType("int");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int?>("FilmId")
+                        .HasColumnType("int");
 
                     b.Property<int>("UserRating")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FilmId");
+                    b.HasIndex("CommentId")
+                        .IsUnique();
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("FilmId");
 
                     b.ToTable("Ratings");
                 });
@@ -863,15 +863,13 @@ namespace CineTrackBE.Data.Migrations
                         .WithMany("Comments")
                         .HasForeignKey("AutorId");
 
-                    b.HasOne("CineTrackBE.Models.Entities.Film", "Film")
+                    b.HasOne("CineTrackBE.Models.Entities.Film", null)
                         .WithMany("Comments")
                         .HasForeignKey("FilmId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Autor");
-
-                    b.Navigation("Film");
                 });
 
             modelBuilder.Entity("CineTrackBE.Models.Entities.FilmGenre", b =>
@@ -895,21 +893,17 @@ namespace CineTrackBE.Data.Migrations
 
             modelBuilder.Entity("CineTrackBE.Models.Entities.Rating", b =>
                 {
-                    b.HasOne("CineTrackBE.Models.Entities.Film", "Film")
+                    b.HasOne("CineTrackBE.Models.Entities.Comment", "Comment")
+                        .WithOne("Rating")
+                        .HasForeignKey("CineTrackBE.Models.Entities.Rating", "CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CineTrackBE.Models.Entities.Film", null)
                         .WithMany("Ratings")
-                        .HasForeignKey("FilmId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("FilmId");
 
-                    b.HasOne("CineTrackBE.Models.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Film");
-
-                    b.Navigation("User");
+                    b.Navigation("Comment");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -966,6 +960,11 @@ namespace CineTrackBE.Data.Migrations
             modelBuilder.Entity("CineTrackBE.Models.Entities.ApplicationUser", b =>
                 {
                     b.Navigation("Comments");
+                });
+
+            modelBuilder.Entity("CineTrackBE.Models.Entities.Comment", b =>
+                {
+                    b.Navigation("Rating");
                 });
 
             modelBuilder.Entity("CineTrackBE.Models.Entities.Film", b =>
