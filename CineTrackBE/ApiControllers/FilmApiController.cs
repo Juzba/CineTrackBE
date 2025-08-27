@@ -24,8 +24,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
 
 
     // Top 5 Latest Films //
-    [HttpGet]
-    [Route("LatestFilms")]
+    [HttpGet("LatestFilms")]
     public async Task<ActionResult<IEnumerable<FilmDto>>> GetLatestFilms()
     {
         var films = await _filmRepository.GetList().OrderByDescending(p => p.ReleaseDate).Take(5).ToListAsync();
@@ -46,8 +45,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
 
 
     // Get all genres //
-    [HttpGet]
-    [Route("AllGenres")]
+    [HttpGet("AllGenres")]
     public async Task<ActionResult<IEnumerable<GenreDto>>> GetAllGenres()
     {
         var genres = await _genreRepository.GetList().ToListAsync();
@@ -62,8 +60,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
     }
 
     // SEARCH FILMS BY PARAMETERS //
-    [HttpPost]
-    [Route("CatalogSearch")]
+    [HttpPost("CatalogSearch")]
     public async Task<ActionResult<IEnumerable<Film>>> CatalogPost([FromBody] SearchParametrsDto? searchParams)
     {
         // get film list from db
@@ -126,8 +123,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
 
 
     // GET FILM DETAILS BY ID //
-    [HttpGet]
-    [Route("FilmDetails/{id}")]
+    [HttpGet("FilmDetails/{id}")]
     public async Task<ActionResult<FilmDto>> GetFilm(int id)
     {
         if (id <= 0) return BadRequest("Film ID must be greater than 0.");
@@ -177,8 +173,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
 
 
     // ADD OR REMOVE FILM FROM FAVORITES //
-    [HttpGet]
-    [Route("ToggleFavorite/{filmId}")]
+    [HttpGet("ToggleFavorite/{filmId}")]
     public async Task<ActionResult<bool>> ToggleFavorite(int filmId)
     {
         if (filmId <= 0) return BadRequest("Film ID must be greater than 0.");
@@ -211,8 +206,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
 
 
     // ADD COMMENT //
-    [HttpPost]
-    [Route("AddComment")]
+    [HttpPost("AddComment")]
     public async Task<ActionResult<bool>> AddComment([FromBody] CommentWithRatingDto comment)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -258,8 +252,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
 
 
     // GET COMMENTS FOR FILM //
-    [HttpGet]
-    [Route("GetComments/{filmId}")]
+    [HttpGet("GetComments/{filmId}")]
     public async Task<ActionResult<IEnumerable<GenreDto>>> GetAllGenres(int filmId)
     {
         if (filmId <= 0) return BadRequest("Film ID must be greater than 0.");
@@ -286,8 +279,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
 
 
     // GET USER PROFIL DATA AND STATISTICS //
-    [HttpGet]
-    [Route("UserProfilData")]
+    [HttpGet("UserProfilData")]
     public async Task<ActionResult<UserProfilDataDto>> GetUserProfilData()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -357,18 +349,5 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
         };
         return Ok(userProfilData);
     }
-
-
-
-    // PUT api/<FilmApiController>/5
-    [HttpPut("{id}")]
-    public void Put(int id, [FromBody] string value)
-    {
-    }
-
-    // DELETE api/<FilmApiController>/5
-    [HttpDelete("{id}")]
-    public void Delete(int id)
-    {
-    }
+      
 }
