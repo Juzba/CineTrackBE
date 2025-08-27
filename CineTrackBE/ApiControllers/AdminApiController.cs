@@ -11,12 +11,14 @@ namespace CineTrackBE.ApiControllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-public class AdminApiController(IRepository<Genre> genreRepository, IRepository<FilmGenre> filmGenreRepository) : ControllerBase
+public class AdminApiController(IRepository<Film> filmRepository, IRepository<Genre> genreRepository, IRepository<FilmGenre> filmGenreRepository) : ControllerBase
 {
     private readonly IRepository<Genre> _genreRepository = genreRepository;
     private readonly IRepository<FilmGenre> _filmGenreRepository = filmGenreRepository;
+    private readonly IRepository<Film> _filmRepository = filmRepository;
 
 
+    // ADD GENRE //
     [HttpPost("AddGenre")]
     public async Task<ActionResult<bool>> AddGenre(GenreDto genre)
     {
@@ -59,11 +61,6 @@ public class AdminApiController(IRepository<Genre> genreRepository, IRepository<
     }
 
 
-
-
-
-
-
     // EDIT GENRE //
     [HttpPut("EditGenre/{id}")]
     public async Task<ActionResult> PutGenre(int id, [FromBody] GenreDto genreDto)
@@ -91,7 +88,29 @@ public class AdminApiController(IRepository<Genre> genreRepository, IRepository<
 
 
 
+    // Get all films //
+    [HttpGet("AllFilms")]
+    public async Task<ActionResult<IEnumerable<FilmDto>>> GetAllFilms()
+    {
+        var films = await _filmRepository
+            .GetList()
+            .Include(p=>p.FilmGenres)
+            .ThenInclude(p=>p.Genre)
+            .ToListAsync();
 
+        var newFilms = films.Select(f => new FilmDto
+        {
+            Id = f.Id,
+            Name = f.Name,
+            Description = f.Description,
+            Director = f.Director,
+            ImageFileName = f.ImageFileName,
+            ReleaseDate = f.ReleaseDate,
+            Genres = f.FilmGenres?.Select(fg => fg.Genre.Name).ToList() ?? []
+        });
+
+        return Ok(newFilms);
+    }
 
 
 
