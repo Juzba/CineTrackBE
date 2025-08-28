@@ -14,7 +14,6 @@ namespace CineTrackBE.AppServices
         Task<int> CountUserInRoleAsync(string role, CancellationToken cancellationToken = default);
         Task AddGenresToFilmAsync(Film film, List<int> genreIds, CancellationToken cancellationToken = default);
         Task<Film?> GetFilmAsync_InclFilmGenres(int filmId, CancellationToken cancellationToken = default);
-        IQueryable<Film> GetFilmListAsync_InclFilmGenres(CancellationToken cancellationToken = default);
         Task RemoveFilmGenres(int filmId, CancellationToken cancellationToken = default);
     }
     public class DataService(ApplicationDbContext context, ILogger<DataService> logger) : IDataService
@@ -123,13 +122,6 @@ namespace CineTrackBE.AppServices
         {
             return await _context.Films.Include(f => f.FilmGenres).ThenInclude(p => p.Genre).FirstOrDefaultAsync(f => f.Id == filmId, cancellationToken);
         }
-
-        // GET FILM LIST WITH FILM-GENRES //
-        public IQueryable<Film> GetFilmListAsync_InclFilmGenres(CancellationToken cancellationToken = default)
-        {
-            return _context.Films.Include(f => f.FilmGenres).ThenInclude(p=>p.Genre);
-        }
-
 
 
         // REMOVE FILM-GENRES //

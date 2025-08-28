@@ -37,7 +37,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
             ImageFileName = p.ImageFileName,
             Description = p.Description,
             ReleaseDate = p.ReleaseDate,
-            Genres = [.. p.FilmGenres.Select(g => g.Genre.Name)]
+            Genres = [.. p.FilmGenres.Select(g => new GenreDto { Id = g.Genre.Id, Name = g.Genre.Name})]
         });
 
         return Ok(filmsDTO);
@@ -64,7 +64,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
     public async Task<ActionResult<IEnumerable<Film>>> CatalogPost([FromBody] SearchParametrsDto? searchParams)
     {
         // get film list from db
-        var films = _dataService.GetFilmListAsync_InclFilmGenres();
+        var films = _filmRepository.GetList().Include(p => p.FilmGenres).ThenInclude(p => p.Genre).AsQueryable();
 
         // search by name
         if (!string.IsNullOrWhiteSpace(searchParams?.SearchText))
@@ -115,7 +115,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
             ImageFileName = p.ImageFileName,
             Description = p.Description,
             ReleaseDate = p.ReleaseDate,
-            Genres = [.. p.FilmGenres.Select(g => g.Genre.Name)]
+            Genres = [.. p.FilmGenres.Select(g => new GenreDto { Id = g.Genre.Id, Name = g.Genre.Name })]
         });
 
         return Ok(filmsDTO);
@@ -132,7 +132,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
         var film = await _filmRepository.GetList().Include(p => p.FilmGenres).ThenInclude(p => p.Genre).FirstOrDefaultAsync(p => p.Id == id);
         if (film == null) return NotFound($"Film with ID {id} not found.");
 
-        // is film user farorite?
+        // is film user favorite?
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null) return Unauthorized("User not authenticated!");
 
@@ -165,7 +165,7 @@ public class FilmApiController(IRepository<Film> filmRepository, IRepository<Rat
             ReleaseDate = film.ReleaseDate,
             IsMyFavorite = isFavoriteFilm,
             AvgRating = avgRating,
-            Genres = [.. film.FilmGenres.Select(g => g.Genre.Name)]
+            Genres = [.. film.FilmGenres.Select(g => new GenreDto { Id = g.Genre.Id, Name = g.Genre.Name})]
         };
 
         return Ok(filmsDTO);

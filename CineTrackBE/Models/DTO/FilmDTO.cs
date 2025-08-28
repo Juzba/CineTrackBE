@@ -14,5 +14,5 @@ public class FilmDto
     public DateTime ReleaseDate { get; set; }
     public bool IsMyFavorite { get; set; }
     public double AvgRating { get; set; }
-    public List<string> Genres { get; set; }
+    public List<GenreDto> Genres { get; set; }
 }

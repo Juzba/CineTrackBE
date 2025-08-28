@@ -106,7 +106,7 @@ public class AdminApiController(IRepository<Film> filmRepository, IRepository<Ge
             Director = f.Director,
             ImageFileName = f.ImageFileName,
             ReleaseDate = f.ReleaseDate,
-            Genres = f.FilmGenres?.Select(fg => fg.Genre.Name).ToList() ?? []
+            Genres = f.FilmGenres?.Select(fg => new GenreDto { Id = fg.Genre.Id, Name = fg.Genre.Name}).ToList() ?? []
         });
 
         return Ok(newFilms);
