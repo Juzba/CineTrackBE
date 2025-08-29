@@ -1,11 +1,13 @@
 ﻿using CineTrackBE.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace CineTrackBE.AppServices
 {
     public interface IRepository<T> where T : class
     {
         Task AddAsync(T entity, CancellationToken cancellationToken = default);
+        Task AddRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default);
         Task<T?> GetAsync_Id(string id, CancellationToken cancellationToken = default);
         Task<T?> GetAsync_Id(int id, CancellationToken cancellationToken = default);
         void Update(T entity);
@@ -14,16 +16,18 @@ namespace CineTrackBE.AppServices
         Task<bool> AnyExistsAsync(int id, CancellationToken cancellationToken = default);
         Task<bool> AnyExistsAsync(string id, CancellationToken cancellationToken = default);
 
-        Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default);
+        Task SaveChangesAsync(CancellationToken cancellationToken = default);
+        Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
     }
 
 
 
 
 
-    public class Repository<T>(ApplicationDbContext context) : IRepository<T> where T : class
+    public class Repository<T>(ApplicationDbContext context, ILogger<Repository<T>> logger) : IRepository<T> where T : class
     {
         private readonly ApplicationDbContext _context = context;
+        private readonly ILogger<Repository<T>> _logger = logger;
 
 
 
@@ -33,6 +37,15 @@ namespace CineTrackBE.AppServices
             ArgumentNullException.ThrowIfNull(entity);
 
             await _context.AddAsync(entity, cancellationToken);
+        }
+
+
+        // ADD-RANGE NEW ENTITY //
+        public async Task AddRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(entities);
+
+            await _context.AddRangeAsync(entities, cancellationToken);
         }
 
 
@@ -106,17 +119,24 @@ namespace CineTrackBE.AppServices
 
 
         // SAVE CHANGES //
-        public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             try
             {
-                return await _context.SaveChangesAsync(cancellationToken) > 0;
+                await _context.SaveChangesAsync(cancellationToken);
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException ex)
             {
-                //throw new ArgumentException(ex.Message);
-                return false;
+                _logger.LogError(ex, "Failed to save changes to database");
+                throw new ArgumentException(ex.Message);
             }
         }
+
+        // BEGIN TRANSACTION ASYNC //
+        public async Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
+        {
+            return await _context.Database.BeginTransactionAsync(cancellationToken);
+        }
+
     }
 }
