@@ -29,7 +29,7 @@ public class AdminApiController(ILogger<AdminApiController> logger, IRepository<
             _logger.LogWarning("Wrong GenreDto input model in AddGenre method!");
             return BadRequest(ModelState);
         }
-        
+
         // Is Genre in db?
         var exist = await _genreRepository.GetList().AnyAsync(p => p.Name == genre.Name);
         if (exist)
@@ -108,8 +108,8 @@ public class AdminApiController(ILogger<AdminApiController> logger, IRepository<
             _logger.LogWarning("Genre is not valid {ModelState}", ModelState);
             return BadRequest($"Genre is not valid {ModelState}");
         }
-            
-        if (id <= 0) 
+
+        if (id <= 0)
         {
             _logger.LogWarning("Invalid genre ID. ID must be greater than 0.");
             return BadRequest("Invalid genre ID. ID must be greater than 0.");
@@ -117,7 +117,7 @@ public class AdminApiController(ILogger<AdminApiController> logger, IRepository<
 
         // find genre with id in db
         var genre = await _genreRepository.GetAsync_Id(id);
-        if (genre == null) 
+        if (genre == null)
         {
             _logger.LogWarning("Genre with Id {GenreId} not found!", id);
             return NotFound($"Genre with Id '{id}' not found!");
@@ -155,42 +155,50 @@ public class AdminApiController(ILogger<AdminApiController> logger, IRepository<
     [HttpGet("AllFilms")]
     public async Task<ActionResult<IEnumerable<FilmDto>>> GetAllFilms()
     {
-        var films = await _filmRepository
-            .GetList()
-            .Include(p => p.FilmGenres)
-            .ThenInclude(p => p.Genre)
-            .ToListAsync();
-
-        var newFilms = films.Select(f => new FilmDto
+        try
         {
-            Id = f.Id,
-            Name = f.Name,
-            Description = f.Description,
-            Director = f.Director,
-            ImageFileName = f.ImageFileName,
-            ReleaseDate = f.ReleaseDate,
-            Genres = f.FilmGenres?.Select(fg => new GenreDto { Id = fg.Genre.Id, Name = fg.Genre.Name }).ToList() ?? []
-        });
 
-        _logger.LogInformation("Retrieved {FilmCount} films from the database.", newFilms.Count());
-        return Ok(newFilms);
+            var films = await _filmRepository
+                .GetList()
+                .Include(p => p.FilmGenres)
+                .ThenInclude(p => p.Genre)
+                .ToListAsync();
+
+            var newFilms = films.Select(f => new FilmDto
+            {
+                Id = f.Id,
+                Name = f.Name,
+                Description = f.Description,
+                Director = f.Director,
+                ImageFileName = f.ImageFileName,
+                ReleaseDate = f.ReleaseDate,
+                Genres = f.FilmGenres?.Select(fg => new GenreDto { Id = fg.Genre.Id, Name = fg.Genre.Name }).ToList() ?? []
+            });
+
+            _logger.LogInformation("Retrieved {FilmCount} films from the database.", newFilms.Count());
+            return Ok(newFilms);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while trying to retrieve films from the database.");
+            return StatusCode(500, "Error occurred while trying to retrieve films from the database.");
+        }
     }
-
 
 
     // ADD FILM //
     [HttpPost("AddFilm")]
     public async Task<ActionResult> AddFilm(FilmDto film)
     {
-        if (!ModelState.IsValid) 
+        if (!ModelState.IsValid)
         {
             _logger.LogWarning("Wrong FilmDto input model in AddFilm method! {ModelState}", ModelState);
-            return BadRequest(ModelState); 
+            return BadRequest(ModelState);
         }
 
         var exist = await _filmRepository.GetList().AnyAsync(p => p.Name == film.Name);
-        if (exist) 
-        { 
+        if (exist)
+        {
             _logger.LogInformation("Film already Exist {FilmName}", film.Name);
             return Conflict($"Film '{film.Name}' already Exist");
         }
