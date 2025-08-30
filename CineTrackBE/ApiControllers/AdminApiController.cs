@@ -3,6 +3,7 @@ using CineTrackBE.Models.DTO;
 using CineTrackBE.Models.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,11 +12,13 @@ namespace CineTrackBE.ApiControllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-public class AdminApiController(ILogger<AdminApiController> logger, IRepository<Film> filmRepository, IRepository<Genre> genreRepository, IRepository<FilmGenre> filmGenreRepository) : ControllerBase
+public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRepository, ILogger<AdminApiController> logger, IRepository<Film> filmRepository, IRepository<Genre> genreRepository, IRepository<FilmGenre> filmGenreRepository) : ControllerBase
 {
     private readonly IRepository<Genre> _genreRepository = genreRepository;
     private readonly IRepository<FilmGenre> _filmGenreRepository = filmGenreRepository;
     private readonly IRepository<Film> _filmRepository = filmRepository;
+    private readonly IRepository<IdentityUserRole<string>> _userRoleRepository = userRoleRepository;
+
     private ILogger<AdminApiController> _logger = logger;
 
 
@@ -309,18 +312,23 @@ public class AdminApiController(ILogger<AdminApiController> logger, IRepository<
         }
 
         // find film with id in db
-        var film = await _filmRepository.GetAsync_Id(id);
+
+        var film = await _filmRepository.GetList()
+            .Include(f => f.FilmGenres)
+            .Include(f => f.Ratings)
+            .FirstOrDefaultAsync(f => f.Id == id);
+
         if (film == null)
         {
             _logger.LogWarning("Film with Id {FilmId} not found!", id);
             return NotFound($"Film with Id '{id}' not found!");
         }
 
-
+        using var transaction = await _filmRepository.BeginTransactionAsync();
         try
         {
             // name already reserved?
-            var exist = await _genreRepository.GetList().AnyAsync(p => p.Name == filmDto.Name);
+            var exist = await _genreRepository.GetList().AnyAsync(p => p.Name == filmDto.Name && p.Id != id);
             if (exist)
             {
                 _logger.LogWarning("Genre NAME '{FilmName}' already exist!", filmDto.Name);
@@ -332,11 +340,17 @@ public class AdminApiController(ILogger<AdminApiController> logger, IRepository<
             film.Description = filmDto.Description;
             film.ImageFileName = filmDto.ImageFileName;
             film.ReleaseDate = filmDto.ReleaseDate;
-            film.Ratings = film.Ratings;
 
-            _filmRepository.Update(film);
 
-            await _genreRepository.SaveChangesAsync();
+            // old film-genres - remove
+            _filmGenreRepository.RemoveRange(film.FilmGenres);
+
+            // new film-genres - add
+            var newFilmGenres = filmDto.Genres.Select(p => new FilmGenre { FilmId = film.Id, GenreId = p.Id });
+            await _filmGenreRepository.AddRangeAsync(newFilmGenres);
+
+            await _filmGenreRepository.SaveChangesAsync();
+            await transaction.CommitAsync();
             _logger.LogInformation("Film '{FilmName}' successfully updated!", film.Name);
 
 
@@ -356,6 +370,7 @@ public class AdminApiController(ILogger<AdminApiController> logger, IRepository<
         }
         catch (Exception)
         {
+            await transaction.RollbackAsync();
             _logger.LogError("Error occurred while trying to save Film '{FilmName}' to db!", film.Name);
             return StatusCode(500, "Error occurred while trying to save Film to db");
         }
