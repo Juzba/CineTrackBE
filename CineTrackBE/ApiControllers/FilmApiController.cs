@@ -303,7 +303,7 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
 
     // ADD COMMENT //
     [HttpPost("AddComment")]
-    public async Task<ActionResult<bool>> AddComment([FromBody] CommentWithRatingDto comment)
+    public async Task<ActionResult<CommentWithRatingDto>> AddComment([FromBody] CommentWithRatingDto comment)
     {
 
         if (!ModelState.IsValid)
@@ -324,7 +324,7 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
         {
             AutorId = userId,
             FilmId = comment.FilmId,
-            SendDate = DateTime.Now,
+            SendDate = comment.SendDate,
             Text = comment.Text,
         };
 
@@ -348,8 +348,20 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
             await _ratingRepository.SaveChangesAsync();
 
             await transaction.CommitAsync();
+
+
+            var result = new CommentWithRatingDto
+            {
+                Id = newComment.Id,
+                FilmId = newComment.FilmId,
+                Rating = newRating.UserRating,
+                Text = newComment.Text,
+                AutorName = User.Identity?.Name,
+                SendDate = newComment.SendDate
+            };
+
             _logger.LogInformation("Comment added successfully: {Comment}", comment);
-            return Ok(true);
+            return Ok(result);
 
         }
         catch (Exception ex)
@@ -364,7 +376,7 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
 
     // GET COMMENTS FOR FILM //
     [HttpGet("GetComments/{filmId}")]
-    public async Task<ActionResult<IEnumerable<CommentDto>>> GetAllComments(int filmId)
+    public async Task<ActionResult<IEnumerable<CommentWithRatingDto>>> GetAllComments(int filmId)
     {
         try
         {
@@ -389,17 +401,18 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
                 .OrderByDescending(p => p.SendDate)
                 .ToListAsync();
 
-            var commentDto = comments.Select(p => new CommentDto
+            var commentWithRatingDto = comments.Select(p => new CommentWithRatingDto
             {
                 Id = p.Id,
                 SendDate = p.SendDate,
                 Text = p.Text,
-                AuthorName = p.Autor.UserName,
-                Rating = p.Rating.UserRating
+                AutorName = p.Autor.UserName,
+                Rating = p.Rating.UserRating,
+                FilmId = p.FilmId
             });
 
-            _logger.LogInformation("Fetched comments for film ID {FilmId}: {Comments}", filmId, commentDto);
-            return Ok(commentDto);
+            _logger.LogInformation("Fetched comments for film ID {FilmId}: {Comments}", filmId, commentWithRatingDto);
+            return Ok(commentWithRatingDto);
         }
         catch (Exception ex)
         {
@@ -417,17 +430,17 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
         {
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) 
+            if (userId == null)
             {
                 _logger.LogWarning("User not authenticated when accessing profile data.");
                 return Unauthorized("User not found.");
             }
 
             var user = await _userRepository.GetAsync_Id(userId);
-            if (user == null) 
+            if (user == null)
             {
                 _logger.LogWarning("User with ID {UserId} not found when accessing profile data.", userId);
-                return Unauthorized("User not found."); 
+                return Unauthorized("User not found.");
             }
 
             // get all user favorite films ( user statistics page )
