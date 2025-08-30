@@ -21,7 +21,7 @@ public class AdminApiController(ILogger<AdminApiController> logger, IRepository<
 
     // ADD GENRE //
     [HttpPost("AddGenre")]
-    public async Task<ActionResult> AddGenre(GenreDto genre)
+    public async Task<ActionResult<GenreDto>> AddGenre(GenreDto genre)
     {
 
         if (!ModelState.IsValid)
@@ -46,7 +46,10 @@ public class AdminApiController(ILogger<AdminApiController> logger, IRepository<
             await _genreRepository.AddAsync(newGenre);
             await _genreRepository.SaveChangesAsync();
             _logger.LogInformation("Success add new genre: {GenreName}", genre.Name);
-            return Ok();
+
+
+            var resultDto = new GenreDto { Id = newGenre.Id, Name = newGenre.Name };
+            return CreatedAtAction(nameof(AddGenre), new { id = resultDto.Id }, resultDto);
 
         }
         catch (Exception ex)
@@ -101,7 +104,7 @@ public class AdminApiController(ILogger<AdminApiController> logger, IRepository<
 
     // EDIT GENRE //
     [HttpPut("EditGenre/{id}")]
-    public async Task<ActionResult> PutGenre(int id, [FromBody] GenreDto genreDto)
+    public async Task<ActionResult<GenreDto>> PutGenre(int id, [FromBody] GenreDto genreDto)
     {
         if (!ModelState.IsValid)
         {
@@ -140,7 +143,7 @@ public class AdminApiController(ILogger<AdminApiController> logger, IRepository<
             await _genreRepository.SaveChangesAsync();
 
             _logger.LogInformation("Genre '{GenreName}' successfully updated!", genre.Name);
-            return Ok();
+            return Ok(new GenreDto { Id = genre.Id, Name = genre.Name });
         }
         catch (Exception)
         {
@@ -188,7 +191,7 @@ public class AdminApiController(ILogger<AdminApiController> logger, IRepository<
 
     // ADD FILM //
     [HttpPost("AddFilm")]
-    public async Task<ActionResult> AddFilm(FilmDto film)
+    public async Task<ActionResult<FilmDto>> AddFilm(FilmDto film)
     {
         if (!ModelState.IsValid)
         {
@@ -224,7 +227,19 @@ public class AdminApiController(ILogger<AdminApiController> logger, IRepository<
 
             await transaction.CommitAsync();
             _logger.LogInformation("Success add new film include genres: {FilmName}", film.Name);
-            return Ok();
+
+            var result = new FilmDto
+            {
+                Id = newFilm.Id,
+                Director = newFilm.Director,
+                ImageFileName = newFilm.ImageFileName,
+                ReleaseDate = newFilm.ReleaseDate,
+                Description = newFilm.Description,
+                Name = newFilm.Name,
+                Genres = film.Genres
+            };
+
+            return CreatedAtAction(nameof(AddFilm), new { id = result.Id }, result);
         }
         catch (Exception)
         {
@@ -236,52 +251,115 @@ public class AdminApiController(ILogger<AdminApiController> logger, IRepository<
 
 
     // DELETE FILM //
-    //[HttpDelete("RemoveGenre/{id}")]
-    //public async Task<ActionResult<bool>> DeleteGenre(int id)
-    //{
-    //    if (id <= 0) return BadRequest("Invalid genre ID. ID must be greater than 0.");
+    [HttpDelete("RemoveFilm/{id}")]
+    public async Task<ActionResult> DeleteFilm(int id)
+    {
 
-    //    var genre = await _genreRepository.GetAsync_Id(id);
-    //    if (genre == null) return NotFound($"Genre with Id '{id}' not exist!");
-
-
-    //    var exist = await _filmGenreRepository.GetList().AnyAsync(p => p.GenreId == id);
-    //    if (exist) return Conflict($"Genre '' cannot be deleted because it is used!");
+        if (id <= 0)
+        {
+            _logger.LogWarning("Invalid film ID. ID must be greater than 0.");
+            return BadRequest("Invalid film ID. ID must be greater than 0.");
+        }
 
 
-    //    _genreRepository.Remove(genre);
-    //    var success = await _genreRepository.SaveChangesAsync();
-    //    if (!success) return StatusCode(500, "Error occurred while trying to save Genre to db");
+        using var transaction = await _filmRepository.BeginTransactionAsync();
+        try
+        {
+            var film = await _filmRepository.GetList()
+             .Include(f => f.FilmGenres)
+             .Include(f => f.Ratings)
+             .Include(f => f.Comments)
+             .FirstOrDefaultAsync(f => f.Id == id);
 
-    //    return Ok(success);
-    //}
+            if (film == null)
+            {
+                _logger.LogWarning("Film with Id {FilmId} not exist!", id);
+                return NotFound($"Film with Id '{id}' not exist!");
+            }
+
+            _filmRepository.Remove(film);
+            await _filmRepository.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            _logger.LogInformation("Film '{FilmName}' successfully deleted!", film.Name);
+            return Ok();
+        }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError("Error occurred while trying to save Film to db!");
+            return StatusCode(500, "Error occurred while trying to save Film to db");
+        }
+    }
+
+    // EDIT FILM //
+    [HttpPut("EditFilm/{id}")]
+    public async Task<ActionResult<FilmDto>> PutFilm(int id, [FromBody] FilmDto filmDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            _logger.LogWarning("Film is not valid {ModelState}", ModelState);
+            return BadRequest($"Film is not valid {ModelState}");
+        }
+
+        if (id <= 0)
+        {
+            _logger.LogWarning("Invalid film ID. ID must be greater than 0.");
+            return BadRequest("Invalid film ID. ID must be greater than 0.");
+        }
+
+        // find film with id in db
+        var film = await _filmRepository.GetAsync_Id(id);
+        if (film == null)
+        {
+            _logger.LogWarning("Film with Id {FilmId} not found!", id);
+            return NotFound($"Film with Id '{id}' not found!");
+        }
 
 
-    //// EDIT FILM //
-    //[HttpPut("EditGenre/{id}")]
-    //public async Task<ActionResult> PutGenre(int id, [FromBody] GenreDto genreDto)
-    //{
-    //    if (!ModelState.IsValid) return BadRequest($"Genre is not valid {ModelState}");
-    //    if (id <= 0) return BadRequest($"Invalid genre ID. ID must be greater than 0.");
+        try
+        {
+            // name already reserved?
+            var exist = await _genreRepository.GetList().AnyAsync(p => p.Name == filmDto.Name);
+            if (exist)
+            {
+                _logger.LogWarning("Genre NAME '{FilmName}' already exist!", filmDto.Name);
+                return Conflict($"Genre NAME '{filmDto.Name}' already exist!");
+            }
 
-    //    // find genre with id in db
-    //    var genre = await _genreRepository.GetAsync_Id(id);
-    //    if (genre == null) return NotFound($"Genre with Id '{id}' not found!");
+            film.Name = filmDto.Name;
+            film.Director = filmDto.Director;
+            film.Description = filmDto.Description;
+            film.ImageFileName = filmDto.ImageFileName;
+            film.ReleaseDate = filmDto.ReleaseDate;
+            film.Ratings = film.Ratings;
 
-    //    // name already reserved?
-    //    var exist = await _genreRepository.GetList().AnyAsync(p => p.Name == genreDto.Name);
-    //    if (exist) return Conflict($"Genre NAME '{genreDto.Name}' already exist!");
+            _filmRepository.Update(film);
+
+            await _genreRepository.SaveChangesAsync();
+            _logger.LogInformation("Film '{FilmName}' successfully updated!", film.Name);
 
 
-    //    genre.Name = genreDto.Name;
-    //    _genreRepository.Update(genre);
+            var resultDto = new FilmDto
+            {
+                Id = film.Id,
+                Name = film.Name,
+                Description = film.Description,
+                Director = film.Director,
+                ImageFileName = film.ImageFileName,
+                ReleaseDate = film.ReleaseDate,
+                Genres = filmDto.Genres
+            };
 
-    //    var success = await _genreRepository.SaveChangesAsync();
-    //    if (!success) return StatusCode(500, "Error occurred while trying to save Genre to db");
+            return Ok(resultDto);
 
-    //    return Ok(success);
-    //}
-
+        }
+        catch (Exception)
+        {
+            _logger.LogError("Error occurred while trying to save Film '{FilmName}' to db!", film.Name);
+            return StatusCode(500, "Error occurred while trying to save Film to db");
+        }
+    }
 
 
 

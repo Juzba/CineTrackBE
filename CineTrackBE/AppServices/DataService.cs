@@ -8,13 +8,11 @@ namespace CineTrackBE.AppServices
     public interface IDataService
     {
         Task<bool> AnyUserExistsByUserNameAsync(string userName, CancellationToken cancellationToken = default);
-        Task<bool> AddUserRoleAsync(ApplicationUser user, string role, CancellationToken cancellationToken = default);
-        Task<bool> RemoveUserRoleAsync(ApplicationUser user, string role, CancellationToken cancellationToken = default);
-        Task<IQueryable<IdentityRole>> GetRolesFromUserAsync(ApplicationUser user, CancellationToken cancellationToken = default);
+        Task AddUserRoleAsync(ApplicationUser user, string role, CancellationToken cancellationToken = default);
+        Task RemoveUserRoleAsync(ApplicationUser user, string role, CancellationToken cancellationToken = default);
+        Task<IEnumerable<IdentityRole>> GetRolesFromUserAsync(ApplicationUser user, CancellationToken cancellationToken = default);
         Task<int> CountUserInRoleAsync(string role, CancellationToken cancellationToken = default);
         Task AddGenresToFilmAsync(Film film, List<int> genreIds, CancellationToken cancellationToken = default);
-        Task<Film?> GetFilmAsync_InclFilmGenres(int filmId, CancellationToken cancellationToken = default);
-        Task RemoveFilmGenres(int filmId, CancellationToken cancellationToken = default);
     }
     public class DataService(ApplicationDbContext context, ILogger<DataService> logger) : IDataService
     {
@@ -35,54 +33,51 @@ namespace CineTrackBE.AppServices
 
 
         // ADD USER ROLE //
-        public async Task<bool> AddUserRoleAsync(ApplicationUser user, string role, CancellationToken cancellationToken = default)
+        public async Task AddUserRoleAsync(ApplicationUser user, string role, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(user);
             ArgumentException.ThrowIfNullOrWhiteSpace(role);
 
-            var roleEntity = await _context.Roles.FirstOrDefaultAsync(r => r.Name == role, cancellationToken);
-            if (roleEntity == null) return false;
+            var roleEntity = await _context.Roles.FirstOrDefaultAsync(r => r.Name == role, cancellationToken)
+            ?? throw new ArgumentException("Role does not exist.", nameof(role));
 
             // any user-role in db? //
-            var anyExist = await _context.UserRoles.AnyAsync(p => p.UserId == user.Id && p.RoleId == roleEntity.Id);
-            if (anyExist) return true;
+            var exist = await _context.UserRoles.AnyAsync(p => p.UserId == user.Id && p.RoleId == roleEntity.Id, cancellationToken);
+            if (exist) throw new ArgumentException("The user already has this role assigned.", nameof(role));
 
 
             var userRole = new IdentityUserRole<string> { UserId = user.Id, RoleId = roleEntity.Id };
             await _context.UserRoles.AddAsync(userRole, cancellationToken);
             _logger.LogInformation("Role {Role} added to user {UserName}", role, user.UserName);
-
-
-            return true;
         }
 
 
         // REMOVE USER ROLE //
-        public async Task<bool> RemoveUserRoleAsync(ApplicationUser user, string role, CancellationToken cancellationToken = default)
+        public async Task RemoveUserRoleAsync(ApplicationUser user, string role, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(user);
             ArgumentException.ThrowIfNullOrWhiteSpace(role);
 
-            var roleEntity = await _context.Roles.FirstOrDefaultAsync(r => r.Name == role, cancellationToken);
-            if (roleEntity == null) return false;
+            var roleEntity = await _context.Roles.FirstOrDefaultAsync(r => r.Name == role, cancellationToken)
+            ?? throw new ArgumentException("Role does not exist.", nameof(role));
 
-            var userRole = await _context.UserRoles.FirstOrDefaultAsync(ur => ur.UserId == user.Id && ur.RoleId == roleEntity.Id, cancellationToken);
-            if (userRole == null) return false;
+
+            var userRole = await _context.UserRoles.FirstOrDefaultAsync(ur => ur.UserId == user.Id && ur.RoleId == roleEntity.Id, cancellationToken)
+            ?? throw new ArgumentException("The user does not have this role assigned.", nameof(role));
+
 
             _context.UserRoles.Remove(userRole);
             _logger.LogInformation("Role {Role} removed from user {UserName}", role, user.UserName);
-
-            return true;
         }
 
 
         // GET ROLES FROM USER //
-        public async Task<IQueryable<IdentityRole>> GetRolesFromUserAsync(ApplicationUser user, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<IdentityRole>> GetRolesFromUserAsync(ApplicationUser user, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(user);
 
-            var userRoles = await _context.UserRoles.Where(ur => ur.UserId == user.Id).Select(ur => ur.RoleId).ToListAsync(cancellationToken);
-            return _context.Roles.Where(r => userRoles.Contains(r.Id)).AsQueryable();
+            var userRoles = await _context.UserRoles.Where(ur => ur.UserId == user.Id).Select(ur => ur.RoleId).ToListAsync(cancellationToken); 
+            return await _context.Roles.Where(r => userRoles.Contains(r.Id)).ToListAsync(cancellationToken);
         }
 
 
@@ -104,7 +99,11 @@ namespace CineTrackBE.AppServices
             ArgumentNullException.ThrowIfNull(film);
             ArgumentNullException.ThrowIfNull(genreIds);
 
-            if (genreIds.Count == 0) return;
+            if (genreIds.Count == 0)
+            {
+                _logger.LogWarning("No genre IDs provided to add to film with ID {FilmId}", film.Id);
+                throw new ArgumentException("The genreIds list is empty.", nameof(genreIds));
+            }
 
             // film-genres existing in db //
             var existsFilmGenres = await _context.FilmGenres.Where(p => p.FilmId == film.Id && genreIds.Contains(p.GenreId)).ToListAsync(cancellationToken);
@@ -112,33 +111,14 @@ namespace CineTrackBE.AppServices
             // film-genres not existing in db //
             var genreList = genreIds.Except(existsFilmGenres.Select(p => p.GenreId)).Select(p => new FilmGenre() { GenreId = p, FilmId = film.Id });
 
-            if (genreList == null) return;
+            if (genreList == null)
+            {
+                _logger.LogWarning("No new genres to add for film with ID {FilmId}", film.Id);
+                throw new ArgumentException("No new genres to add.", nameof(genreIds));
+            }
+
             await _context.AddRangeAsync(genreList, cancellationToken);
-
         }
-
-        // GET FILM WITH GENRES //
-        public async Task<Film?> GetFilmAsync_InclFilmGenres(int filmId, CancellationToken cancellationToken = default)
-        {
-            return await _context.Films.Include(f => f.FilmGenres).ThenInclude(p => p.Genre).FirstOrDefaultAsync(f => f.Id == filmId, cancellationToken);
-        }
-
-
-        // REMOVE FILM-GENRES //
-        public async Task RemoveFilmGenres(int filmId, CancellationToken cancellationToken = default)
-        {
-            var filmGenres = await _context.FilmGenres.Where(p => p.FilmId == filmId).ToListAsync(cancellationToken);
-
-            if (filmGenres == null) return;
-
-            _context.RemoveRange(filmGenres);
-        }
-
-
-
-
-
-
 
     }
 }

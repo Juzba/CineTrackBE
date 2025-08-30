@@ -97,7 +97,14 @@ builder.Services.AddAuthorization(options =>
         policy.RequireRole("Admin"));
 });
 
-
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole(options =>
+{
+    options.FormatterName = "Simple";
+});
+// Vypnutí EF Core logování
+builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
+builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.None);
 
 
 var app = builder.Build();

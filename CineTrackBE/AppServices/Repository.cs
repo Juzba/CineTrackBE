@@ -12,10 +12,10 @@ namespace CineTrackBE.AppServices
         Task<T?> GetAsync_Id(int id, CancellationToken cancellationToken = default);
         void Update(T entity);
         void Remove(T entity);
+        void RemoveRange(IEnumerable<T> entities);
         IQueryable<T> GetList();
         Task<bool> AnyExistsAsync(int id, CancellationToken cancellationToken = default);
         Task<bool> AnyExistsAsync(string id, CancellationToken cancellationToken = default);
-
         Task SaveChangesAsync(CancellationToken cancellationToken = default);
         Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
     }
@@ -54,7 +54,14 @@ namespace CineTrackBE.AppServices
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(id);
 
-            return await _context.Set<T>().FindAsync([id], cancellationToken);
+            var entity = await _context.Set<T>().FindAsync([id], cancellationToken);
+
+            if (entity == null)
+            {
+                _logger.LogWarning("Entity of type {EntityType} with ID {EntityId} not found.", typeof(T).Name, id);
+            }
+
+            return entity;
         }
 
 
@@ -89,6 +96,14 @@ namespace CineTrackBE.AppServices
         }
 
 
+        // REMOVE RANGE ENTITY //
+        public void RemoveRange(IEnumerable<T> entities)
+        {
+            ArgumentNullException.ThrowIfNull(entities);
+            if (!entities.Any()) throw new ArgumentException("The collection is empty.", nameof(entities));
+
+            _context.Set<T>().RemoveRange(entities);
+        }
 
 
         // GET LIST //
