@@ -102,7 +102,7 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
             // search by name
             if (!string.IsNullOrWhiteSpace(searchParams?.SearchText))
             {
-                films = films.Where(p => p.Name.Contains(searchParams.SearchText));
+                films = films.Where(p => p.Name.ToLower().Contains(searchParams.SearchText.ToLower()));
             }
 
             // search by release date

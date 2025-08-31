@@ -25,17 +25,17 @@ public class AuthApiController(ILogger<AuthApiController> logger, UserManager<Ap
             return BadRequest(ModelState);
         }
 
-        var user = await _userManager.FindByNameAsync(loginDto.UserName);
+        var user = await _userManager.FindByEmailAsync(loginDto.Email);
         if (user == null)
         {
-            _logger.LogWarning("Login attempt failed for non-existent user: {UserName}", loginDto.UserName);
+            _logger.LogWarning("Login attempt failed for non-existent user: {UserEmail}", loginDto.Email);
             return Unauthorized();
         }
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
         if (!result.Succeeded)
         {
-            _logger.LogWarning("Invalid password attempt for user: {UserName}", loginDto.UserName);
+            _logger.LogWarning("Invalid password attempt for user: {UserEmail}", loginDto.Email);
             return Unauthorized();
         }
 
@@ -43,7 +43,7 @@ public class AuthApiController(ILogger<AuthApiController> logger, UserManager<Ap
         var token = _jwtService.GenerateToken(user, roles);
         var userDto = new UserDto { UserName = user.UserName, Email = user.Email ?? "", Roles = roles };
 
-        _logger.LogInformation("User {UserName} logged in successfully", loginDto.UserName);
+        _logger.LogInformation("User {UserEmail} logged in successfully", loginDto.Email);
         return Ok(new AuthResponseDto { Token = token, User = userDto });
     }
 
@@ -54,21 +54,21 @@ public class AuthApiController(ILogger<AuthApiController> logger, UserManager<Ap
     {
         if (!ModelState.IsValid)
         {
-            _logger.LogWarning("Invalid registration model state");
+            _logger.LogWarning("Invalid registration model state: {ModelState}",ModelState);
             return BadRequest(ModelState);
         }
 
-        var existingUser = await _userManager.FindByNameAsync(registerData.UserName);
+        var existingUser = await _userManager.FindByEmailAsync(registerData.Email);
         if (existingUser != null)
         {
-            _logger.LogWarning("Registration attempt with existing username: {UserName}", registerData.UserName);
-            return Conflict("User with this UserName already exists");
+            _logger.LogWarning("Registration attempt with existing username: {UserEmail}", registerData.Email);
+            return Conflict("User with this Email already exists");
         }
 
         var user = new ApplicationUser
         {
-            UserName = registerData.UserName,
-            Email = registerData.UserName
+            UserName = registerData.Email,
+            Email = registerData.Email
         };
 
         var result = await _userManager.CreateAsync(user, registerData.Password);
@@ -79,7 +79,7 @@ public class AuthApiController(ILogger<AuthApiController> logger, UserManager<Ap
             return BadRequest(result.Errors);
         }
 
-        _logger.LogInformation("User {UserName} registered successfully", registerData.UserName);
+        _logger.LogInformation("User {UserEmail} registered successfully", registerData.Email);
         return CreatedAtAction(nameof(LoginAsync), new { username = user.UserName }, null);
     }
 
