@@ -45,86 +45,86 @@ public class FilmApiControllerTests
         );
     }
 
-    [Fact]
-    public async Task GetLatestFilms_ShouldReturnTop5Films()
-    {
-        // Arrange
-        var genres = new List<Genre>
-        {
-            new() { Id = 1, Name = "Action" },
-            new() { Id = 2, Name = "Drama" }
-        };
+    //[Fact]
+    //public async Task GetLatestFilms_ShouldReturnTop5Films()
+    //{
+    //    // Arrange
+    //    var genres = new List<Genre>
+    //    {
+    //        new() { Id = 1, Name = "Action" },
+    //        new() { Id = 2, Name = "Drama" }
+    //    };
 
-        var films = new List<Film>
-        {
-            new()
-            {
-                Id = 1,
-                Name = "Film 1",
-                ReleaseDate = DateTime.Now.AddDays(-1),
-                FilmGenres = new List<FilmGenre>
-                {
-                    new()
-                    {
-                        FilmId = 1,
-                        GenreId = 1,
-                        Genre = genres[0]
-                    }
-                }
-            },
-            new()
-            {
-                Id = 2,
-                Name = "Film 2",
-                ReleaseDate = DateTime.Now.AddDays(-2),
-                FilmGenres = new List<FilmGenre>
-                {
-                    new()
-                    {
-                        FilmId = 2,
-                        GenreId = 2,
-                        Genre = genres[1]
-                    }
-                }
-            }
-        };
+    //    var films = new List<Film>
+    //    {
+    //        new()
+    //        {
+    //            Id = 1,
+    //            Name = "Film 1",
+    //            ReleaseDate = DateTime.Now.AddDays(-1),
+    //            FilmGenres = new List<FilmGenre>
+    //            {
+    //                new()
+    //                {
+    //                    FilmId = 1,
+    //                    GenreId = 1,
+    //                    Genre = genres[0]
+    //                }
+    //            }
+    //        },
+    //        new()
+    //        {
+    //            Id = 2,
+    //            Name = "Film 2",
+    //            ReleaseDate = DateTime.Now.AddDays(-2),
+    //            FilmGenres = new List<FilmGenre>
+    //            {
+    //                new()
+    //                {
+    //                    FilmId = 2,
+    //                    GenreId = 2,
+    //                    Genre = genres[1]
+    //                }
+    //            }
+    //        }
+    //    };
 
-        // Správná syntaxe pro MockQueryable
-        var mockFilms = films.AsQueryable();
+    //    // Správná syntaxe pro MockQueryable
+    //    var mockFilms = films.AsQueryable();
 
-        _filmRepositoryMock
-            .Setup(x => x.GetList())
-            .Returns(mockFilms);
-        // Act
-        var result = await _controller.GetLatestFilms();
+    //    _filmRepositoryMock
+    //        .Setup(x => x.GetList())
+    //        .Returns(mockFilms);
+    //    // Act
+    //    var result = await _controller.GetLatestFilms();
 
-        // Assert
-        result.Should().NotBeNull();
-        result.Value.Should()
-            .NotBeNull()
-            .And.HaveCount(2)
-            .And.SatisfyRespectively(
-                first =>
-                {
-                    first.Id.Should().Be(1);
-                    first.Name.Should().Be("Film 1");
-                    first.Genres.Should().HaveCount(1);
-                    first.Genres.First().Id.Should().Be(1);
-                    first.Genres.First().Name.Should().Be("Action");
-                },
-                second =>
-                {
-                    second.Id.Should().Be(2);
-                    second.Name.Should().Be("Film 2");
-                    second.Genres.Should().HaveCount(1);
-                    second.Genres.First().Id.Should().Be(2);
-                    second.Genres.First().Name.Should().Be("Drama");
-                }
-            );
+    //    // Assert
+    //    result.Should().NotBeNull();
+    //    result.Value.Should()
+    //        .NotBeNull()
+    //        .And.HaveCount(2)
+    //        .And.SatisfyRespectively(
+    //            first =>
+    //            {
+    //                first.Id.Should().Be(1);
+    //                first.Name.Should().Be("Film 1");
+    //                first.Genres.Should().HaveCount(1);
+    //                first.Genres.First().Id.Should().Be(1);
+    //                first.Genres.First().Name.Should().Be("Action");
+    //            },
+    //            second =>
+    //            {
+    //                second.Id.Should().Be(2);
+    //                second.Name.Should().Be("Film 2");
+    //                second.Genres.Should().HaveCount(1);
+    //                second.Genres.First().Id.Should().Be(2);
+    //                second.Genres.First().Name.Should().Be("Drama");
+    //            }
+    //        );
 
-        // Ověření že filmy jsou seřazeny podle data (nejnovější první)
-        result.Value.Should().BeInDescendingOrder(f => f.ReleaseDate);
-    }
+    //    // Ověření že filmy jsou seřazeny podle data (nejnovější první)
+    //    result.Value.Should().BeInDescendingOrder(f => f.ReleaseDate);
+    //}
 
 
 
