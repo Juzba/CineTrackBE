@@ -1,15 +1,10 @@
 ﻿using CineTrackBE.ApiControllers;
 using CineTrackBE.AppServices;
-using CineTrackBE.Models.DTO;
 using CineTrackBE.Models.Entities;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MockQueryable.Moq;
 using Moq;
 using Xunit;
-//using Xunit;
 
 namespace CineTrackBE.Tests.Unit.Controllers;
 
