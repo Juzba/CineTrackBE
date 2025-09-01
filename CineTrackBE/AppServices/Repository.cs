@@ -49,7 +49,7 @@ namespace CineTrackBE.AppServices
         }
 
 
-        // GET ENTITY - id string //
+        // GET ASYNC ENTITY - id string //
         public async Task<T?> GetAsync_Id(string id, CancellationToken cancellationToken = default)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(id);
@@ -65,10 +65,17 @@ namespace CineTrackBE.AppServices
         }
 
 
-        // GET ENTITY - id int //
+        // GET ASYNC ENTITY - id int //
         public async Task<T?> GetAsync_Id(int id, CancellationToken cancellationToken = default)
         {
-            return await _context.Set<T>().FindAsync([id], cancellationToken);
+            var entity = await _context.Set<T>().FindAsync([id], cancellationToken);
+
+            if (entity == null)
+            {
+                _logger.LogWarning("Entity of type {EntityType} with ID {EntityId} not found.", typeof(T).Name, id);
+            }
+
+            return entity;
         }
 
 
