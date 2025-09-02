@@ -8,8 +8,8 @@ namespace CineTrackBE.AppServices
     {
         Task AddAsync(T entity, CancellationToken cancellationToken = default);
         Task AddRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default);
-        Task<T?> GetAsync_Id(string id, CancellationToken cancellationToken = default);
-        Task<T?> GetAsync_Id(int id, CancellationToken cancellationToken = default);
+        Task<T?> GetAsync(string id, CancellationToken cancellationToken = default);
+        Task<T?> GetAsync(int id, CancellationToken cancellationToken = default);
         void Update(T entity);
         void Remove(T entity);
         void RemoveRange(IEnumerable<T> entities);
@@ -44,13 +44,14 @@ namespace CineTrackBE.AppServices
         public async Task AddRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(entities);
+            if (!entities.Any()) throw new ArgumentException("The collection is empty.", nameof(entities));
 
             await _context.AddRangeAsync(entities, cancellationToken);
         }
 
 
         // GET ASYNC ENTITY - id string //
-        public async Task<T?> GetAsync_Id(string id, CancellationToken cancellationToken = default)
+        public async Task<T?> GetAsync(string id, CancellationToken cancellationToken = default)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(id);
 
@@ -66,7 +67,7 @@ namespace CineTrackBE.AppServices
 
 
         // GET ASYNC ENTITY - id int //
-        public async Task<T?> GetAsync_Id(int id, CancellationToken cancellationToken = default)
+        public async Task<T?> GetAsync(int id, CancellationToken cancellationToken = default)
         {
             var entity = await _context.Set<T>().FindAsync([id], cancellationToken);
 

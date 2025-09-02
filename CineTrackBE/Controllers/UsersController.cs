@@ -64,7 +64,7 @@ namespace CineTrackBE.Controllers
                 return NotFound();
             }
 
-            var user = await _userRepository.GetAsync_Id(id);
+            var user = await _userRepository.GetAsync(id);
 
             if (user == null)
             {
@@ -148,7 +148,7 @@ namespace CineTrackBE.Controllers
                 return NotFound();
             }
 
-            var user = await _userRepository.GetAsync_Id(id);
+            var user = await _userRepository.GetAsync(id);
 
             if (user == null)
             {
@@ -187,7 +187,7 @@ namespace CineTrackBE.Controllers
                 return View(formUser);
             }
 
-            var defaultUser = await _userRepository.GetAsync_Id(id);
+            var defaultUser = await _userRepository.GetAsync(id);
             if (defaultUser == null)
             {
                 _logger.LogWarning("User with ID {UserId} not found for editing.", id);
@@ -274,7 +274,7 @@ namespace CineTrackBE.Controllers
                 return NotFound();
             }
 
-            var user = await _userRepository.GetAsync_Id(id);
+            var user = await _userRepository.GetAsync(id);
 
             if (user == null)
             {
@@ -297,7 +297,7 @@ namespace CineTrackBE.Controllers
             }
 
 
-            var user = await _userRepository.GetAsync_Id(id);
+            var user = await _userRepository.GetAsync(id);
             if (user == null)
             {
                 _logger.LogWarning("User with ID {UserId} not found for deletion.", id);

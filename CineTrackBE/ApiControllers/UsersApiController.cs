@@ -234,7 +234,7 @@ public class UsersApiController(IRepository<IdentityRole> roleRepository, IRepos
         }
 
         // find user with id in db
-        var user = await _userRepository.GetAsync_Id(id);
+        var user = await _userRepository.GetAsync(id);
         if (user == null)
         {
             _logger.LogWarning("User with Id {UserId} not found!", id);

@@ -197,7 +197,7 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
                 return Unauthorized("User not authenticated!");
             }
 
-            var user = await _userRepository.GetAsync_Id(userId);
+            var user = await _userRepository.GetAsync(userId);
             if (user == null)
             {
                 _logger.LogWarning("User with ID {UserId} not found when accessing film ID {Id}.", userId, id);
@@ -267,7 +267,7 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
                 return Unauthorized("User not authenticated.");
             }
 
-            var user = await _userRepository.GetAsync_Id(userId);
+            var user = await _userRepository.GetAsync(userId);
             if (user == null)
             {
                 _logger.LogWarning("User with ID {UserId} not found when toggling favorite for film ID {FilmId}.", userId, filmId);
@@ -436,7 +436,7 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
                 return Unauthorized("User not found.");
             }
 
-            var user = await _userRepository.GetAsync_Id(userId);
+            var user = await _userRepository.GetAsync(userId);
             if (user == null)
             {
                 _logger.LogWarning("User with ID {UserId} not found when accessing profile data.", userId);

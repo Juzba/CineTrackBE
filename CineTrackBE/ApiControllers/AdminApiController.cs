@@ -73,7 +73,7 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
             return BadRequest("Invalid genre ID. ID must be greater than 0.");
         }
 
-        var genre = await _genreRepository.GetAsync_Id(id);
+        var genre = await _genreRepository.GetAsync(id);
         if (genre == null)
         {
             _logger.LogWarning("Genre with Id {GenreId} not exist!", id);
@@ -122,7 +122,7 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
         }
 
         // find genre with id in db
-        var genre = await _genreRepository.GetAsync_Id(id);
+        var genre = await _genreRepository.GetAsync(id);
         if (genre == null)
         {
             _logger.LogWarning("Genre with Id {GenreId} not found!", id);

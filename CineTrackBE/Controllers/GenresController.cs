@@ -27,7 +27,7 @@ namespace CineTrackBE.Controllers
                 return NotFound();
             }
 
-            var genre = await _genreRepository.GetAsync_Id(intId);
+            var genre = await _genreRepository.GetAsync(intId);
             if (genre == null)
             {
                 _logger.LogWarning("Genre with ID {GenreId} not found.", intId);
@@ -78,7 +78,7 @@ namespace CineTrackBE.Controllers
                 return NotFound();
             }
 
-            var genre = await _genreRepository.GetAsync_Id(intId);
+            var genre = await _genreRepository.GetAsync(intId);
             if (genre == null)
             {
                 _logger.LogWarning("Genre with ID {GenreId} not found for editing.", intId);
@@ -132,7 +132,7 @@ namespace CineTrackBE.Controllers
                 return NotFound();
             }
 
-            var genre = await _genreRepository.GetAsync_Id(intId);
+            var genre = await _genreRepository.GetAsync(intId);
             if (genre == null)
             {
                 _logger.LogWarning("Genre with ID {GenreId} not found for deletion.", intId);
@@ -154,7 +154,7 @@ namespace CineTrackBE.Controllers
                 return BadRequest();
             }
 
-            var genre = await _genreRepository.GetAsync_Id(id);
+            var genre = await _genreRepository.GetAsync(id);
 
             if (genre == null)
             {

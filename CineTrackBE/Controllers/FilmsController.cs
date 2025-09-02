@@ -199,7 +199,7 @@ public class FilmsController( IRepository<FilmGenre> filmGenreRepository ,ILogge
             return NotFound();
         }
 
-        var film = await _filmRepository.GetAsync_Id(intId);
+        var film = await _filmRepository.GetAsync(intId);
         if (film == null)
         { 
             _logger.LogWarning("Film not found with ID: {FilmId}", intId);
@@ -214,7 +214,7 @@ public class FilmsController( IRepository<FilmGenre> filmGenreRepository ,ILogge
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var film = await _filmRepository.GetAsync_Id(id);
+        var film = await _filmRepository.GetAsync(id);
         if (film == null)
         {
             _logger.LogWarning("Attempted to delete non-existent film with ID {FilmId}", id);
