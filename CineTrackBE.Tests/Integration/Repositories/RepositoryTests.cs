@@ -230,7 +230,41 @@ public class RepositoryTests
             .WithMessage("Attempted to update or delete an entity that does not exist in the store.");
     }
 
+    [Fact]
+    public void RemoveRange__Should_RemoveFilms_FromDb()
+    {
+        // Arrange
+        List<Film> films = 
+            [
+                new Film
+                {
+                    Name = "Film 1",
+                    Director = "Film 1 Director"
+                },
+                new Film {
+                    Name = "Film 2",
+                    Director = "Film 2 Director"
+                      },
+                new Film {
+                    Name = "Film 3",
+                    Director = "Film 3 Director"
+                }
+             ];
 
+
+        // Check
+
+
+        // Act
+
+        // Assert
+
+
+
+
+
+
+    }
 
 
 
