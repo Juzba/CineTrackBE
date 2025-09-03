@@ -1,6 +1,7 @@
 ﻿using CineTrackBE.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.Linq.Expressions;
 
 namespace CineTrackBE.AppServices
 {
@@ -10,10 +11,12 @@ namespace CineTrackBE.AppServices
         Task AddRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default);
         Task<T?> GetAsync(string id, CancellationToken cancellationToken = default);
         Task<T?> GetAsync(int id, CancellationToken cancellationToken = default);
+        Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
         void Update(T entity);
         void Remove(T entity);
         void RemoveRange(IEnumerable<T> entities);
         IQueryable<T> GetList();
+        Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<bool> AnyExistsAsync(int id, CancellationToken cancellationToken = default);
         Task<bool> AnyExistsAsync(string id, CancellationToken cancellationToken = default);
         Task SaveChangesAsync(CancellationToken cancellationToken = default);
@@ -66,6 +69,7 @@ namespace CineTrackBE.AppServices
         }
 
 
+
         // GET ASYNC ENTITY - id int //
         public async Task<T?> GetAsync(int id, CancellationToken cancellationToken = default)
         {
@@ -79,6 +83,12 @@ namespace CineTrackBE.AppServices
             return entity;
         }
 
+        // FIRST OR DEFAULT ASYNC //
+        public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(predicate);
+            return await _context.Set<T>().FirstOrDefaultAsync(predicate, cancellationToken);
+        }
 
         // UPDATE ETITY //
         public void Update(T entity)
@@ -112,6 +122,12 @@ namespace CineTrackBE.AppServices
         public IQueryable<T> GetList()
         {
             return _context.Set<T>().AsQueryable();
+        }
+
+        // GET ALL ASYNC //
+        public async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return await _context.Set<T>().ToListAsync();
         }
 
 

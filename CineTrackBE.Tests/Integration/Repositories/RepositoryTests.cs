@@ -13,7 +13,7 @@ public class RepositoryTests
     public async Task AddAsync__Should_AddFilm_ToDb()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var filmRepository = setup.FilmRepository;
 
         var film = TestDataBuilder.FilmBuilder.Create().WithRandomData().Build();
@@ -34,7 +34,7 @@ public class RepositoryTests
     public async Task AddRangeAsync__Should_AddFilmList_ToDb()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var filmRepository = setup.FilmRepository;
 
         var films = TestDataBuilder.FilmBuilder.Create().ListWithRandomData(3).BuildList();
@@ -56,7 +56,7 @@ public class RepositoryTests
     public async Task GetAsync__IntId_Should_GetFilm_FromDb()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var filmRepository = setup.FilmRepository;
 
         var film = await TestDataBuilder.FilmBuilder.Create().WithRandomData().BuildAndSaveAsync(setup.Context);
@@ -75,7 +75,7 @@ public class RepositoryTests
     public async Task GetAsync__IntId_Should_BeNull_WhenFilmDoesNotExist()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var filmRepository = setup.FilmRepository;
 
         const int nonExistedId = 999;
@@ -92,7 +92,7 @@ public class RepositoryTests
     public async Task GetAsync__StringId_Should_GetRole_FromDb()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var roleRepository = setup.RoleRepository;
 
         var role = await TestDataBuilder.RoleBuilder.Create().WithRandomData().BuildAndSaveAsync(setup.Context);
@@ -109,7 +109,7 @@ public class RepositoryTests
     public async Task GetAsync__StringId_Should_BeNull_WhenRoleDoesNotExist()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var roleRepository = setup.RoleRepository;
 
         const string nonExistedId = "Non-Existed-Id";
@@ -125,7 +125,7 @@ public class RepositoryTests
     public async Task Update__Should_UpdateFilm_InDB()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var filmRepository = setup.FilmRepository;
 
         // Create and save initial film
@@ -159,7 +159,7 @@ public class RepositoryTests
     public async Task Update__Should_ThrowException_WhenFilmDoesNotExist()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var filmRepository = setup.FilmRepository;
 
         var nonExistentFilm = TestDataBuilder.FilmBuilder.Create().WithId(999).WithRandomData().Build();
@@ -182,7 +182,7 @@ public class RepositoryTests
     public async Task Remove__Should_RemoveFilm_FromDb()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var filmRepository = setup.FilmRepository;
 
         var film = await TestDataBuilder.FilmBuilder.Create().WithRandomData().BuildAndSaveAsync(setup.Context);
@@ -204,7 +204,7 @@ public class RepositoryTests
     public async Task Remove__Should_ThrowException_WhenFilmDoesNotExist()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var filmRepository = setup.FilmRepository;
 
         var nonExistedFilm = TestDataBuilder.FilmBuilder.Create().WithId(9999).WithRandomData().Build();
@@ -224,7 +224,7 @@ public class RepositoryTests
     public async Task RemoveRange__Should_RemoveFilms_FromDb()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var filmRepository = setup.FilmRepository;
 
         var films = await TestDataBuilder.FilmBuilder.Create().ListWithRandomData(4).BuildListAndSaveAsync(setup.Context);
@@ -247,7 +247,7 @@ public class RepositoryTests
     public async Task RemoveRangeAsync__ThrowException_When_FilmsDoesNotExist_InDb()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var filmRepository = setup.FilmRepository;
 
         // Arrange
@@ -272,7 +272,7 @@ public class RepositoryTests
     public async Task GetList__Should_ReturnQueryableList()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var filmRepository = setup.FilmRepository;
 
         var films = await TestDataBuilder.FilmBuilder.Create().ListWithRandomData(3).BuildListAndSaveAsync(setup.Context);
@@ -288,7 +288,7 @@ public class RepositoryTests
     public async Task AnyExistsAsync__StringId_Should_ReturnTrue_WhenRoleExists()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var roleRepository = setup.RoleRepository;
 
         var role = new IdentityRole { Name = "User" };
@@ -307,7 +307,7 @@ public class RepositoryTests
     public async Task AnyExistsAsync__StringId_Should_ReturnFalse_WhenFilmDoesNotExists()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var roleRepository = setup.RoleRepository;
 
         const string NonExistingId = "This Id Does Not Exist";
@@ -324,7 +324,7 @@ public class RepositoryTests
     public async Task AnyExistsAsync__IntId_Should_ReturnTrue_WhenFilmExists()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var filmRepository = setup.FilmRepository;
 
         var film = new Film { Name = "Existence Test Film" };
@@ -343,7 +343,7 @@ public class RepositoryTests
     public async Task AnyExistsAsync__IntId_Should_ReturnFalse_WhenFilmDoesNotExists()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var filmRepository = setup.FilmRepository;
 
         const int NonExistingId = 99999;
@@ -359,7 +359,7 @@ public class RepositoryTests
     public async Task SaveChangesAsync__Should_ThrowException_WhenDbUpdateExceptionOccurs()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var filmRepository = setup.FilmRepository;
 
         var NonExistingFilm = new Film { Id = 999, Name = "This Film Does not Exist" };
@@ -377,7 +377,7 @@ public class RepositoryTests
     public async Task SaveChangesAsync_Should_SaveChanges_Successfully()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var filmRepository = setup.FilmRepository;
 
         var film = new Film { Name = "Test Film" };
@@ -396,7 +396,7 @@ public class RepositoryTests
     public async Task BeginTransactionAsync__Should_SuccessfulCommitData_ToDb()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var filmRepository = setup.FilmRepository;
 
         var film = TestDataBuilder.FilmBuilder.Create().WithRandomData().Build();
@@ -418,29 +418,64 @@ public class RepositoryTests
     public async Task BeginTransactionAsync__Should_RollbackData_WhenExceptionWasThrow()
     {
         // Arrange
-        using var setup = DatabaseTestHelper.CreateTestSetup();
+        using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
         var filmRepository = setup.FilmRepository;
 
         var film = TestDataBuilder.FilmBuilder.Create().WithRandomData().Build();
 
         // Act
         using var transaction = await filmRepository.BeginTransactionAsync();
-        try
-        {
-            await filmRepository.AddAsync(film);
-            await filmRepository.SaveChangesAsync();
 
-            throw new InvalidOperationException("Test exception");
-        }
-        catch (Exception)
-        {
-           await transaction.RollbackAsync();
-           
-        }
+        await FluentActions
+          .Awaiting(async () =>
+          {
+              await filmRepository.AddAsync(film);
+              await filmRepository.SaveChangesAsync();
+              throw new InvalidOperationException("Test exception");
+          })
+          .Should()
+          .ThrowAsync<InvalidOperationException>();
+
+        await transaction.RollbackAsync();
 
         // Assert
         var result = await filmRepository.GetList().ToListAsync();
         result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task GetAllAsync__Shoul_ReturnListAsync()
+    {
+        // Arange
+        using var context = DatabaseTestHelper.CreateSqlLiteContext();
+        var filmRepository = DatabaseTestHelper.CreateRepository<Film>(context);
+
+        var films = await TestDataBuilder.FilmBuilder.Create().ListWithRandomData(3).BuildListAndSaveAsync(context);
+
+        // Act
+        var result = await filmRepository.GetAllAsync();
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(films);
+    }
+
+    [Fact]
+    public async Task FirstOrDefaultAsync__Should_ReturnFirstFilm_MatchingPredicate()
+    {
+        // Arange
+        using var context = DatabaseTestHelper.CreateSqlLiteContext();
+        var filmRepository = DatabaseTestHelper.CreateRepository<Film>(context);
+
+        var films = await TestDataBuilder.FilmBuilder.Create().ListWithRandomData(3).BuildListAndSaveAsync(context);
+        var targetFilm = films[1];
+
+        // Act
+        var result = await filmRepository.FirstOrDefaultAsync(f => f.Id == targetFilm.Id);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(targetFilm);
     }
 }
 

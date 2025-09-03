@@ -1,6 +1,7 @@
 ﻿using CineTrackBE.AppServices;
 using CineTrackBE.Data;
 using CineTrackBE.Models.Entities;
+using CineTrackBE.Tests.Helpers;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -12,28 +13,16 @@ namespace CineTrackBE.Tests.Integration.Repositories
     public class Repository_NullInputTests
     {
 
-        private readonly IRepository<Film> _repository;
-        private readonly ApplicationDbContext _context;
-
-        public Repository_NullInputTests()
-        {
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-               .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-               .Options;
-
-            _context = new ApplicationDbContext(options);
-            var logger = new Mock<ILogger<Repository<Film>>>().Object;
-            _repository = new Repository<Film>(_context, logger);
-        }
-
-
         [Fact]
         public async Task AddAsync__ArgumentException_When_NullInput()
         {
+            // Arrange
+            using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
+            var filmRepository = setup.FilmRepository;
 
             // Act & Assert
             await FluentActions
-                .Invoking(async () => await _repository.AddAsync(null!))
+                .Invoking(async () => await filmRepository.AddAsync(null!))
                 .Should()
                 .ThrowAsync<ArgumentNullException>()
                 .WithMessage("Value cannot be null. (Parameter 'entity')");
@@ -42,9 +31,13 @@ namespace CineTrackBE.Tests.Integration.Repositories
         [Fact]
         public async Task AddRangeAsync__ArgumentException_When_NullInput()
         {
+            // Arrange
+            using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
+            var filmRepository = setup.FilmRepository;
 
+            // Act & Assert
             await FluentActions
-                .Invoking(async () => await _repository.AddRangeAsync(null!))
+                .Invoking(async () => await filmRepository.AddRangeAsync(null!))
                 .Should()
                 .ThrowAsync<ArgumentNullException>()
                 .WithMessage("Value cannot be null. (Parameter 'entities')");
@@ -53,8 +46,13 @@ namespace CineTrackBE.Tests.Integration.Repositories
         [Fact]
         public async Task AddRangeAsync__ThrowException_When_InputIsEmpty()
         {
+            // Arrange
+            using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
+            var filmRepository = setup.FilmRepository;
+
+            // Act & Assert
             await FluentActions
-                .Invoking(async () => await _repository
+                .Invoking(async () => await filmRepository
                 .AddRangeAsync([]))                     
                 .Should()
                 .ThrowAsync<ArgumentException>()
@@ -65,8 +63,13 @@ namespace CineTrackBE.Tests.Integration.Repositories
         [Fact]
         public async Task GetAsync_Id__ThrowException_When_NullInput()
         {
+            // Arrange
+            using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
+            var filmRepository = setup.FilmRepository;
+
+            // Act & Assert
             await FluentActions
-                .Invoking(async () => await _repository.GetAsync(null!))
+                .Invoking(async () => await filmRepository.GetAsync(null!))
                 .Should()
                 .ThrowAsync<ArgumentNullException>()
                 .WithMessage("Value cannot be null. (Parameter 'id')");
@@ -76,8 +79,13 @@ namespace CineTrackBE.Tests.Integration.Repositories
         [Fact]
         public void Update__ThrowException_When_NullInput()
         {
+            // Arrange
+            using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
+            var filmRepository = setup.FilmRepository;
+
+            // Act & Assert
             FluentActions
-                .Invoking(() => _repository.Update(null!))
+                .Invoking(() => filmRepository.Update(null!))
                 .Should()
                 .Throw<ArgumentNullException>()
                 .WithMessage("Value cannot be null. (Parameter 'entity')");
@@ -87,8 +95,13 @@ namespace CineTrackBE.Tests.Integration.Repositories
         [Fact]
         public void Remove__ThrowException_When_NullInput()
         {
+            // Arrange
+            using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
+            var filmRepository = setup.FilmRepository;
+
+            // Act & Assert
             FluentActions
-                .Invoking(() => _repository.Remove(null!))
+                .Invoking(() => filmRepository.Remove(null!))
                 .Should()
                 .Throw<ArgumentNullException>()
                 .WithMessage("Value cannot be null. (Parameter 'entity')");
@@ -98,8 +111,13 @@ namespace CineTrackBE.Tests.Integration.Repositories
         [Fact]
         public void RemoveRange__ThrowException_When_NullInput()
         {
+            // Arrange
+            using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
+            var filmRepository = setup.FilmRepository;
+
+            // Act & Assert
             FluentActions
-                .Invoking(() => _repository.RemoveRange(null!))
+                .Invoking(() => filmRepository.RemoveRange(null!))
                 .Should()
                 .Throw<ArgumentNullException>()
                 .WithMessage("Value cannot be null. (Parameter 'entities')");
@@ -109,8 +127,13 @@ namespace CineTrackBE.Tests.Integration.Repositories
         [Fact]
         public void RemoveRange__ThrowException_When_EmptyInput()
         {
+            // Arrange
+            using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
+            var filmRepository = setup.FilmRepository;
+
+            // Act & Assert
             FluentActions
-                .Invoking(() => _repository.RemoveRange([]))
+                .Invoking(() => filmRepository.RemoveRange([]))
                 .Should()
                 .Throw<ArgumentException>()
                 .WithMessage("The collection is empty. (Parameter 'entities')");
@@ -121,11 +144,37 @@ namespace CineTrackBE.Tests.Integration.Repositories
         [Fact]
         public async Task AnyExistsAsync__ThrowException_When_NullInput()
         {
+            // Arrange
+            using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
+            var filmRepository = setup.FilmRepository;
+
+            // Act & Assert
             await FluentActions
-                .Invoking(async () => await _repository.AnyExistsAsync(null!))
+                .Invoking(async () => await filmRepository.AnyExistsAsync(null!))
                 .Should()
                 .ThrowAsync<ArgumentNullException>()
                 .WithMessage("Value cannot be null. (Parameter 'id')");
         }
+
+        [Fact]
+        public async Task FirstOrDefaultAsync_Should()
+        {
+            // Arrange
+            using var setup = DatabaseTestHelper.CreateSqlLiteTestSetup();
+            var filmRepository = setup.FilmRepository;
+
+            // Act & Assert
+
+
+
+
+
+
+
+        }
+
+
+        /// Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
+
     }
 }

@@ -11,8 +11,8 @@ namespace CineTrackBE.Tests.Helpers;
 
 public static class DatabaseTestHelper
 {
-
-    public static ApplicationDbContext CreateInMemoryContext(bool enableSeeding = false)
+    // SQL LITE //
+    public static ApplicationDbContext CreateSqlLiteContext(bool enableSeeding = false)
     {
         var connection = new SqliteConnection("DataSource=:memory:");
         connection.Open();
@@ -29,14 +29,31 @@ public static class DatabaseTestHelper
         return context;
     }
 
+
+    // EF IN-MEMORY-DB //
+    public static ApplicationDbContext CreateInMemoryContext(bool enableSeeding = false)
+    {
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+              .UseInMemoryDatabase(databaseName: "TestDb")
+              .Options;
+
+        var context = new ApplicationDbContext(options, false);
+
+        return context;
+    }
+
+
+    // CREATE REPOSITORY //
     public static Repository<T> CreateRepository<T>(ApplicationDbContext context) where T : class
     {
         return new Repository<T>(context, Mock.Of<ILogger<Repository<T>>>());
     }
 
-    public static TestDatabaseSetup CreateTestSetup()
+
+    // CREATE  SQLLITE TEST SETUP //
+    public static TestDatabaseSetup CreateSqlLiteTestSetup()
     {
-        var context = CreateInMemoryContext();
+        var context = CreateSqlLiteContext();
         return new TestDatabaseSetup
         {
             Context = context,
@@ -45,6 +62,8 @@ public static class DatabaseTestHelper
         };
     }
 }
+
+
 
 public class TestDatabaseSetup : IDisposable
 {
