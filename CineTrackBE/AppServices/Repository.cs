@@ -85,13 +85,7 @@ namespace CineTrackBE.AppServices
         {
             ArgumentNullException.ThrowIfNull(entity);
 
-            var entry = _context.Entry(entity);
-
-            if (entry.State == EntityState.Detached)
-            {
-                _context.Attach(entity);
-            }
-            _context.Entry(entity).State = EntityState.Modified;
+            _context.Set<T>().Update(entity);
         }
 
 

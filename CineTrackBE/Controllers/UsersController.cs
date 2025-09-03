@@ -246,7 +246,6 @@ namespace CineTrackBE.Controllers
 
                 await _userRepository.SaveChangesAsync();
 
-                _userRepository.Update(completedUser);
                 await _userRepository.SaveChangesAsync();
                 await transaction.CommitAsync();
 

@@ -289,7 +289,6 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
                 isFavorite = true;
             }
 
-            _userRepository.Update(user);
             await _userRepository.SaveChangesAsync();
             return Ok(isFavorite);
         }

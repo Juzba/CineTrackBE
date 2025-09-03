@@ -142,7 +142,6 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
 
         try
         {
-            _genreRepository.Update(genre);
             await _genreRepository.SaveChangesAsync();
 
             _logger.LogInformation("Genre '{GenreName}' successfully updated!", genre.Name);

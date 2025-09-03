@@ -7,7 +7,7 @@ namespace CineTrackBE.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
     {
-
+        private readonly bool _enableSeeding;
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Film> Films { get; set; }
         public DbSet<FilmGenre> FilmGenres { get; set; }
@@ -16,17 +16,21 @@ namespace CineTrackBE.Data
 
 
 
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, bool enableSeeding = true)
             : base(options)
         {
+            _enableSeeding = enableSeeding;
         }
 
 
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            // Seed initial data //
-            SeedData.Seed(builder);
+            if (_enableSeeding)
+            {
+                // Seed initial data //
+                SeedData.Seed(builder);
+            }
 
 
             builder.Entity<Comment>()
