@@ -4,8 +4,6 @@ using CineTrackBE.Models.Entities;
 namespace CineTrackBE.Tests.Helpers.TestDataBuilders;
 
 // FILM BUILDER
-// FILM LIST BUILDER
-
 public class FilmBuilder
 {
     private Film _film = new();

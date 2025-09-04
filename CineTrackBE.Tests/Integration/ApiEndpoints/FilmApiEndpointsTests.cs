@@ -123,17 +123,17 @@ public class FilmApiEndpointsTests
         .Including(p => p.ReleaseDate));
     }
 
-    [Fact]
-    public async Task GetAllGenres__Should_Return_OkResult()
-    {
-        // Arrange
-        using var setup = FilmApiControllerTestSetup.Create();
-        var genres = 
+    //[Fact]
+    //public async Task GetAllGenres__Should_Return_OkResult()
+    //{
+    //    // Arrange
+    //    using var setup = FilmApiControllerTestSetup.Create();
+    //    var genres = 
 
-        // Act
+    //    // Act
 
-        // Assert
-    }
+    //    // Assert
+    //}
 
 
 
