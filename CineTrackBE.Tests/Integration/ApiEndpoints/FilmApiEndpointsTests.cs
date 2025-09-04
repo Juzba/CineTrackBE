@@ -30,6 +30,21 @@ public class FilmApiEndpointsTests
     }
 
     [Fact]
+    public async Task GetLatestFilms__Should_Return_EmptyList()
+    {
+        // Arrange 
+        using var setup = FilmApiControllerTestSetup.Create();
+
+        // Act
+        var result = await setup.Controller.GetLatestFilms();
+
+        // Assert
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var returnedFilms = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject;
+        returnedFilms.Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task GetLatestFilms__Should_Return_Exactly_5_Films()
     {
         // Arrange 
@@ -108,7 +123,17 @@ public class FilmApiEndpointsTests
         .Including(p => p.ReleaseDate));
     }
 
+    [Fact]
+    public async Task GetAllGenres__Should_Return_OkResult()
+    {
+        // Arrange
+        using var setup = FilmApiControllerTestSetup.Create();
+        var genres = 
 
+        // Act
+
+        // Assert
+    }
 
 
 

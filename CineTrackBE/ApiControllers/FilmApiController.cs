@@ -47,6 +47,12 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
                 Genres = [.. p.FilmGenres.Select(g => new GenreDto { Id = g.Genre.Id, Name = g.Genre.Name })]
             });
 
+            if (!filmsDTO.Any())
+            {
+                _logger.LogWarning("No films found in the database.");
+                return Ok(filmsDTO);
+            }
+
             _logger.LogInformation("Fetched latest films: {FilmsDTO}", filmsDTO);
             return Ok(filmsDTO);
 
@@ -64,8 +70,8 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
     {
         try
         {
-            var genres = await _genreRepository.GetList().ToListAsync();
-            if (genres.Count == 0)
+            var genres = await _genreRepository.GetAllAsync();
+            if (!genres.Any())
             {
                 _logger.LogWarning("No genres found in the database.");
                 return NotFound("No genres found.");
