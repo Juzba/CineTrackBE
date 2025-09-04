@@ -13,7 +13,7 @@ namespace CineTrackBE.ApiControllers;
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 [ApiController]
 
-public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Film> filmRepository, IRepository<Rating> ratingRepository, IRepository<Comment> CommentRepository, IRepository<ApplicationUser> userRepository, IRepository<Genre> genreRepository, IDataService dataService) : ControllerBase
+public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Film> filmRepository, IRepository<Rating> ratingRepository, IRepository<Comment> CommentRepository, IRepository<ApplicationUser> userRepository, IRepository<Genre> genreRepository) : ControllerBase
 {
     private readonly ILogger<FilmApiController> _logger = logger;
     private readonly IRepository<Film> _filmRepository = filmRepository;
@@ -21,7 +21,6 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
     private readonly IRepository<ApplicationUser> _userRepository = userRepository;
     private readonly IRepository<Comment> _commentRepository = CommentRepository;
     private readonly IRepository<Rating> _ratingRepository = ratingRepository;
-    private readonly IDataService _dataService = dataService;
 
 
     // Top 5 Latest Films //

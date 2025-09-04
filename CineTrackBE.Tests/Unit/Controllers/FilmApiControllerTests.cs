@@ -10,35 +10,35 @@ namespace CineTrackBE.Tests.Unit.Controllers;
 
 public class FilmApiControllerTests
 {
-    private readonly Mock<ILogger<FilmApiController>> _loggerMock;
-    private readonly Mock<IRepository<Film>> _filmRepositoryMock;
-    private readonly Mock<IRepository<Rating>> _ratingRepositoryMock;
-    private readonly Mock<IRepository<Comment>> _commentRepositoryMock;
-    private readonly Mock<IRepository<ApplicationUser>> _userRepositoryMock;
-    private readonly Mock<IRepository<Genre>> _genreRepositoryMock;
-    private readonly Mock<IDataService> _dataServiceMock;
-    private readonly FilmApiController _controller;
+    //private readonly Mock<ILogger<FilmApiController>> _loggerMock;
+    //private readonly Mock<IRepository<Film>> _filmRepositoryMock;
+    //private readonly Mock<IRepository<Rating>> _ratingRepositoryMock;
+    //private readonly Mock<IRepository<Comment>> _commentRepositoryMock;
+    //private readonly Mock<IRepository<ApplicationUser>> _userRepositoryMock;
+    //private readonly Mock<IRepository<Genre>> _genreRepositoryMock;
+    //private readonly Mock<IDataService> _dataServiceMock;
+    //private readonly FilmApiController _controller;
 
-    public FilmApiControllerTests()
-    {
-        _loggerMock = new Mock<ILogger<FilmApiController>>();
-        _filmRepositoryMock = new Mock<IRepository<Film>>();
-        _ratingRepositoryMock = new Mock<IRepository<Rating>>();
-        _commentRepositoryMock = new Mock<IRepository<Comment>>();
-        _userRepositoryMock = new Mock<IRepository<ApplicationUser>>();
-        _genreRepositoryMock = new Mock<IRepository<Genre>>();
-        _dataServiceMock = new Mock<IDataService>();
+    //public FilmApiControllerTests()
+    //{
+    //    _loggerMock = new Mock<ILogger<FilmApiController>>();
+    //    _filmRepositoryMock = new Mock<IRepository<Film>>();
+    //    _ratingRepositoryMock = new Mock<IRepository<Rating>>();
+    //    _commentRepositoryMock = new Mock<IRepository<Comment>>();
+    //    _userRepositoryMock = new Mock<IRepository<ApplicationUser>>();
+    //    _genreRepositoryMock = new Mock<IRepository<Genre>>();
+    //    _dataServiceMock = new Mock<IDataService>();
 
-        _controller = new FilmApiController(
-            _loggerMock.Object,
-            _filmRepositoryMock.Object,
-            _ratingRepositoryMock.Object,
-            _commentRepositoryMock.Object,
-            _userRepositoryMock.Object,
-            _genreRepositoryMock.Object,
-            _dataServiceMock.Object
-        );
-    }
+    //    _controller = new FilmApiController(
+    //        _loggerMock.Object,
+    //        _filmRepositoryMock.Object,
+    //        _ratingRepositoryMock.Object,
+    //        _commentRepositoryMock.Object,
+    //        _userRepositoryMock.Object,
+    //        _genreRepositoryMock.Object,
+    //        _dataServiceMock.Object
+    //    );
+    //}
 
     //[Fact]
     //public async Task GetLatestFilms_ShouldReturnTop5Films()

@@ -48,35 +48,6 @@ public static class DatabaseTestHelper
     {
         return new Repository<T>(context, Mock.Of<ILogger<Repository<T>>>());
     }
-
-
-    // CREATE  SQLLITE TEST SETUP //
-    public static TestDatabaseSetup CreateSqlLiteTestSetup()
-    {
-        var context = CreateSqlLiteContext();
-        return new TestDatabaseSetup
-        {
-            Context = context,
-            FilmRepository = CreateRepository<Film>(context),
-            RoleRepository = CreateRepository<IdentityRole>(context)
-        };
-    }
-}
-
-
-
-public class TestDatabaseSetup : IDisposable
-{
-#nullable disable
-
-    public ApplicationDbContext Context { get; init; }
-    public Repository<Film> FilmRepository { get; init; }
-    public Repository<IdentityRole> RoleRepository { get; init; }
-
-    public void Dispose()
-    {
-        Context?.Dispose();
-    }
 }
 
 
