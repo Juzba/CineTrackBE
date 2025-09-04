@@ -13,21 +13,21 @@ public class FilmApiControllerTestSetup : IDisposable
     public Mock<ILogger<FilmApiController>> LoggerMock { get; }
 
 
-    public Repository<Film> FilmRepository { get; }
-    public Repository<Rating> RatingRepository { get; }
-    public Repository<Comment> CommentRepository { get; }
-    public Repository<ApplicationUser> UserRepository { get; }
-    public Repository<Genre> GenreRepository { get; }
+    public IRepository<Film> FilmRepository { get; set; }
+    public IRepository<Rating> RatingRepository { get; }
+    public IRepository<Comment> CommentRepository { get; }
+    public IRepository<ApplicationUser> UserRepository { get; }
+    public IRepository<Genre> GenreRepository { get; }
 
     private FilmApiControllerTestSetup(
         ApplicationDbContext context,
         FilmApiController controller,
         Mock<ILogger<FilmApiController>> loggerMock,
-        Repository<Film> filmRepository,
-        Repository<Rating> ratingRepository,
-        Repository<Comment> commentRepository,
-        Repository<ApplicationUser> userRepository,
-        Repository<Genre> genreRepository)
+        IRepository<Film> filmRepository,
+        IRepository<Rating> ratingRepository,
+        IRepository<Comment> commentRepository,
+        IRepository<ApplicationUser> userRepository,
+        IRepository<Genre> genreRepository)
     {
         Context = context;
         Controller = controller;
@@ -39,16 +39,17 @@ public class FilmApiControllerTestSetup : IDisposable
         GenreRepository = genreRepository;
     }
 
-    public static FilmApiControllerTestSetup Create()
+    public static FilmApiControllerTestSetup Create(ApplicationDbContext? context = null, IRepository<Genre>? genreRepository = null, IRepository<Film>? filmRepository = null)
     {
-        var context = DatabaseTestHelper.CreateSqlLiteContext();
+
+        context ??= DatabaseTestHelper.CreateSqlLiteContext();
         var loggerMock = new Mock<ILogger<FilmApiController>>();
 
-        var filmRepository = DatabaseTestHelper.CreateRepository<Film>(context);
+        filmRepository ??= DatabaseTestHelper.CreateRepository<Film>(context);
         var ratingRepository = DatabaseTestHelper.CreateRepository<Rating>(context);
         var commentRepository = DatabaseTestHelper.CreateRepository<Comment>(context);
         var userRepository = DatabaseTestHelper.CreateRepository<ApplicationUser>(context);
-        var genreRepository = DatabaseTestHelper.CreateRepository<Genre>(context);
+        genreRepository ??= DatabaseTestHelper.CreateRepository<Genre>(context);
 
         var controller = new FilmApiController(
             loggerMock.Object,
@@ -70,6 +71,7 @@ public class FilmApiControllerTestSetup : IDisposable
             genreRepository
         );
     }
+
 
     public void Dispose()
     {

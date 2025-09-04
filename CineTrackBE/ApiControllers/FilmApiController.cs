@@ -74,7 +74,7 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
             if (!genres.Any())
             {
                 _logger.LogWarning("No genres found in the database.");
-                return NotFound("No genres found.");
+                return Ok(Enumerable.Empty<GenreDto>());
             }
 
             var genresDto = genres.Select(p => new GenreDto()
