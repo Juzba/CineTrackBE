@@ -1,5 +1,6 @@
-﻿using CineTrackBE.Models.DTO;
-using CineTrackBE.Tests.Helpers.TestDataBuilders;
+﻿using Bogus;
+using CineTrackBE.Models.DTO;
+using CineTrackBE.Tests.Helpers.Common;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
@@ -15,11 +16,7 @@ public class FilmApiEndpointsTests
         // Arrange 
         using var setup = FilmApiControllerTestSetup.Create();
 
-        var films = await FilmListBuilder
-            .Create(1)
-            .WithRandomData()
-            .IncludeGenre()
-            .BuildAndSaveAsync(setup.Context);
+        var films = await Fakers.Film.GenerateAndSaveAsync(1, setup.Context);
 
         // Act
         var result = await setup.Controller.GetLatestFilms();
@@ -50,11 +47,7 @@ public class FilmApiEndpointsTests
         // Arrange 
         using var setup = FilmApiControllerTestSetup.Create();
 
-        var films = await FilmListBuilder
-            .Create(6)
-            .WithRandomData()
-            .IncludeGenre()
-            .BuildAndSaveAsync(setup.Context);
+        var films = await Fakers.Film.GenerateAndSaveAsync(6, setup.Context);
 
         // Act
         var result = await setup.Controller.GetLatestFilms();
@@ -73,11 +66,7 @@ public class FilmApiEndpointsTests
         // Arrange 
         using var setup = FilmApiControllerTestSetup.Create();
 
-        var films = await FilmListBuilder
-            .Create(6)
-            .WithRandomData()
-            .IncludeGenre()
-            .BuildAndSaveAsync(setup.Context);
+        var films = await Fakers.FilmIncGenre.GenerateAndSaveAsync(3, setup.Context);
 
         var expectedGenreName = films.OrderByDescending(p => p.ReleaseDate).FirstOrDefault()?.FilmGenres.FirstOrDefault()?.Genre.Name;
         expectedGenreName.Should().NotBeNullOrEmpty("Test setup should create films with genres");
@@ -101,11 +90,7 @@ public class FilmApiEndpointsTests
         // Arrange 
         using var setup = FilmApiControllerTestSetup.Create();
 
-        var films = await FilmListBuilder
-            .Create(6)
-            .WithRandomData()
-            .IncludeGenre()
-            .BuildAndSaveAsync(setup.Context);
+        var films = await Fakers.Film.GenerateAndSaveAsync(5, setup.Context);
 
         var expectedFilms = films.OrderByDescending(p => p.ReleaseDate).Take(5).ToList();
 

@@ -1,5 +1,5 @@
 ﻿using CineTrackBE.Models.Entities;
-using CineTrackBE.Tests.Helpers.TestDataBuilders;
+using CineTrackBE.Tests.Helpers.Common;
 using CineTrackBE.Tests.Helpers.TestSetups;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
@@ -17,7 +17,7 @@ public class RepositoryTests
         using var setup = RepositoryTestSetup.Create();
         var filmRepository = setup.FilmRepository;
 
-        var film = FilmBuilder.Create().WithRandomData().Build();
+        var film = Fakers.Film.Generate();
 
         // Act
         await filmRepository.AddAsync(film);
@@ -38,7 +38,7 @@ public class RepositoryTests
         using var setup = RepositoryTestSetup.Create();
         var filmRepository = setup.FilmRepository;
 
-        var films = FilmListBuilder.Create(3).WithRandomData().Build();
+        var films = Fakers.Film.Generate(3);
 
         // Act
         await filmRepository.AddRangeAsync(films);
@@ -60,13 +60,12 @@ public class RepositoryTests
         using var setup = RepositoryTestSetup.Create();
         var filmRepository = setup.FilmRepository;
 
-        var film = await FilmBuilder.Create().WithRandomData().BuildAndSaveAsync(setup.Context);
+        var film = await Fakers.Film.GenerateOneAndSaveAsync(setup.Context);
 
         // Act
         var result = await filmRepository.GetAsync(film.Id);
 
         // Assert
-
         result.Should().NotBeNull();
         result.Should().BeEquivalentTo(film);
     }
@@ -96,7 +95,7 @@ public class RepositoryTests
         using var setup = RepositoryTestSetup.Create();
         var roleRepository = setup.RoleRepository;
 
-        var role = await RoleBuilder.Create().WithRandomData().BuildAndSaveAsync(setup.Context);
+        var role = await Fakers.Role.GenerateOneAndSaveAsync(setup.Context);
 
         // Act
         var result = await roleRepository.GetAsync(role.Id);
@@ -129,12 +128,11 @@ public class RepositoryTests
         using var setup = RepositoryTestSetup.Create();
         var filmRepository = setup.FilmRepository;
 
-        // Create and save initial film
-        var originalFilm = await FilmBuilder.Create()
-            .WithName("Test Before Update")
-            .WithDirector("Test Director")
-            .BuildAndSaveAsync(setup.Context);
+        var originalFilm = new Film { Name = "Test Before Update", Director = "Test Director" };
+        await filmRepository.AddAsync(originalFilm);
+        await filmRepository.SaveChangesAsync();
 
+        // clear ef
         setup.Context.ChangeTracker.Clear();
 
         var updatedFilm = new Film
@@ -163,7 +161,8 @@ public class RepositoryTests
         using var setup = RepositoryTestSetup.Create();
         var filmRepository = setup.FilmRepository;
 
-        var nonExistentFilm = FilmBuilder.Create().WithId(999).WithRandomData().Build();
+        var nonExistentFilm = Fakers.Film.Generate();
+        nonExistentFilm.Id = 999;
 
         // Pre-condition check
         var exists = await filmRepository.AnyExistsAsync(nonExistentFilm.Id);
@@ -186,7 +185,7 @@ public class RepositoryTests
         using var setup = RepositoryTestSetup.Create();
         var filmRepository = setup.FilmRepository;
 
-        var film = await FilmBuilder.Create().WithRandomData().BuildAndSaveAsync(setup.Context);
+        var film = await Fakers.Film.GenerateOneAndSaveAsync(setup.Context);
 
         // Check
         var exist = await filmRepository.GetAsync(film.Id);
@@ -208,7 +207,8 @@ public class RepositoryTests
         using var setup = RepositoryTestSetup.Create();
         var filmRepository = setup.FilmRepository;
 
-        var nonExistedFilm = FilmBuilder.Create().WithId(9999).WithRandomData().Build();
+        var nonExistedFilm = Fakers.Film.Generate();
+        nonExistedFilm.Id = 999;
 
         // Act
         filmRepository.Remove(nonExistedFilm);
@@ -228,8 +228,7 @@ public class RepositoryTests
         using var setup = RepositoryTestSetup.Create();
         var filmRepository = setup.FilmRepository;
 
-        var films = await FilmListBuilder.Create(4).WithRandomData().BuildAndSaveAsync(setup.Context);
-
+        var films = await Fakers.Film.GenerateAndSaveAsync(4, setup.Context);
 
         // Check
         var check = await filmRepository.GetList().ToListAsync();
@@ -252,11 +251,9 @@ public class RepositoryTests
         var filmRepository = setup.FilmRepository;
 
         // Arrange
-        List<Film> NonExistedFilms =
-            [
-                new Film { Id = 98, Name = "NonExistingFilm1" },
-                new Film { Id = 99, Name = "NonExistedFilm2" }
-            ];
+        int id = 998;
+
+        var NonExistedFilms = Fakers.Film.RuleFor(p => p.Id, id++).Generate(2);
 
         // Act
         filmRepository.RemoveRange(NonExistedFilms);
@@ -276,7 +273,7 @@ public class RepositoryTests
         using var setup = RepositoryTestSetup.Create();
         var filmRepository = setup.FilmRepository;
 
-        var films = await FilmListBuilder.Create(3).WithRandomData().BuildAndSaveAsync(setup.Context);
+        var films = await Fakers.Film.GenerateAndSaveAsync(3, setup.Context);
 
         // Act & Assert
         var result = filmRepository.GetList();
@@ -292,10 +289,7 @@ public class RepositoryTests
         using var setup = RepositoryTestSetup.Create();
         var roleRepository = setup.RoleRepository;
 
-        var role = new IdentityRole { Name = "User" };
-
-        await roleRepository.AddAsync(role);
-        await roleRepository.SaveChangesAsync();
+        var role = await Fakers.Role.GenerateOneAndSaveAsync(setup.Context);
 
         // Act
         var result = await roleRepository.AnyExistsAsync(role.Id);
@@ -328,10 +322,7 @@ public class RepositoryTests
         using var setup = RepositoryTestSetup.Create();
         var filmRepository = setup.FilmRepository;
 
-        var film = new Film { Name = "Existence Test Film" };
-
-        await filmRepository.AddAsync(film);
-        await filmRepository.SaveChangesAsync();
+        var film = await Fakers.Film.GenerateOneAndSaveAsync(setup.Context);
 
         // Act
         var result = await filmRepository.AnyExistsAsync(film.Id);
@@ -400,7 +391,7 @@ public class RepositoryTests
         using var setup = RepositoryTestSetup.Create();
         var filmRepository = setup.FilmRepository;
 
-        var film = FilmBuilder.Create().WithRandomData().Build();
+        var film = Fakers.Film.Generate();
 
         // Act
         using var transaction = await filmRepository.BeginTransactionAsync();
@@ -422,7 +413,7 @@ public class RepositoryTests
         using var setup = RepositoryTestSetup.Create();
         var filmRepository = setup.FilmRepository;
 
-        var film = FilmBuilder.Create().WithRandomData().Build();
+        var film = Fakers.Film.Generate();
 
         // Act
         using var transaction = await filmRepository.BeginTransactionAsync();
@@ -451,7 +442,7 @@ public class RepositoryTests
         using var setup = RepositoryTestSetup.Create();
         var filmRepository = setup.FilmRepository;
 
-        var films = await FilmListBuilder.Create(3).WithRandomData().BuildAndSaveAsync(setup.Context);
+        var films = await Fakers.Film.GenerateAndSaveAsync(3, setup.Context);
 
         // Act
         var result = await filmRepository.GetAllAsync();
@@ -468,7 +459,7 @@ public class RepositoryTests
         using var setup = RepositoryTestSetup.Create();
         var filmRepository = setup.FilmRepository;
 
-        var films = await FilmListBuilder.Create(3).WithRandomData().BuildAndSaveAsync(setup.Context);
+        var films = await Fakers.Film.GenerateAndSaveAsync(3, setup.Context);
         var targetFilm = films[1];
 
         // Act
