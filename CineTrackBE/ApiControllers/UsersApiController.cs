@@ -280,7 +280,7 @@ public class UsersApiController(IRepository<IdentityRole> roleRepository, IRepos
             var newUserRoles = Roles.Select(r => new IdentityUserRole<string>
             {
                 UserId = user.Id,
-                RoleId = r.Id
+                RoleId = r?.Id!
             }).ToList();
 
             await _userRoleRepository.AddRangeAsync(newUserRoles);

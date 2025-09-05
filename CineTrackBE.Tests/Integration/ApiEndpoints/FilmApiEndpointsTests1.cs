@@ -9,7 +9,7 @@ using Xunit;
 
 namespace CineTrackBE.Tests.Integration.ApiEndpoints;
 
-public class FilmApiEndpointsTests
+public class FilmApiEndpointsTests1
 {
 
     [Fact]
@@ -379,7 +379,7 @@ public class FilmApiEndpointsTests
         // Arrange
         using var setup = FilmApiControllerTestSetup.Create();
 
-        var films = await Fakers.Film.GenerateAndSaveAsync(5, setup.Context);
+        var films = await Fakers.Film.GenerateAndSaveAsync(6, setup.Context);
         var expectedFilms = films.OrderByDescending(p => p.Name).ToList();
 
         // Act
@@ -400,15 +400,111 @@ public class FilmApiEndpointsTests
         returned.Should().BeEquivalentTo(expected, options => options.WithStrictOrdering());
     }
 
+    [Fact]
+    public async Task CatalogPost__Should_ReturnFilms_OrderedBy_NameAscending()
+    {
+        // Arrange
+        using var setup = FilmApiControllerTestSetup.Create();
 
-    // NameAsc
-    // YearDesc
-    // YearAsc
-    // no search param OrderByDescending(p => p.Id)
-    // zkontrolovat jestli se vytvari nova instance fakera pro kazdy test
+        var films = await Fakers.Film.GenerateAndSaveAsync(6, setup.Context);
+        var expectedFilms = films.OrderBy(p => p.Name).ToList();
+
+        // Act
+        var result = await setup.Controller.CatalogPost(new SearchParametrsDto { SearchOrder = "NameAsc" });
+
+        // Assert
+        result.Should().NotBeNull();
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var returnedFilms = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject.ToList();
+
+        /// Compare Objects Film and FilmDto
+        var expected = expectedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
+        var returned = returnedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
+
+        returned.Should().NotBeEmpty();
+        returned.Should().HaveSameCount(returned);
+        returned.Should().BeInAscendingOrder(f => f.Name);
+        returned.Should().BeEquivalentTo(expected, options => options.WithStrictOrdering());
+    }
+
+    [Fact]
+    public async Task CatalogPost__Should_ReturnFilms_OrderedBy_YearDescending()
+    {
+        // Arrange
+        using var setup = FilmApiControllerTestSetup.Create();
+
+        var films = await Fakers.Film.GenerateAndSaveAsync(6, setup.Context);
+        var expectedFilms = films.OrderByDescending(p => p.ReleaseDate).ToList();
+
+        // Act
+        var result = await setup.Controller.CatalogPost(new SearchParametrsDto { SearchOrder = "YearDesc" });
+
+        // Assert
+        result.Should().NotBeNull();
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var returnedFilms = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject.ToList();
+
+        /// Compare Objects Film and FilmDto
+        var expected = expectedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
+        var returned = returnedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
+
+        returned.Should().NotBeEmpty();
+        returned.Should().HaveSameCount(returned);
+        returned.Should().BeInDescendingOrder(f => f.Date);
+        returned.Should().BeEquivalentTo(expected, options => options.WithStrictOrdering());
+    }
+
+    [Fact]
+    public async Task CatalogPost__Should_ReturnFilms_OrderedBy_YearAscending()
+    {
+        // Arrange
+        using var setup = FilmApiControllerTestSetup.Create();
+
+        var films = await Fakers.Film.GenerateAndSaveAsync(6, setup.Context);
+        var expectedFilms = films.OrderBy(p => p.ReleaseDate).ToList();
+
+        // Act
+        var result = await setup.Controller.CatalogPost(new SearchParametrsDto { SearchOrder = "YearAsc" });
+
+        // Assert
+        result.Should().NotBeNull();
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var returnedFilms = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject.ToList();
+
+        /// Compare Objects Film and FilmDto
+        var expected = expectedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
+        var returned = returnedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
+
+        returned.Should().NotBeEmpty();
+        returned.Should().HaveSameCount(returned);
+        returned.Should().BeInAscendingOrder(f => f.Date);
+        returned.Should().BeEquivalentTo(expected, options => options.WithStrictOrdering());
+    }
 
 
+    [Fact]
+    public async Task CatalogPost__Should_ReturnFilms_OrderedByDescendingId_When_NoSearchingParametr()
+    {
+        // Arrange
+        using var setup = FilmApiControllerTestSetup.Create();
 
+        var films = await Fakers.Film.GenerateAndSaveAsync(6, setup.Context);
+        var expectedFilms = films.OrderByDescending(p => p.Id).ToList();
 
+        // Act
+        var result = await setup.Controller.CatalogPost(null!); // No searching parametr
 
+        // Assert
+        result.Should().NotBeNull();
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var returnedFilms = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject.ToList();
+
+        /// Compare Objects Film and FilmDto
+        var expected = expectedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
+        var returned = returnedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
+
+        returned.Should().NotBeEmpty();
+        returned.Should().HaveSameCount(returned);
+        returned.Should().BeEquivalentTo(expected, options => options.WithStrictOrdering());
+    }
 }

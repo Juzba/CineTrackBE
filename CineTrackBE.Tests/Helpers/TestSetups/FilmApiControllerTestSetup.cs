@@ -3,8 +3,7 @@ using CineTrackBE.AppServices;
 using CineTrackBE.Data;
 using CineTrackBE.Models.Entities;
 using CineTrackBE.Tests.Helpers;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -12,10 +11,11 @@ public class FilmApiControllerTestSetup : IDisposable
 {
     public ApplicationDbContext Context { get; }
     public FilmApiController Controller { get; }
+    public DefaultHttpContext _httpContext { get; }
+
+
     public Mock<ILogger<FilmApiController>> LoggerMock { get; }
-
-
-    public IRepository<Film> FilmRepository { get; set; }
+    public IRepository<Film> FilmRepository { get; }
     public IRepository<Rating> RatingRepository { get; }
     public IRepository<Comment> CommentRepository { get; }
     public IRepository<ApplicationUser> UserRepository { get; }
@@ -29,7 +29,8 @@ public class FilmApiControllerTestSetup : IDisposable
         IRepository<Rating> ratingRepository,
         IRepository<Comment> commentRepository,
         IRepository<ApplicationUser> userRepository,
-        IRepository<Genre> genreRepository)
+        IRepository<Genre> genreRepository,
+        DefaultHttpContext httpContext)
     {
         Context = context;
         Controller = controller;
@@ -39,9 +40,16 @@ public class FilmApiControllerTestSetup : IDisposable
         CommentRepository = commentRepository;
         UserRepository = userRepository;
         GenreRepository = genreRepository;
+        _httpContext = httpContext;
     }
 
-    public static FilmApiControllerTestSetup Create(ApplicationDbContext? context = null, IRepository<Genre>? genreRepository = null, IRepository<Film>? filmRepository = null)
+    public static FilmApiControllerTestSetup Create
+        (
+        ApplicationDbContext? context = null,
+        IRepository<Genre>? genreRepository = null,
+        IRepository<Film>? filmRepository = null,
+        string? userId = null,
+        string? userName = null)
     {
         context ??= DatabaseTestHelper.CreateSqlLiteContext();
 
@@ -53,6 +61,7 @@ public class FilmApiControllerTestSetup : IDisposable
         var userRepository = DatabaseTestHelper.CreateRepository<ApplicationUser>(context);
         genreRepository ??= DatabaseTestHelper.CreateRepository<Genre>(context);
 
+
         var controller = new FilmApiController(
             loggerMock.Object,
             filmRepository,
@@ -61,6 +70,8 @@ public class FilmApiControllerTestSetup : IDisposable
             userRepository,
             genreRepository
         );
+        var (httpContext, _) = DatabaseTestHelper.CreateHttpContext(userId, userName);
+        DatabaseTestHelper.SetupControllerContext(controller, httpContext);
 
         return new FilmApiControllerTestSetup(
             context,
@@ -70,7 +81,8 @@ public class FilmApiControllerTestSetup : IDisposable
             ratingRepository,
             commentRepository,
             userRepository,
-            genreRepository
+            genreRepository,
+            httpContext
         );
     }
 
