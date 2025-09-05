@@ -1,4 +1,5 @@
 ﻿using CineTrackBE.Models.Entities;
+using CineTrackBE.Tests.Helpers;
 using CineTrackBE.Tests.Helpers.Common;
 using CineTrackBE.Tests.Helpers.TestSetups;
 using FluentAssertions;

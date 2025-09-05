@@ -3,6 +3,8 @@ using CineTrackBE.AppServices;
 using CineTrackBE.Data;
 using CineTrackBE.Models.Entities;
 using CineTrackBE.Tests.Helpers;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -41,8 +43,8 @@ public class FilmApiControllerTestSetup : IDisposable
 
     public static FilmApiControllerTestSetup Create(ApplicationDbContext? context = null, IRepository<Genre>? genreRepository = null, IRepository<Film>? filmRepository = null)
     {
-
         context ??= DatabaseTestHelper.CreateSqlLiteContext();
+
         var loggerMock = new Mock<ILogger<FilmApiController>>();
 
         filmRepository ??= DatabaseTestHelper.CreateRepository<Film>(context);
@@ -77,4 +79,5 @@ public class FilmApiControllerTestSetup : IDisposable
     {
         Context?.Dispose();
     }
+
 }

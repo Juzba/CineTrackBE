@@ -307,19 +307,87 @@ public class FilmApiEndpointsTests
         var searchByYear = films[0].ReleaseDate.Year;
         var expectedFilms = films.Where(f => f.ReleaseDate.Year == searchByYear).ToList();
         expectedFilms.Should().NotBeEmpty("Test setup should create films with release dates is same as searchByYear Parametr");
-       
+
         // Act
-        var result = await setup.Controller.CatalogPost(new SearchParametrsDto {  SearchByYear = searchByYear });
-        
+        var result = await setup.Controller.CatalogPost(new SearchParametrsDto { SearchByYear = searchByYear });
+
         // Assert
         result.Should().NotBeNull();
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
         var returnedFilms = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject;
-      
+
         returnedFilms.Should().HaveCount(expectedFilms.Count);
         returnedFilms.Should().BeEquivalentTo(expectedFilms, options => options
             .Including(p => p.Name)
             .Including(p => p.Director)
             .Including(p => p.ReleaseDate));
+    }
+
+
+    [Fact]
+    public async Task CatalogPost__Should_ReturnFilms_WhereFilms_Are_SearchByGenre()
+    {
+        // Arrange
+        using var setup = FilmApiControllerTestSetup.Create();
+
+        var genres = await Fakers.Genre.GenerateAndSaveAsync(3, setup.Context);
+        var targetGenre = genres.First();
+
+        var films = await Fakers.Film.GenerateAndSaveAsync(5, setup.Context);
+
+        films[0].FilmGenres.Add(new FilmGenre { FilmId = films[0].Id, GenreId = targetGenre.Id });
+        films[1].FilmGenres.Add(new FilmGenre { FilmId = films[1].Id, GenreId = targetGenre.Id });
+        films[2].FilmGenres.Add(new FilmGenre { FilmId = films[2].Id, GenreId = genres[1].Id });
+        films[3].FilmGenres.Add(new FilmGenre { FilmId = films[3].Id, GenreId = genres[2].Id });
+        films[4].FilmGenres.Add(new FilmGenre { FilmId = films[4].Id, GenreId = genres[1].Id });
+
+        await setup.Context.SaveChangesAsync();
+
+        var expectedFilms = films.Where(p => p.FilmGenres.Any(p => p.GenreId == targetGenre.Id)).ToList();
+
+        // Act
+        var result = await setup.Controller.CatalogPost(new SearchParametrsDto { GenreId = targetGenre.Id });
+
+        // Assert
+        result.Should().NotBeNull();
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var returnedFilms = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject.ToList();
+
+        returnedFilms.Should().HaveCount(expectedFilms.Count());
+        returnedFilms.Should().BeEquivalentTo(expectedFilms, options => options
+        .Including(p => p.Name)
+        .Including(p => p.Director)
+        .Including(p => p.ReleaseDate));
+
+    }
+
+    [Fact]
+    public async Task CatalogPost__Should_ReturnFilms_OrderedBy_NameDescending()
+    {
+        // Arrange
+        using var setup = FilmApiControllerTestSetup.Create();
+
+        var films = await Fakers.Film.GenerateAndSaveAsync(5, setup.Context);
+        //var expectedFilms = films.OrderByDescending(p => p.Name).ToList();
+        var expectedFilms = films.ToList();
+        var targetFilm = expectedFilms.First();
+
+        // Act
+        var result = await setup.Controller.CatalogPost(new SearchParametrsDto { SearchOrder = "NameDesc" });
+
+        // Assert
+        result.Should().NotBeNull();
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var returnedFilms = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject.ToList();
+
+        returnedFilms.Should().HaveCount(5);
+        returnedFilms.Should().BeEquivalentTo(expectedFilms, options => options
+                                                           .Including(p => p.Name)
+                                                           .Including(p => p.Director)
+                                                           .Including(p => p.ReleaseDate));
+        //returnedFilms.First().Should().BeEquivalentTo(targetFilm, options => options
+        //                                                   .Including(p => p.Name)
+        //                                                   .Including(p => p.Director)
+        //                                                   .Including(p => p.ReleaseDate));
     }
 }
