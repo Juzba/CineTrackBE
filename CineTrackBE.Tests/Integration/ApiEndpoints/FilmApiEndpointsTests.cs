@@ -104,10 +104,15 @@ public class FilmApiEndpointsTests
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
         var returnedFilms = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject;
 
-        returnedFilms.Should().BeEquivalentTo(expectedFilms, options => options
-        .Including(p => p.Name)
-        .Including(p => p.Director)
-        .Including(p => p.ReleaseDate));
+        /// Compare Objects Film and FilmDto
+        var expected = expectedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
+        var returned = returnedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
+
+        returned.Should().NotBeEmpty();
+        returned.Should().HaveSameCount(returned);
+        returned.Should().BeInDescendingOrder(p => p.Date);
+        returned.Should().BeEquivalentTo(expected, options => options.WithStrictOrdering());
+
     }
 
     [Fact]
@@ -166,10 +171,12 @@ public class FilmApiEndpointsTests
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
         var returnedGenres = okResult.Value.Should().BeAssignableTo<IEnumerable<GenreDto>>().Subject;
 
+        /// Compare Objects Genre and GenreDto
+        var expected = genres.Select(p => new { Name = p.Name });
+        var returned = returnedGenres.Select(p => new { Name = p.Name });
+
         returnedGenres.Should().NotBeEmpty();
-        returnedGenres.Should().BeEquivalentTo(genres, options => options
-            .Including(p => p.Name)
-            .Including(p => p.Id));
+        returned.Should().BeEquivalentTo(expected);
     }
 
 
@@ -270,7 +277,7 @@ public class FilmApiEndpointsTests
     }
 
     [Fact]
-    public async Task CatalogPost__Should_ReturnFilms_WhereName_ContainsParametr()
+    public async Task CatalogPost__Should_ReturnFilms_WhereName_ContainsStringParametr()
     {
         // Arrange
         using var setup = FilmApiControllerTestSetup.Create();
@@ -288,12 +295,13 @@ public class FilmApiEndpointsTests
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
         var returnedFilms = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject;
 
-        returnedFilms.Should().HaveCount(expectedFilms.Count);
-        returnedFilms.Should().BeEquivalentTo(expectedFilms, options => options
-            .Including(p => p.Name)
-            .Including(p => p.Director)
-            .Including(p => p.ReleaseDate));
+        /// Compare Objects Film and FilmDto
+        var expected = expectedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
+        var returned = returnedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
 
+        returned.Should().NotBeEmpty();
+        returned.Should().HaveSameCount(returned);
+        returned.Should().BeEquivalentTo(expected);
     }
 
 
@@ -316,11 +324,13 @@ public class FilmApiEndpointsTests
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
         var returnedFilms = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject;
 
-        returnedFilms.Should().HaveCount(expectedFilms.Count);
-        returnedFilms.Should().BeEquivalentTo(expectedFilms, options => options
-            .Including(p => p.Name)
-            .Including(p => p.Director)
-            .Including(p => p.ReleaseDate));
+        /// Compare Objects Film and FilmDto
+        var expected = expectedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
+        var returned = returnedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
+
+        returned.Should().NotBeEmpty();
+        returned.Should().HaveSameCount(returned);
+        returned.Should().BeEquivalentTo(expected);
     }
 
 
@@ -354,12 +364,13 @@ public class FilmApiEndpointsTests
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
         var returnedFilms = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject.ToList();
 
-        returnedFilms.Should().HaveCount(expectedFilms.Count);
-        returnedFilms.Should().BeEquivalentTo(expectedFilms, options => options
-        .Including(p => p.Name)
-        .Including(p => p.Director)
-        .Including(p => p.ReleaseDate));
+        /// Compare Objects Film and FilmDto
+        var expected = expectedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
+        var returned = returnedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
 
+        returned.Should().NotBeEmpty();
+        returned.Should().HaveSameCount(returned);
+        returned.Should().BeEquivalentTo(expected);
     }
 
     [Fact]
@@ -379,13 +390,14 @@ public class FilmApiEndpointsTests
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
         var returnedFilms = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject.ToList();
 
-        returnedFilms.Should().BeInDescendingOrder(f => f.Name);
-        returnedFilms.Should().BeEquivalentTo(expectedFilms, options => options
-                                                       .WithStrictOrdering()
-                                                       .Including(p => p.Name)
-                                                       .Including(p => p.Director)
-                                                       .Including(p => p.ReleaseDate));
+        /// Compare Objects Film and FilmDto
+        var expected = expectedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
+        var returned = returnedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
 
+        returned.Should().NotBeEmpty();
+        returned.Should().HaveSameCount(returned);
+        returned.Should().BeInDescendingOrder(f => f.Name);
+        returned.Should().BeEquivalentTo(expected, options => options.WithStrictOrdering());
     }
 
 
