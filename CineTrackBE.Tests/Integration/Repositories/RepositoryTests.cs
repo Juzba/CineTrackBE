@@ -1,9 +1,7 @@
 ﻿using CineTrackBE.Models.Entities;
-using CineTrackBE.Tests.Helpers;
 using CineTrackBE.Tests.Helpers.Common;
 using CineTrackBE.Tests.Helpers.TestSetups;
 using FluentAssertions;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
@@ -79,7 +77,7 @@ public class RepositoryTests
         using var setup = RepositoryTestSetup.Create();
         var filmRepository = setup.FilmRepository;
 
-        const int nonExistedId = 999;
+        const int nonExistedId = 99;
 
         // Act
         var result = await filmRepository.GetAsync(nonExistedId);
@@ -209,7 +207,7 @@ public class RepositoryTests
         var filmRepository = setup.FilmRepository;
 
         var nonExistedFilm = Fakers.Film.Generate();
-        nonExistedFilm.Id = 999;
+        nonExistedFilm.Id = 98;
 
         // Act
         filmRepository.Remove(nonExistedFilm);
@@ -252,9 +250,7 @@ public class RepositoryTests
         var filmRepository = setup.FilmRepository;
 
         // Arrange
-        int id = 998;
-
-        var NonExistedFilms = Fakers.Film.RuleFor(p => p.Id, id++).Generate(2);
+        List<Film> NonExistedFilms = [new Film { Id = 100, Name = "NonExistingFilm1" }, new Film { Id = 101, Name = "NonExistingFilm2" }];
 
         // Act
         filmRepository.RemoveRange(NonExistedFilms);
@@ -339,7 +335,7 @@ public class RepositoryTests
         using var setup = RepositoryTestSetup.Create();
         var filmRepository = setup.FilmRepository;
 
-        const int NonExistingId = 99999;
+        const int NonExistingId = 97;
 
         // Act
         var result = await filmRepository.AnyExistsAsync(NonExistingId);
@@ -355,7 +351,7 @@ public class RepositoryTests
         using var setup = RepositoryTestSetup.Create();
         var filmRepository = setup.FilmRepository;
 
-        var NonExistingFilm = new Film { Id = 999, Name = "This Film Does not Exist" };
+        var NonExistingFilm = new Film { Id = 96, Name = "This Film Does not Exist" };
 
         filmRepository.Remove(NonExistingFilm);
 

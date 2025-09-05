@@ -21,10 +21,11 @@ public static class Fakers
 
     public static readonly Faker<Film> Film =
         new Faker<Film>()
+            //.RuleFor(fm => fm.Id, 0)  /// pridano
             .RuleFor(fm => fm.Name, f => $"Film {f.Random.AlphaNumeric(8)}")
             .RuleFor(fm => fm.Director, f => f.Person.FullName)
             .RuleFor(fm => fm.ReleaseDate, f => f.Date.Between(new DateTime(1980, 1, 1), new DateTime(2025, 12, 31)));
-        
+
 
 
     public static readonly Faker<Film> FilmIncGenre =

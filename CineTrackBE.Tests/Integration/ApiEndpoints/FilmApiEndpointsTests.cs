@@ -330,6 +330,7 @@ public class FilmApiEndpointsTests
         // Arrange
         using var setup = FilmApiControllerTestSetup.Create();
 
+
         var genres = await Fakers.Genre.GenerateAndSaveAsync(3, setup.Context);
         var targetGenre = genres.First();
 
@@ -353,7 +354,7 @@ public class FilmApiEndpointsTests
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
         var returnedFilms = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject.ToList();
 
-        returnedFilms.Should().HaveCount(expectedFilms.Count());
+        returnedFilms.Should().HaveCount(expectedFilms.Count);
         returnedFilms.Should().BeEquivalentTo(expectedFilms, options => options
         .Including(p => p.Name)
         .Including(p => p.Director)
@@ -368,9 +369,7 @@ public class FilmApiEndpointsTests
         using var setup = FilmApiControllerTestSetup.Create();
 
         var films = await Fakers.Film.GenerateAndSaveAsync(5, setup.Context);
-        //var expectedFilms = films.OrderByDescending(p => p.Name).ToList();
-        var expectedFilms = films.ToList();
-        var targetFilm = expectedFilms.First();
+        var expectedFilms = films.OrderByDescending(p => p.Name).ToList();
 
         // Act
         var result = await setup.Controller.CatalogPost(new SearchParametrsDto { SearchOrder = "NameDesc" });
@@ -380,14 +379,24 @@ public class FilmApiEndpointsTests
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
         var returnedFilms = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject.ToList();
 
-        returnedFilms.Should().HaveCount(5);
+        returnedFilms.Should().BeInDescendingOrder(f => f.Name);
         returnedFilms.Should().BeEquivalentTo(expectedFilms, options => options
-                                                           .Including(p => p.Name)
-                                                           .Including(p => p.Director)
-                                                           .Including(p => p.ReleaseDate));
-        //returnedFilms.First().Should().BeEquivalentTo(targetFilm, options => options
-        //                                                   .Including(p => p.Name)
-        //                                                   .Including(p => p.Director)
-        //                                                   .Including(p => p.ReleaseDate));
+                                                       .WithStrictOrdering()
+                                                       .Including(p => p.Name)
+                                                       .Including(p => p.Director)
+                                                       .Including(p => p.ReleaseDate));
+
     }
+
+
+    // NameAsc
+    // YearDesc
+    // YearAsc
+    // no search param OrderByDescending(p => p.Id)
+    // zkontrolovat jestli se vytvari nova instance fakera pro kazdy test
+
+
+
+
+
 }
