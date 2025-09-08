@@ -180,23 +180,15 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
     {
         try
         {
-            if (id <= 0)
+
+            if (User == null || User.Identity == null || !User.Identity.IsAuthenticated)
             {
-                _logger.LogWarning("Invalid film ID: {Id}", id);
-                return BadRequest("Film ID must be greater than 0.");
+                _logger.LogWarning("User not authenticated when accessing film ID {Id}.", id);
+                return Unauthorized("User not authenticated!");
             }
 
-            // get film from db
-            var film = await _filmRepository.GetList().Include(p => p.FilmGenres).ThenInclude(p => p.Genre).FirstOrDefaultAsync(p => p.Id == id);
-            if (film == null)
-            {
-                _logger.LogWarning("Film with ID {Id} not found.", id);
-                return NotFound($"Film with ID {id} not found.");
-            }
-
-            // is film user favorite?
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null)
+            if (string.IsNullOrEmpty(userId))
             {
                 _logger.LogWarning("User not authenticated when accessing film ID {Id}.", id);
                 return Unauthorized("User not authenticated!");
@@ -207,6 +199,21 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
             {
                 _logger.LogWarning("User with ID {UserId} not found when accessing film ID {Id}.", userId, id);
                 return Unauthorized("User not authenticated!");
+            }
+
+            if (id <= 0)
+            {
+                _logger.LogWarning("Invalid film ID: {Id}", id);
+                return BadRequest("Film ID must be greater than 0.");
+            }
+
+
+            // get film from db
+            var film = await _filmRepository.GetList().Include(p => p.FilmGenres).ThenInclude(p => p.Genre).FirstOrDefaultAsync(p => p.Id == id);
+            if (film == null)
+            {
+                _logger.LogWarning("Film with ID {Id} not found.", id);
+                return NotFound($"Film with ID {id} not found.");
             }
 
             var isFavoriteFilm = user.FavoriteMovies.Any(p => p == film.Id);
@@ -251,6 +258,26 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
     {
         try
         {
+            if (User == null || User.Identity == null || !User.Identity.IsAuthenticated)
+            {
+                _logger.LogWarning("User not authenticated when toggling favorite for film ID {FilmId}.", filmId);
+                return Unauthorized("User not authenticated!");
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User not authenticated when toggling favorite for film ID {FilmId}.", filmId);
+                return Unauthorized("User not authenticated!");
+            }
+
+            var user = await _userRepository.GetAsync(userId);
+            if (user == null)
+            {
+                _logger.LogWarning("User not authenticated when toggling favorite for film ID {FilmId}.", filmId);
+                return Unauthorized("User not authenticated!");
+            }
+
             if (filmId <= 0)
             {
                 _logger.LogWarning("Invalid film ID for toggling favorite: {FilmId}", filmId);
@@ -265,19 +292,6 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
                 return NotFound($"Film with ID {filmId} not found.");
             }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrWhiteSpace(userId))
-            {
-                _logger.LogWarning("User not authenticated when toggling favorite for film ID {FilmId}.", filmId);
-                return Unauthorized("User not authenticated.");
-            }
-
-            var user = await _userRepository.GetAsync(userId);
-            if (user == null)
-            {
-                _logger.LogWarning("User with ID {UserId} not found when toggling favorite for film ID {FilmId}.", userId, filmId);
-                return Unauthorized("User not found.");
-            }
 
             // Initialize collection if null
             user.FavoriteMovies ??= [];

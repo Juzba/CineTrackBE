@@ -15,8 +15,8 @@ namespace CineTrackBE.Tests.Helpers
             IEnumerable<Claim>? additionalClaims = null
             )
         {
-            userId ??= "test-user-id";
-            userName ??= "testuser";
+            userId ??= Guid.NewGuid().ToString();
+            userName ??= "Test-UserName";
             role ??= "Admin";
 
             var defaultClaims = new[]

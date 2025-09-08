@@ -36,4 +36,20 @@ public static class Fakers
                 var g = Fakers.Genre.Generate();
                 fm.FilmGenres.Add(new FilmGenre { Film = fm, Genre = g });
             });
+
+    public static readonly Faker<Rating> Rating =
+          new Faker<Rating>()
+            .RuleFor(fm => fm.UserRating, f => Random.Shared.Next(0, 101));
+
+    public static readonly Faker<Comment> CommentInclRating =
+          new Faker<Comment>()
+            .RuleFor(fm => fm.Text, f => $"Test Comment {f.Random.AlphaNumeric(8)}")
+            .RuleFor(fm => fm.SendDate, f => f.Date.Between(new DateTime(1980, 1, 1), new DateTime(2026, 12, 31)))
+            .FinishWith((f, fm) =>
+            {
+                var rating = Fakers.Rating.Generate();
+                fm.Rating = rating;
+                fm.RatingId = rating.Id;
+            });
+
 }

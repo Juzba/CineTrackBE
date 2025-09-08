@@ -47,22 +47,21 @@ public class HttpContextTestSetup
 
         var user = new ApplicationUser
         {
-            Id = _userId ?? Guid.NewGuid().ToString(),
+            Id = _userId ?? claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier)!,
             UserName = _userName ?? claimsPrincipal.FindFirstValue(ClaimTypes.Name),
             NormalizedUserName = _userName?.ToUpper() ?? claimsPrincipal.FindFirstValue(ClaimTypes.Name)?.ToUpper(),
             Email = _userName ?? claimsPrincipal.FindFirstValue(ClaimTypes.Name),
             NormalizedEmail = _userName?.ToUpper() ?? claimsPrincipal.FindFirstValue(ClaimTypes.Name)?.ToUpper(),
             PasswordHash = "123456-hash",
             EmailConfirmed = true,
-            FavoriteMovies = []
         };
         return (User: user, HttpContext: httpContext, Claims: claimsPrincipal);
     }
 
 
-    public async Task<(ApplicationUser User, DefaultHttpContext HttpContext)> BuildAndSaveAsync<T>(T controller, ApplicationDbContext context, CancellationToken cancellationToken = default) where T : ControllerBase
+    public async Task<(ApplicationUser User, DefaultHttpContext HttpContext, ClaimsPrincipal Claims)> BuildAndSaveAsync<T>(T controller, ApplicationDbContext context, CancellationToken cancellationToken = default) where T : ControllerBase
     {
-        var (user, httpContext, _) = Build(controller);
+        var (user, httpContext, claimsPrincipal) = Build(controller);
 
         var exist = await context.Users.FindAsync([user.Id], cancellationToken);
         if (exist == null)
@@ -71,6 +70,6 @@ public class HttpContextTestSetup
             await context.SaveChangesAsync(cancellationToken);
         }
 
-        return (User: user, HttpContext: httpContext);
+        return (User: user, HttpContext: httpContext, Claims: claimsPrincipal);
     }
 }
