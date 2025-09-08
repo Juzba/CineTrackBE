@@ -1,6 +1,7 @@
 ﻿using CineTrackBE.Models.DTO;
 using CineTrackBE.Models.Entities;
 using CineTrackBE.Tests.Helpers.Common;
+using CineTrackBE.Tests.Helpers.TestSetups;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -17,19 +18,20 @@ namespace CineTrackBE.Tests.Integration.ApiEndpoints
             // Arrange
             using var setup = FilmApiControllerTestSetup.Create();
 
+            var testUser = HttpContextTestSetup.Create().BuildAndSave(setup.Controller);
 
             // zredukovat
 
-            var testUserId = "test-user-id";
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, testUserId),
-                new Claim(ClaimTypes.Name, "TestUser")
-            };
-            var identity = new ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme);
-            var claimsPrincipal = new ClaimsPrincipal(identity);
+            //var testUserId = "test-user-id";
+            //var claims = new[]
+            //{
+            //    new Claim(ClaimTypes.NameIdentifier, testUserId),
+            //    new Claim(ClaimTypes.Name, "TestUser")
+            //};
+            //var identity = new ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme);
+            //var claimsPrincipal = new ClaimsPrincipal(identity);
 
-            setup._httpContext.User = claimsPrincipal;
+            //setup._httpContext.User = claimsPrincipal;
 
             ////////////////////////////////////
 

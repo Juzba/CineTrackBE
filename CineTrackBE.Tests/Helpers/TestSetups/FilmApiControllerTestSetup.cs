@@ -3,7 +3,6 @@ using CineTrackBE.AppServices;
 using CineTrackBE.Data;
 using CineTrackBE.Models.Entities;
 using CineTrackBE.Tests.Helpers;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -11,7 +10,6 @@ public class FilmApiControllerTestSetup : IDisposable
 {
     public ApplicationDbContext Context { get; }
     public FilmApiController Controller { get; }
-    public DefaultHttpContext _httpContext { get; }
 
 
     public Mock<ILogger<FilmApiController>> LoggerMock { get; }
@@ -29,8 +27,7 @@ public class FilmApiControllerTestSetup : IDisposable
         IRepository<Rating> ratingRepository,
         IRepository<Comment> commentRepository,
         IRepository<ApplicationUser> userRepository,
-        IRepository<Genre> genreRepository,
-        DefaultHttpContext httpContext)
+        IRepository<Genre> genreRepository)
     {
         Context = context;
         Controller = controller;
@@ -40,16 +37,13 @@ public class FilmApiControllerTestSetup : IDisposable
         CommentRepository = commentRepository;
         UserRepository = userRepository;
         GenreRepository = genreRepository;
-        _httpContext = httpContext;
     }
 
     public static FilmApiControllerTestSetup Create
         (
         ApplicationDbContext? context = null,
         IRepository<Genre>? genreRepository = null,
-        IRepository<Film>? filmRepository = null,
-        string? userId = null,
-        string? userName = null)
+        IRepository<Film>? filmRepository = null)
     {
         context ??= DatabaseTestHelper.CreateSqlLiteContext();
 
@@ -70,8 +64,7 @@ public class FilmApiControllerTestSetup : IDisposable
             userRepository,
             genreRepository
         );
-        var (httpContext, _) = DatabaseTestHelper.CreateHttpContext(userId, userName);
-        DatabaseTestHelper.SetupControllerContext(controller, httpContext);
+
 
         return new FilmApiControllerTestSetup(
             context,
@@ -81,8 +74,7 @@ public class FilmApiControllerTestSetup : IDisposable
             ratingRepository,
             commentRepository,
             userRepository,
-            genreRepository,
-            httpContext
+            genreRepository
         );
     }
 
