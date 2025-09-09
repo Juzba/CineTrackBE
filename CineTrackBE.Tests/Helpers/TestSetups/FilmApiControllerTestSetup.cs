@@ -43,6 +43,9 @@ public class FilmApiControllerTestSetup : IDisposable
         (
         ApplicationDbContext? context = null,
         IRepository<Genre>? genreRepository = null,
+        IRepository<Comment>? commentRepository = null,
+        IRepository<Rating>? ratingRepository = null,
+        IRepository<ApplicationUser>? userRepository = null,
         IRepository<Film>? filmRepository = null)
     {
         context ??= DatabaseTestHelper.CreateSqlLiteContext();
@@ -50,9 +53,9 @@ public class FilmApiControllerTestSetup : IDisposable
         var loggerMock = new Mock<ILogger<FilmApiController>>();
 
         filmRepository ??= DatabaseTestHelper.CreateRepository<Film>(context);
-        var ratingRepository = DatabaseTestHelper.CreateRepository<Rating>(context);
-        var commentRepository = DatabaseTestHelper.CreateRepository<Comment>(context);
-        var userRepository = DatabaseTestHelper.CreateRepository<ApplicationUser>(context);
+        ratingRepository ??= DatabaseTestHelper.CreateRepository<Rating>(context);
+        commentRepository ??= DatabaseTestHelper.CreateRepository<Comment>(context);
+        userRepository ??= DatabaseTestHelper.CreateRepository<ApplicationUser>(context);
         genreRepository ??= DatabaseTestHelper.CreateRepository<Genre>(context);
 
 

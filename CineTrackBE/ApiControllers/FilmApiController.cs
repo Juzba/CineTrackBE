@@ -330,12 +330,17 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
             return BadRequest(ModelState);
         }
 
+        if (User == null || User.Identity == null || !User.Identity.IsAuthenticated)
+        {
+            _logger.LogWarning("User not authenticated when adding comment: {Comment}", comment);
+            return Unauthorized("User not authenticated!");
+        }
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId == null)
+        if (string.IsNullOrEmpty(userId))
         {
-            _logger.LogWarning("User not authenticated when adding comment.");
-            return Unauthorized("User not found.");
+            _logger.LogWarning("User not authenticated when adding comment: {Comment}", comment);
+            return Unauthorized("User not authenticated!");
         }
 
         var newComment = new Comment
@@ -418,6 +423,12 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
                 .Include(p => p.Rating)
                 .OrderByDescending(p => p.SendDate)
                 .ToListAsync();
+
+            if (comments.Count == 0)
+            {
+                _logger.LogInformation("No comments found for film ID {FilmId}.", filmId);
+                return Ok(Enumerable.Empty<CommentWithRatingDto>());
+            }
 
             var commentWithRatingDto = comments.Select(p => new CommentWithRatingDto
             {

@@ -9,7 +9,6 @@ namespace CineTrackBE.Tests.Helpers.TestSetups;
 public class HttpContextTestSetup
 {
     private readonly HttpContextTestHelper _httpContextTestHelper;
-    private readonly IRepository<ApplicationUser>? _userRepository;
     private string? _userId;
     private string? _userName;
     private string? _role;
