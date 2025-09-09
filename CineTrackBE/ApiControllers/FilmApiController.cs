@@ -4,6 +4,7 @@ using CineTrackBE.Models.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.Elfie.Serialization;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -457,19 +458,24 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
     {
         try
         {
-
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null)
+            if (User == null || User.Identity == null || !User.Identity.IsAuthenticated)
             {
                 _logger.LogWarning("User not authenticated when accessing profile data.");
-                return Unauthorized("User not found.");
+                return Unauthorized("User not authenticated!");
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User not authenticated when accessing profile data.");
+                return Unauthorized("User not authenticated!");
             }
 
             var user = await _userRepository.GetAsync(userId);
             if (user == null)
             {
-                _logger.LogWarning("User with ID {UserId} not found when accessing profile data.", userId);
-                return Unauthorized("User not found.");
+                _logger.LogWarning("User not authenticated when accessing profile data.");
+                return Unauthorized("User not authenticated!");
             }
 
             // get all user favorite films ( user statistics page )

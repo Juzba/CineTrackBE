@@ -6,7 +6,6 @@ using CineTrackBE.Tests.Helpers.TestSetups;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using NuGet.Packaging;
 using Xunit;
@@ -151,7 +150,7 @@ public class FilmApiEndpointsTests3
         using var setup = FilmApiControllerTestSetup.Create();
         var (user, _, _) = await HttpContextTestSetup.Create().BuildAndSaveAsync(setup.Controller, setup.Context);
 
-        var films = await Fakers.Film.RuleFor(fm=>fm.ImageFileName, f=>$"Img{f.Random.Number(100)}.jpg").GenerateAndSaveAsync(5, setup.Context);
+        var films = await Fakers.Film.RuleFor(fm => fm.ImageFileName, f => $"Img{f.Random.Number(100)}.jpg").GenerateAndSaveAsync(5, setup.Context);
         var expectedFavFilms = films.Take(4);
 
         // Last add favorite film
@@ -179,23 +178,106 @@ public class FilmApiEndpointsTests3
         var returned = userDataResult.FavoriteFilms.Select(p => new { Name = p.Title, ImgPath = p.ImagePath });
         var expected = expectedFavFilms.Select(p => new { Name = p.Name, ImgPath = p.ImageFileName });
         returned.Should().BeEquivalentTo(expected);
-
-
     }
 
 
+    [Fact]
+    public async Task GetUserProfilData__Should_Return_StatusCode500_When_ErrorOccurredInDb()
+    {
+        // Arrange
+        var mockUserRepository = new Mock<IRepository<ApplicationUser>>();
+        mockUserRepository
+            .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new Exception("Database error"));
 
-    // GetUserProfilData
+        using var setup = FilmApiControllerTestSetup.Create(userRepository: mockUserRepository.Object);
+        HttpContextTestSetup.Create().Build(setup.Controller);
 
+        // Act 
+        var result = await setup.Controller.GetUserProfilData();
 
-    // badrequest 500 when db error
+        // Assert
+        result.Should().NotBeNull();
+        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
+        statusResult.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
+        statusResult.Value.Should().Be("An error occurred while fetching user profile data.");
 
-    // authorize claim problem
-    // autorize user is not in db
+        // Verify that the mocked method was called
+        mockUserRepository.Verify(x => x.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
 
-    // return  avg rating, top rating, totalcomments
+    [Fact]
+    public async Task GetUserProfilData__Should_Return_UnAuthorized_When_UserClaims_AreInvalid()
+    {
+        // Arrange
+        using var setup = FilmApiControllerTestSetup.Create();
 
+        // Act
+        var result = await setup.Controller.GetUserProfilData();
 
+        // Assert
+        result.Should().NotBeNull();
+        var unauthorizedResult = result.Result.Should().BeOfType<UnauthorizedObjectResult>().Subject;
+        unauthorizedResult.StatusCode.Should().Be(StatusCodes.Status401Unauthorized);
+        unauthorizedResult.Value.Should().Be("User not authenticated!");
+    }
+
+    [Fact]
+    public async Task GetUserProfilData__Should_Return_UnAuthorized_When_User_NotExist_InDb()
+    {
+        // Arrange
+        using var setup = FilmApiControllerTestSetup.Create();
+        HttpContextTestSetup.Create()
+            .WithUser(userName: "nonexistent@test.com") 
+            .Build(setup.Controller);
+
+        // Act
+        var result = await setup.Controller.GetUserProfilData();
+
+        // Assert
+        result.Should().NotBeNull();
+        var unauthorizedResult = result.Result.Should().BeOfType<UnauthorizedObjectResult>().Subject;
+        unauthorizedResult.StatusCode.Should().Be(StatusCodes.Status401Unauthorized);
+        unauthorizedResult.Value.Should().Be("User not authenticated!");
+    }
+
+    [Fact]
+    public async Task GetUserProfilData__Should_Return_Correct_Rating_And_Comments_Statistics()
+    {
+        // Arrange
+        using var setup = FilmApiControllerTestSetup.Create();
+        var (user, _, _) = await HttpContextTestSetup.Create().BuildAndSaveAsync(setup.Controller, setup.Context);
+
+        var films = await Fakers.Film.GenerateAndSaveAsync(3, setup.Context);
+
+        // Create comments with different ratings
+        var comments = new List<Comment>
+    {
+        new() { AutorId = user.Id, FilmId = films[0].Id, Rating =new Rating{ UserRating = 89}, Text = "Great movie", SendDate = DateTime.UtcNow },
+        new() { AutorId = user.Id, FilmId = films[1].Id, Rating = new Rating{ UserRating = 60}, Text = "Average movie", SendDate = DateTime.UtcNow },
+        new() { AutorId = user.Id, FilmId = films[2].Id, Rating = new Rating{ UserRating = 75}, Text = "Good movie", SendDate = DateTime.UtcNow }
+    };
+
+        var expectedAverageRating = ((int)comments.Select(p => p.Rating.UserRating).Average());
+        var expectedCommentCount = comments.Count;
+        var expectedTopRating = comments.Select(p => p.Rating.UserRating).Max();
+
+        await setup.Context.Comments.AddRangeAsync(comments);
+        await setup.Context.SaveChangesAsync();
+
+        // Act
+        var result = await setup.Controller.GetUserProfilData();
+
+        // Assert
+        result.Should().NotBeNull();
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var userDataResult = okResult.Value.Should().BeOfType<UserProfilDataDto>().Subject;
+
+        userDataResult.Should().NotBeNull();
+        userDataResult.TotalComments.Should().Be(expectedCommentCount);
+        userDataResult.AvgRating.Should().Be(expectedAverageRating);
+        userDataResult.TopRating.Should().Be(expectedTopRating);
+    }
 
 
 
