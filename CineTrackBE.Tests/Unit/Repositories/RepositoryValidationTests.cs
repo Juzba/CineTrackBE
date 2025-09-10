@@ -99,11 +99,11 @@ public class RepositoryValidationTests
     }
 
     [Fact]
-    public async Task AnyExistsAsync_ThrowsArgumentNullException_WhenStringIdIsNull()
+    public async Task AnyAsync_ThrowsArgumentNullException_WhenStringIdIsNull()
     {
         // Act & Assert
         await FluentActions
-            .Invoking(async () => await _repository.AnyExistsAsync(null!))
+            .Invoking(async () => await _repository.AnyAsync(null!))
             .Should()
             .ThrowAsync<ArgumentNullException>();
     }

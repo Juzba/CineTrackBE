@@ -18,8 +18,7 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
     private readonly IRepository<FilmGenre> _filmGenreRepository = filmGenreRepository;
     private readonly IRepository<Film> _filmRepository = filmRepository;
     private readonly IRepository<IdentityUserRole<string>> _userRoleRepository = userRoleRepository;
-
-    private ILogger<AdminApiController> _logger = logger;
+    private readonly ILogger<AdminApiController> _logger = logger;
 
 
     // ADD GENRE //
@@ -33,19 +32,20 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
             return BadRequest(ModelState);
         }
 
-        // Is Genre in db?
-        var exist = await _genreRepository.GetList().AnyAsync(p => p.Name == genre.Name);
-        if (exist)
-        {
-            _logger.LogInformation("Genre already Exist {GenreName}", genre.Name);
-            return Conflict($"Genre '{genre.Name}' already Exist");
-        }
-
-
-        var newGenre = new Genre { Name = genre.Name };
 
         try
         {
+            // Is Genre in db?
+            var exist = await _genreRepository.GetList().AnyAsync(p => p.Name == genre.Name);
+            //var exist = await _genreRepository.FirstOrDefaultAsync(p=>p.Name == genre.Name);
+            if (exist)
+            {
+                _logger.LogInformation("Genre already Exist {GenreName}", genre.Name);
+                return Conflict($"Genre '{genre.Name}' already Exist");
+            }
+
+
+            var newGenre = new Genre { Name = genre.Name };
             await _genreRepository.AddAsync(newGenre);
             await _genreRepository.SaveChangesAsync();
             _logger.LogInformation("Success add new genre: {GenreName}", genre.Name);

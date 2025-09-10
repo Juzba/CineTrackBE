@@ -17,8 +17,7 @@ namespace CineTrackBE.AppServices
         void RemoveRange(IEnumerable<T> entities);
         IQueryable<T> GetList();
         Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default);
-        Task<bool> AnyExistsAsync(int id, CancellationToken cancellationToken = default);
-        Task<bool> AnyExistsAsync(string id, CancellationToken cancellationToken = default);
+        Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
         Task SaveChangesAsync(CancellationToken cancellationToken = default);
         Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
     }
@@ -131,24 +130,12 @@ namespace CineTrackBE.AppServices
         }
 
 
-        // ANY ENTITY EXIST? - id string //
-        public async Task<bool> AnyExistsAsync(string id, CancellationToken cancellationToken = default)
+        // ANY ASYNC //
+        public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(id);
-
-            return await _context.Set<T>().FindAsync([id], cancellationToken) != null;
+            ArgumentNullException.ThrowIfNull(predicate);
+            return await _context.Set<T>().AnyAsync(predicate, cancellationToken);
         }
-
-
-        // ANY ENTITY EXIST? - id int //
-        public async Task<bool> AnyExistsAsync(int id, CancellationToken cancellationToken = default)
-        {
-            return await _context.Set<T>().FindAsync([id], cancellationToken) != null;
-        }
-
-
-
-
 
 
         // SAVE CHANGES //

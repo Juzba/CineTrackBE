@@ -4,7 +4,6 @@ using CineTrackBE.Models.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.Elfie.Serialization;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -286,7 +285,7 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
             }
 
             // Verify film exists
-            var filmExists = await _filmRepository.AnyExistsAsync(filmId);
+            var filmExists = await _filmRepository.AnyAsync(p => p.Id == filmId);
             if (!filmExists)
             {
                 _logger.LogWarning("Film with ID {FilmId} not found.", filmId);
@@ -411,7 +410,7 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
             }
 
             // Verify film exists
-            var filmExists = await _filmRepository.AnyExistsAsync(filmId);
+            var filmExists = await _filmRepository.AnyAsync(p => p.Id == filmId);
             if (!filmExists)
             {
                 _logger.LogWarning("Film with ID {FilmId} not found when fetching comments.", filmId);

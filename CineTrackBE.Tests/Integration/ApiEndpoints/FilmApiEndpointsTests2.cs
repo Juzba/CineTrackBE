@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Moq;
+using System.Linq.Expressions;
 using Xunit;
 
 namespace CineTrackBE.Tests.Integration.ApiEndpoints;
@@ -91,6 +92,8 @@ public class FilmApiEndpointsTests2
         var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
         statusResult.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
         statusResult.Value.Should().Be("An error occurred while fetching film details.");
+
+        mockFilmRepository.Verify(x => x.GetList(), Times.Once);
     }
 
     [Fact]
@@ -266,7 +269,7 @@ public class FilmApiEndpointsTests2
         // Arrange
         var mockFilmRepository = new Mock<IRepository<Film>>();
         mockFilmRepository
-               .Setup(x => x.AnyExistsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+               .Setup(x => x.AnyAsync(It.IsAny<Expression<Func<Film, bool>>>(), It.IsAny<CancellationToken>()))
                .ThrowsAsync(new Exception("Database error"));
 
         using var setup = FilmApiControllerTestSetup.Create(filmRepository: mockFilmRepository.Object);
@@ -280,6 +283,8 @@ public class FilmApiEndpointsTests2
         var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
         statusResult.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
         statusResult.Value.Should().Be("An error occurred while updating favorite films.");
+
+        mockFilmRepository.Verify(x => x.AnyAsync(It.IsAny<Expression<Func<Film, bool>>>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
 

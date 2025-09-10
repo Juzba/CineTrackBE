@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NuGet.Packaging;
+using System.Linq.Expressions;
 using Xunit;
 
 namespace CineTrackBE.Tests.Integration.ApiEndpoints;
@@ -69,8 +70,8 @@ public class FilmApiEndpointsTests3
         // Arrange
         var mockFilmRepository = new Mock<IRepository<Film>>();
         mockFilmRepository
-            .Setup(x => x.AnyExistsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new Exception("Database error"));
+         .Setup(x => x.AnyAsync(It.IsAny<Expression<Func<Film, bool>>>(), It.IsAny<CancellationToken>()))
+         .ThrowsAsync(new Exception("Database error"));
 
         using var setup = FilmApiControllerTestSetup.Create(filmRepository: mockFilmRepository.Object);
 
@@ -84,7 +85,7 @@ public class FilmApiEndpointsTests3
         statusResult.Value.Should().Be("An error occurred while fetching comments.");
 
         // Verify method calls
-        mockFilmRepository.Verify(x => x.AnyExistsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+        mockFilmRepository.Verify(x => x.AnyAsync(It.IsAny<Expression<Func<Film, bool>>>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -228,7 +229,7 @@ public class FilmApiEndpointsTests3
         // Arrange
         using var setup = FilmApiControllerTestSetup.Create();
         HttpContextTestSetup.Create()
-            .WithUser(userName: "nonexistent@test.com") 
+            .WithUser(userName: "nonexistent@test.com")
             .Build(setup.Controller);
 
         // Act
@@ -258,7 +259,7 @@ public class FilmApiEndpointsTests3
         new() { AutorId = user.Id, FilmId = films[2].Id, Rating = new Rating{ UserRating = 75}, Text = "Good movie", SendDate = DateTime.UtcNow }
     };
 
-        var expectedAverageRating = ((int)comments.Select(p => p.Rating.UserRating).Average());
+        var expectedAverageRating = (int)comments.Select(p => p.Rating.UserRating).Average();
         var expectedCommentCount = comments.Count;
         var expectedTopRating = comments.Select(p => p.Rating.UserRating).Max();
 

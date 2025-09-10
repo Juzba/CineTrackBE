@@ -164,7 +164,7 @@ public class RepositoryTests
         nonExistentFilm.Id = 999;
 
         // Pre-condition check
-        var exists = await filmRepository.AnyExistsAsync(nonExistentFilm.Id);
+        var exists = await filmRepository.AnyAsync(p => p.Id == nonExistentFilm.Id);
         exists.Should().BeFalse();
 
         // Act & Assert
@@ -279,41 +279,9 @@ public class RepositoryTests
         result.Should().HaveCount(3);
     }
 
+   
     [Fact]
-    public async Task AnyExistsAsync__StringId_Should_ReturnTrue_WhenRoleExists()
-    {
-        // Arrange
-        using var setup = RepositoryTestSetup.Create();
-        var roleRepository = setup.RoleRepository;
-
-        var role = await Fakers.Role.GenerateOneAndSaveAsync(setup.Context);
-
-        // Act
-        var result = await roleRepository.AnyExistsAsync(role.Id);
-
-        // Assert
-        result.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task AnyExistsAsync__StringId_Should_ReturnFalse_WhenFilmDoesNotExists()
-    {
-        // Arrange
-        using var setup = RepositoryTestSetup.Create();
-        var roleRepository = setup.RoleRepository;
-
-        const string NonExistingId = "This Id Does Not Exist";
-
-        // Act
-        var result = await roleRepository.AnyExistsAsync(NonExistingId);
-
-        // Assert
-        result.Should().BeFalse();
-    }
-
-
-    [Fact]
-    public async Task AnyExistsAsync__IntId_Should_ReturnTrue_WhenFilmExists()
+    public async Task AnyAsync__Should_ReturnTrue_WhenFilmExists()
     {
         // Arrange
         using var setup = RepositoryTestSetup.Create();
@@ -322,14 +290,14 @@ public class RepositoryTests
         var film = await Fakers.Film.GenerateOneAndSaveAsync(setup.Context);
 
         // Act
-        var result = await filmRepository.AnyExistsAsync(film.Id);
+        var result = await filmRepository.AnyAsync(p => p.Id == film.Id);
 
         // Assert
         result.Should().BeTrue();
     }
 
     [Fact]
-    public async Task AnyExistsAsync__IntId_Should_ReturnFalse_WhenFilmDoesNotExists()
+    public async Task AnyAsync__Should_ReturnFalse_WhenFilmDoesNotExists()
     {
         // Arrange
         using var setup = RepositoryTestSetup.Create();
@@ -338,7 +306,7 @@ public class RepositoryTests
         const int NonExistingId = 97;
 
         // Act
-        var result = await filmRepository.AnyExistsAsync(NonExistingId);
+        var result = await filmRepository.AnyAsync(p => p.Id == NonExistingId);
 
         // Assert
         result.Should().BeFalse();
