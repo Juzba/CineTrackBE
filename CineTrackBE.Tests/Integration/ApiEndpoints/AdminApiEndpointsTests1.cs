@@ -223,7 +223,7 @@ public class AdminApiEndpointsTests1
 
     // EDIT GENRE //
     [Fact]
-    public async Task EditGenre_Should_ReturnOkObjectResult_withEdited_GenreDto()
+    public async Task EditGenre__Should_ReturnOkObjectResult_withEdited_GenreDto()
     {
         // Arrange
         using var setup = AdminApiControllerTestSetup.Create();
@@ -246,7 +246,7 @@ public class AdminApiEndpointsTests1
     }
 
     [Fact]
-    public async Task EditGenre_Should_EditGenre_InsideDb()
+    public async Task EditGenre__Should_EditGenre_InsideDb()
     {
         // Arrange
         using var setup = AdminApiControllerTestSetup.Create();
@@ -270,7 +270,7 @@ public class AdminApiEndpointsTests1
     }
 
     [Fact]
-    public async Task EditGenre_Should_Return_BadRequest_When_Id_IsInvalid()
+    public async Task EditGenre__Should_Return_BadRequest_When_Id_IsInvalid()
     {
         // Arrange
         using var setup = AdminApiControllerTestSetup.Create();
@@ -286,7 +286,7 @@ public class AdminApiEndpointsTests1
     }
 
     [Fact]
-    public async Task EditGenre_Should_Return_BadRequest_When_ModelState_IsInvalid()
+    public async Task EditGenre__Should_Return_BadRequest_When_ModelState_IsInvalid()
     {
         // Arrange
         using var setup = AdminApiControllerTestSetup.Create();
@@ -305,7 +305,7 @@ public class AdminApiEndpointsTests1
 
 
     [Fact]
-    public async Task EditGenre_Should_Return_Conflict_When_Genre_WithSameName_Exists()
+    public async Task EditGenre__Should_Return_Conflict_When_Genre_WithSameName_Exists()
     {
         // Arrange
         using var setup = AdminApiControllerTestSetup.Create();
@@ -322,7 +322,7 @@ public class AdminApiEndpointsTests1
         conflictResult.Value.Should().Be($"Genre NAME '{genreDto.Name}' already exist!");
     }
 
-    // editgenre should return notfound when genre not exist in db
+
     [Fact]
     public async Task EditGenre_Should_Return_NotFound_When_Genre_NotExist()
     {
@@ -341,7 +341,7 @@ public class AdminApiEndpointsTests1
     }
 
     [Fact]
-    public async Task EditGenre_Should_Return_Status500InternalServerError_When_DbError_Occurs()
+    public async Task EditGenre__Should_Return_Status500InternalServerError_When_DbError_Occurs()
     {
         // Arrange
         var genreRepositoryMock = new Mock<IRepository<Genre>>();
@@ -361,12 +361,80 @@ public class AdminApiEndpointsTests1
         genreRepositoryMock.Verify(o => o.GetAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    // GET ALL FILMS //
+    [Fact]
+    public async Task GetAllFilms__Should_ReturnOkObjectResult_WithEnumerable_FilmDto()
+    {
+        // Arrange
+        using var setup = AdminApiControllerTestSetup.Create();
+
+        var films = await Fakers.FilmIncGenre.GenerateAndSaveAsync(3, setup.Context);
+
+        // Act
+        var result = await setup.Controller.GetAllFilms();
+
+        // Assert
+        result.Should().NotBeNull();
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>();
+    }
 
 
+    [Fact]
+    public async Task GetAllFilms__Should_ReturnEnumerable_FilmDto_IncludeGenres()
+    {
+        // Arrange
+        using var setup = AdminApiControllerTestSetup.Create();
+        var films = await Fakers.FilmIncGenre.GenerateAndSaveAsync(3, setup.Context);
+
+        // Act
+        var result = await setup.Controller.GetAllFilms();
+
+        // Assert
+        result.Should().NotBeNull();
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var filmDtos = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject;
+
+        filmDtos.Should().HaveCount(films.Count);
+        filmDtos.Should().OnlyContain(p => p.Genres != null && p.Genres.Count > 0);
+        filmDtos.Should().OnlyContain(p => p.Genres.First().Name.Contains("Genre"));
+    }
 
 
+    [Fact]
+    public async Task GetAllFilms__Should_ReturnOkStatus_When_ZeroFilm_Exist()
+    {
+        // Arrange
+        using var setup = AdminApiControllerTestSetup.Create();
 
+        // Act
+        var result = await setup.Controller.GetAllFilms();
 
+        // Assert
+        result.Should().NotBeNull();
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var filmDtos = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject;
+        filmDtos.Should().BeEmpty();
+    }
 
+    [Fact]
+    public async Task GetAllFilms__Should_Return_Status500InternalServerError_When_DbError_Occurs()
+    {
+        // Arrange
+        var filmRepositoryMock = new Mock<IRepository<Film>>();
+        filmRepositoryMock.Setup(o => o.GetList())
+        .Throws(new Exception("Database error -> filmRepository 'GetList'"));
+
+        using var setup = AdminApiControllerTestSetup.Create(filmRepository: filmRepositoryMock.Object);
+
+        // Act
+        var result = await setup.Controller.GetAllFilms();
+
+        // Assert
+        result.Should().NotBeNull();
+        var objectResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
+        objectResult.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
+        filmRepositoryMock.Verify(o => o.GetList(), Times.Once);
+    }
 
 }
