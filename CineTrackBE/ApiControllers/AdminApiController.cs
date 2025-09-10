@@ -72,33 +72,32 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
             return BadRequest("Invalid genre ID. ID must be greater than 0.");
         }
 
-        var genre = await _genreRepository.GetAsync(id);
-        if (genre == null)
-        {
-            _logger.LogWarning("Genre with Id {GenreId} not exist!", id);
-            return NotFound($"Genre with Id '{id}' not exist!");
-        }
-
-
-        var exist = await _filmGenreRepository.GetList().AnyAsync(p => p.GenreId == id);
-        if (exist)
-        {
-            _logger.LogWarning("Genre '{GenreName}' cannot be deleted because it is used!", genre.Name);
-            return Conflict($"Genre '{genre.Name}' cannot be deleted because it is used!");
-        }
-
-
         try
         {
+            var genre = await _genreRepository.GetAsync(id);
+            if (genre == null)
+            {
+                _logger.LogWarning("Genre with Id {GenreId} not exist!", id);
+                return NotFound($"Genre with Id '{id}' not exist!");
+            }
+
+
+            var isGenreUsed = await _filmGenreRepository.GetList().AnyAsync(p => p.GenreId == id);
+            if (isGenreUsed)
+            {
+                _logger.LogWarning("Genre '{GenreName}' cannot be deleted because it is used!", genre.Name);
+                return Conflict($"Genre '{genre.Name}' cannot be deleted because it is used!");
+            }
+
             _genreRepository.Remove(genre);
             await _genreRepository.SaveChangesAsync();
             _logger.LogInformation("Genre '{GenreName}' successfully deleted!", genre.Name);
-            return Ok();
+            return Ok($"Genre '{genre.Name}' deleted");
 
         }
         catch (Exception)
         {
-            _logger.LogError("Error occurred while trying to save Genre '{GenreName}' to db!", genre.Name);
+            _logger.LogError("Error occurred while trying to save Genre to db!");
             return StatusCode(500, "Error occurred while trying to save Genre to db");
         }
     }
@@ -106,7 +105,7 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
 
     // EDIT GENRE //
     [HttpPut("EditGenre/{id}")]
-    public async Task<ActionResult<GenreDto>> PutGenre(int id, [FromBody] GenreDto genreDto)
+    public async Task<ActionResult<GenreDto>> EditGenre(int id, [FromBody] GenreDto genreDto)
     {
         if (!ModelState.IsValid)
         {
@@ -120,27 +119,27 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
             return BadRequest("Invalid genre ID. ID must be greater than 0.");
         }
 
-        // find genre with id in db
-        var genre = await _genreRepository.GetAsync(id);
-        if (genre == null)
-        {
-            _logger.LogWarning("Genre with Id {GenreId} not found!", id);
-            return NotFound($"Genre with Id '{id}' not found!");
-        }
-
-        // name already reserved?
-        var exist = await _genreRepository.GetList().AnyAsync(p => p.Name == genreDto.Name);
-        if (exist)
-        {
-            _logger.LogWarning("Genre NAME '{GenreName}' already exist!", genreDto.Name);
-            return Conflict($"Genre NAME '{genreDto.Name}' already exist!");
-        }
-
-        genre.Name = genreDto.Name;
-
-
         try
         {
+            // find genre with id in db
+            var genre = await _genreRepository.GetAsync(id);
+            if (genre == null)
+            {
+                _logger.LogWarning("Genre with Id {GenreId} not found!", id);
+                return NotFound($"Genre with Id '{id}' not found!");
+            }
+
+            // name already reserved?
+            var exist = await _genreRepository.AnyAsync(p => p.Name == genreDto.Name);
+            if (exist)
+            {
+                _logger.LogWarning("Genre NAME '{GenreName}' already exist!", genreDto.Name);
+                return Conflict($"Genre NAME '{genreDto.Name}' already exist!");
+            }
+
+            genre.Name = genreDto.Name;
+
+
             await _genreRepository.SaveChangesAsync();
 
             _logger.LogInformation("Genre '{GenreName}' successfully updated!", genre.Name);
@@ -148,8 +147,8 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
         }
         catch (Exception)
         {
-            _logger.LogError("Error occurred while trying to save Genre '{GenreName}' to db!", genre.Name);
-            return StatusCode(500, "Error occurred while trying to save Genre to db");
+            _logger.LogError("Error occurred while trying to edit Genre in db!");
+            return StatusCode(500, "Error occurred while trying edit Genre in db");
         }
     }
 
