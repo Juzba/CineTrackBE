@@ -36,8 +36,7 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
         try
         {
             // Is Genre in db?
-            var exist = await _genreRepository.GetList().AnyAsync(p => p.Name == genre.Name);
-            //var exist = await _genreRepository.FirstOrDefaultAsync(p=>p.Name == genre.Name);
+            var exist = await _genreRepository.AnyAsync(p => p.Name == genre.Name);
             if (exist)
             {
                 _logger.LogInformation("Genre already Exist {GenreName}", genre.Name);

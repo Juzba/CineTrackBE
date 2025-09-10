@@ -7,6 +7,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Linq.Expressions;
 using Xunit;
 
 namespace CineTrackBE.Tests.Integration.ApiEndpoints;
@@ -73,7 +74,8 @@ public class AdminApiEndpointsTests1
     {
         // Arrange
         var genreRepositoryMock = new Mock<Repository<Genre>>();
-        genreRepositoryMock.Setup(o => o.GetList()).Throws(new Exception("Database error -> genreRepository 'GetList'"));
+        genreRepositoryMock.Setup(o => o.AnyAsync(It.IsAny<Expression<Func<Genre, bool>>>(), It.IsAny<CancellationToken>()))
+        .ThrowsAsync(new Exception("Database error -> genreRepository 'GetList'"));
 
         using var setup = AdminApiControllerTestSetup.Create(genreRepository: genreRepositoryMock.Object);
         var genreDto = Fakers.GenreDto.Generate();
@@ -86,7 +88,7 @@ public class AdminApiEndpointsTests1
         var objectResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
         objectResult.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
 
-        genreRepositoryMock.Verify(o => o.GetList(), Times.Once);
+        genreRepositoryMock.Verify(o => o.AnyAsync(It.IsAny<Expression<Func<Genre, bool>>>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
 
