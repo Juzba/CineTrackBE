@@ -379,7 +379,7 @@ public class FilmApiEndpointsTests1
         // Arrange
         using var setup = FilmApiControllerTestSetup.Create();
 
-        var films = await Fakers.Film.GenerateAndSaveAsync(6, setup.Context);
+        var films = await Fakers.Film.UseSeed(999).GenerateAndSaveAsync(6, setup.Context);
         var expectedFilms = films.OrderByDescending(p => p.Name).ToList();
 
         // Act

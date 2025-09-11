@@ -26,7 +26,7 @@ public static class Fakers
             .RuleFor(g => g.Email, f => $"TestEmail {f.Random.AlphaNumeric(6)}")
             .RuleFor(g => g.PasswordHash, f => $"PassWord {f.Random.Hash(10)}")
             .RuleFor(g => g.PhoneNumber, f => $"Test-PhoneNumber {f.Random.AlphaNumeric(6)}");
-        
+
 
     // ROLE //
     public static readonly Faker<IdentityRole> Role =
@@ -35,10 +35,25 @@ public static class Fakers
 
     // FILM //
     public static readonly Faker<Film> Film =
-        new Faker<Film>()
-            .RuleFor(fm => fm.Name, f => $"Film {f.Random.AlphaNumeric(8)}")
-            .RuleFor(fm => fm.Director, f => f.Person.FullName)
-            .RuleFor(fm => fm.ReleaseDate, f => f.Date.Between(new DateTime(1980, 1, 1), new DateTime(2025, 12, 31)));
+    new Faker<Film>()
+        .CustomInstantiator(f => new Film
+        {
+            Name = $"Film {f.Random.AlphaNumeric(8)}",
+            Director = f.Person.FullName,
+            ReleaseDate = f.Date.Between(new DateTime(1980, 1, 1), new DateTime(2025, 12, 31)),
+            FilmGenres = new List<FilmGenre>()
+        });
+
+    // FILM //
+    public static readonly Faker<FilmDto> FilmDto =
+    new Faker<FilmDto>()
+        .CustomInstantiator(f => new FilmDto
+        {
+            Name = $"FilmDto {f.Random.AlphaNumeric(8)}",
+            Director = f.Person.FullName,
+            ReleaseDate = f.Date.Between(new DateTime(1980, 1, 1), new DateTime(2025, 12, 31)),
+            Genres = []
+        });
 
 
     // FILM INCLUDE GENRE //
@@ -47,11 +62,10 @@ public static class Fakers
             .RuleFor(fm => fm.Name, f => $"FilmInclGenre {f.Random.AlphaNumeric(8)}")
             .RuleFor(fm => fm.Director, f => f.Person.FullName)
             .RuleFor(fm => fm.ReleaseDate, f => f.Date.Between(new DateTime(1980, 1, 1), new DateTime(2025, 12, 31)))
-            .FinishWith((f, fm) =>
+            .RuleFor(fm => fm.FilmGenres, f =>
             {
-
-                var g = Fakers.Genre.Generate();
-                fm.FilmGenres.Add(new FilmGenre { Film = fm, Genre = g });
+                var genre = Fakers.Genre.Generate();
+                return new List<FilmGenre> { new FilmGenre { Genre = genre } };
             });
 
 

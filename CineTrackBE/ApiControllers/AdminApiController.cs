@@ -199,16 +199,16 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
             return BadRequest(ModelState);
         }
 
-        var exist = await _filmRepository.GetList().AnyAsync(p => p.Name == film.Name);
-        if (exist)
-        {
-            _logger.LogInformation("Film already Exist {FilmName}", film.Name);
-            return Conflict($"Film '{film.Name}' already Exist");
-        }
-
         using var transaction = await _filmRepository.BeginTransactionAsync();
         try
         {
+            var exist = await _filmRepository.GetList().AnyAsync(p => p.Name == film.Name);
+            if (exist)
+            {
+                _logger.LogInformation("Film already Exist {FilmName}", film.Name);
+                return Conflict($"Film '{film.Name}' already Exist");
+            }
+
             var newFilm = new Film
             {
                 Name = film.Name,
