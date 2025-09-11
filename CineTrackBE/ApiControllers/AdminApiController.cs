@@ -202,11 +202,22 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
         using var transaction = await _filmRepository.BeginTransactionAsync();
         try
         {
-            var exist = await _filmRepository.GetList().AnyAsync(p => p.Name == film.Name);
+            var exist = await _filmRepository.AnyAsync(p => p.Name == film.Name);
             if (exist)
             {
                 _logger.LogInformation("Film already Exist {FilmName}", film.Name);
                 return Conflict($"Film '{film.Name}' already Exist");
+            }
+
+            // if genre is not in db
+            var existGenres = await _genreRepository.GetAllAsync();
+            foreach (var genreDto in film.Genres)
+            {
+                if (!existGenres.Any(p => p.Id == genreDto.Id))
+                {
+                    _logger.LogWarning("Genre with Id {GenreId} does not exist in db!", genreDto.Id);
+                    return BadRequest($"Genre with Id '{genreDto.Id}' does not exist in db!");
+                }
             }
 
             var newFilm = new Film
@@ -261,8 +272,6 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
             return BadRequest("Invalid film ID. ID must be greater than 0.");
         }
 
-
-        using var transaction = await _filmRepository.BeginTransactionAsync();
         try
         {
             var film = await _filmRepository.GetList()
@@ -279,14 +288,12 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
 
             _filmRepository.Remove(film);
             await _filmRepository.SaveChangesAsync();
-            await transaction.CommitAsync();
 
             _logger.LogInformation("Film '{FilmName}' successfully deleted!", film.Name);
             return Ok();
         }
         catch (Exception)
         {
-            await transaction.RollbackAsync();
             _logger.LogError("Error occurred while trying to save Film to db!");
             return StatusCode(500, "Error occurred while trying to save Film to db");
         }
@@ -294,7 +301,7 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
 
     // EDIT FILM //
     [HttpPut("EditFilm/{id}")]
-    public async Task<ActionResult<FilmDto>> PutFilm(int id, [FromBody] FilmDto filmDto)
+    public async Task<ActionResult<FilmDto>> EditFilm(int id, [FromBody] FilmDto filmDto)
     {
         if (!ModelState.IsValid)
         {
@@ -310,26 +317,25 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
 
         // find film with id in db
 
-        var film = await _filmRepository.GetList()
-            .Include(f => f.FilmGenres)
-            .Include(f => f.Ratings)
-            .FirstOrDefaultAsync(f => f.Id == id);
-
-        if (film == null)
-        {
-            _logger.LogWarning("Film with Id {FilmId} not found!", id);
-            return NotFound($"Film with Id '{id}' not found!");
-        }
-
         using var transaction = await _filmRepository.BeginTransactionAsync();
         try
         {
-            // name already reserved?
-            var exist = await _genreRepository.GetList().AnyAsync(p => p.Name == filmDto.Name && p.Id != id);
+            var film = await _filmRepository.GetList()
+                .Include(f => f.FilmGenres)
+                .Include(f => f.Ratings)
+                .FirstOrDefaultAsync(f => f.Id == id);
+
+            if (film == null)
+            {
+                _logger.LogWarning("Film with Id {FilmId} not found!", id);
+                return NotFound($"Film with Id '{id}' not found!");
+            }
+            // film name already reserved?
+            var exist = await _filmRepository.GetList().AnyAsync(p => p.Name == filmDto.Name && p.Id != id);
             if (exist)
             {
-                _logger.LogWarning("Genre NAME '{FilmName}' already exist!", filmDto.Name);
-                return Conflict($"Genre NAME '{filmDto.Name}' already exist!");
+                _logger.LogWarning("Film NAME '{FilmName}' already exist!", filmDto.Name);
+                return Conflict($"Film NAME '{filmDto.Name}' already exist!");
             }
 
             film.Name = filmDto.Name;
@@ -340,7 +346,10 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
 
 
             // old film-genres - remove
-            _filmGenreRepository.RemoveRange(film.FilmGenres);
+            if (film.FilmGenres.Count != 0)
+            {
+                _filmGenreRepository.RemoveRange(film.FilmGenres);
+            }
 
             // new film-genres - add
             var newFilmGenres = filmDto.Genres.Select(p => new FilmGenre { FilmId = film.Id, GenreId = p.Id });
@@ -368,7 +377,7 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
         catch (Exception)
         {
             await transaction.RollbackAsync();
-            _logger.LogError("Error occurred while trying to save Film '{FilmName}' to db!", film.Name);
+            _logger.LogError("Error occurred while trying to save Film to db!");
             return StatusCode(500, "Error occurred while trying to save Film to db");
         }
     }

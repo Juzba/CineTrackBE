@@ -26,6 +26,7 @@ public class FilmApiEndpointsTests3
         var comments = await Fakers.Comment
             .RuleFor(fm => fm.AutorId, f => user.Id)
             .RuleFor(fm => fm.FilmId, f => film.Id)
+            .RuleFor(fm => fm.Rating, f => new())
             .GenerateAndSaveAsync(3, setup.Context);
 
         // Act

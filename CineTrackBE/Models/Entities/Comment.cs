@@ -20,7 +20,7 @@ namespace CineTrackBE.Models.Entities
 
         // Rating //
         public int RatingId { get; set; }
-        public Rating Rating { get; set; } = new();
+        public Rating Rating { get; set; }
        
 
 
