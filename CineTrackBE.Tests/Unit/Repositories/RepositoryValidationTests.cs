@@ -1,6 +1,7 @@
 using CineTrackBE.AppServices;
 using CineTrackBE.Models.Entities;
 using CineTrackBE.Tests.Helpers;
+using CineTrackBE.Tests.Helpers.TestSetups.Universal;
 using FluentAssertions;
 using Xunit;
 
@@ -13,13 +14,17 @@ public class RepositoryValidationTests
     public RepositoryValidationTests()
     {
         // EF - IN MEMORY DB //
-        var context = DatabaseTestHelper.CreateInMemoryContext();
+        var setup = InMemoryDbTestSetup.Create();
+        var context = setup.Context;
+
         _repository = DatabaseTestHelper.CreateRepository<Film>(context);
     }
 
     [Fact]
     public async Task AddAsync_ThrowsArgumentNullException_WhenEntityIsNull()
     {
+        
+
         // Act & Assert
         await FluentActions
             .Invoking(async () => await _repository.AddAsync(null!))
@@ -48,8 +53,11 @@ public class RepositoryValidationTests
             .WithMessage("The collection is empty. (Parameter 'entities')");
     }
 
-    [Fact]
-    public async Task GetAsync_ThrowsArgumentNullException_WhenStringIdIsNull()
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData(null)]
+    public async Task GetAsync_ThrowsArgumentNullException_WhenStringIsInvalid(string? Id)
     {
         // Act & Assert
         await FluentActions
@@ -99,7 +107,7 @@ public class RepositoryValidationTests
     }
 
     [Fact]
-    public async Task AnyAsync_ThrowsArgumentNullException_WhenStringIdIsNull()
+    public async Task AnyAsync_ThrowsArgumentNullException_WhenPredicateIsNull()
     {
         // Act & Assert
         await FluentActions

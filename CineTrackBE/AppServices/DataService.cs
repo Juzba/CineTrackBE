@@ -7,7 +7,6 @@ namespace CineTrackBE.AppServices
 {
     public interface IDataService
     {
-        Task<bool> AnyUserExistsByUserNameAsync(string userName, CancellationToken cancellationToken = default);
         Task AddUserRoleAsync(ApplicationUser user, string role, CancellationToken cancellationToken = default);
         Task RemoveUserRoleAsync(ApplicationUser user, string role, CancellationToken cancellationToken = default);
         Task<IEnumerable<IdentityRole>> GetRolesFromUserAsync(ApplicationUser user, CancellationToken cancellationToken = default);
@@ -19,17 +18,6 @@ namespace CineTrackBE.AppServices
         private readonly ApplicationDbContext _context = context;
         private readonly ILogger<DataService> _logger = logger;
 
-
-
-
-
-        // ANY USER EXIST? //
-        public async Task<bool> AnyUserExistsByUserNameAsync(string userName, CancellationToken cancellationToken = default)
-        {
-            ArgumentException.ThrowIfNullOrWhiteSpace(userName);
-
-            return await _context.Users.AnyAsync(p => p.UserName == userName.ToUpper(), cancellationToken);
-        }
 
 
         // ADD USER ROLE //

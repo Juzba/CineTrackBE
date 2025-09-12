@@ -2,6 +2,7 @@
 using CineTrackBE.Models.DTO;
 using CineTrackBE.Tests.Helpers.Common;
 using CineTrackBE.Tests.Helpers.TestSetups;
+using CineTrackBE.Tests.Helpers.TestSetups.Universal;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;

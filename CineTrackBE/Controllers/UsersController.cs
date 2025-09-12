@@ -104,7 +104,7 @@ namespace CineTrackBE.Controllers
             }
 
             // user with this UserName exist
-            if (await _dataService.AnyUserExistsByUserNameAsync(user.UserName))
+            if (await _userRepository.AnyAsync(p => p.UserName == user.UserName))
             {
                 ModelState.AddModelError("UserName", "UserName je obsazen!");
                 _logger.LogWarning("User creation failed because the username {UserName} is already taken.", user.UserName);
@@ -195,7 +195,7 @@ namespace CineTrackBE.Controllers
             }
 
             // user with this UserName exist?
-            if (defaultUser.UserName != formUser.UserName && await _dataService.AnyUserExistsByUserNameAsync(formUser.UserName))
+            if (defaultUser.UserName != formUser.UserName && await _userRepository.AnyAsync(p => p.UserName == formUser.UserName))
             {
                 _logger.LogWarning("User edit failed because the username {UserName} is already taken.", formUser.UserName);
                 ModelState.AddModelError("UserName", "User je obsazen.");

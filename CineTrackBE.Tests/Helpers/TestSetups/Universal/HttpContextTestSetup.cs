@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace CineTrackBE.Tests.Helpers.TestSetups;
+namespace CineTrackBE.Tests.Helpers.TestSetups.Universal;
 public class HttpContextTestSetup
 {
     private readonly HttpContextTestHelper _httpContextTestHelper;
