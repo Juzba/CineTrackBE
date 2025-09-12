@@ -201,12 +201,18 @@ public class UsersApiController(IRepository<IdentityRole> roleRepository, IRepos
 
     // EDIT USER //
     [HttpPut("EditUser/{id}")]
-    public async Task<ActionResult<UserDto>> PutUser(string id, [FromBody] UserDto userDto)
+    public async Task<ActionResult<UserDto>> EditUser(string id, [FromBody] UserDto userDto)
     {
         if (!ModelState.IsValid)
         {
             _logger.LogWarning("User is not valid {ModelState}", ModelState);
             return BadRequest($"User is not valid {ModelState}");
+        }
+
+        if (string.IsNullOrEmpty(id))
+        {
+            _logger.LogWarning("Invalid user ID. ID must be greater than 0.");
+            return BadRequest("Invalid user ID. ID must be greater than 0.");
         }
 
         if (!string.IsNullOrWhiteSpace(userDto.NewPassword))
@@ -218,34 +224,41 @@ public class UsersApiController(IRepository<IdentityRole> roleRepository, IRepos
                 return BadRequest("Password must be at least 6 characters long!");
             }
             // Additional password complexity checks can be added here
-
-        }
-
-        if (string.IsNullOrEmpty(id))
-        {
-            _logger.LogWarning("Invalid user ID. ID must be greater than 0.");
-            return BadRequest("Invalid user ID. ID must be greater than 0.");
-        }
-
-        // find user with id in db
-        var user = await _userRepository.GetAsync(id);
-        if (user == null)
-        {
-            _logger.LogWarning("User with Id {UserId} not found!", id);
-            return NotFound($"User with Id '{id}' not found!");
-        }
-
-        // Email already reserved on diferent User?
-        var exist = await _userRepository.GetList().AnyAsync(p => p.NormalizedEmail == userDto.Email.ToUpper() && p.Id != userDto.Id);
-        if (exist)
-        {
-            _logger.LogInformation("User with this Email already Exist {UserEmail}", userDto.Email);
-            return Conflict($"User with this Email already Exist {userDto.Email}");
         }
 
         using var transaction = await _userRepository.BeginTransactionAsync();
         try
         {
+
+            // find user with id in db
+            var user = await _userRepository.GetAsync(id);
+            if (user == null)
+            {
+                _logger.LogWarning("User with Id {UserId} not found!", id);
+                return NotFound($"User with Id '{id}' not found!");
+            }
+
+            // Email already reserved on diferent User?
+            var exist = await _userRepository.AnyAsync(p => p.NormalizedEmail == userDto.Email.ToUpper() && p.Id != userDto.Id);
+            if (exist)
+            {
+                _logger.LogInformation("User with this Email already Exist {UserEmail}", userDto.Email);
+                return Conflict($"User with this Email already Exist {userDto.Email}");
+            }
+
+            var rolesList = await _roleRepository.GetAllAsync();
+
+            if (userDto.Roles != null && userDto.Roles.Count > 0)
+            {
+                // check userDto roles exist in db
+                var invalidRoles = userDto.Roles.Except(rolesList.Select(r => r.Name)).ToList();
+                if (invalidRoles.Count > 0)
+                {
+                    _logger.LogWarning("Invalid roles found in UserDto: {InvalidRoles}", invalidRoles);
+                    return BadRequest($"Role do not exist: {invalidRoles[0]}");
+                }
+
+            }
 
             user.Email = userDto.Email;
             user.NormalizedEmail = userDto.Email.ToUpper();
@@ -258,33 +271,30 @@ public class UsersApiController(IRepository<IdentityRole> roleRepository, IRepos
                 user.PasswordHash = new PasswordHasher<ApplicationUser>().HashPassword(null!, userDto.NewPassword);
             }
 
-            // Remove old userRoles
-            var oldUserRoles = await _userRoleRepository.GetList().Where(ur => ur.UserId == user.Id).ToListAsync();
-            if (oldUserRoles.Count > 0)
+            if (rolesList.Any())
             {
-                _userRoleRepository.RemoveRange(oldUserRoles);
+                // Remove old userRoles
+                var oldUserRoles = await _userRoleRepository.GetList().Where(ur => ur.UserId == user.Id).ToListAsync();
+                if (oldUserRoles.Count > 0)
+                {
+                    _userRoleRepository.RemoveRange(oldUserRoles);
+                }
             }
 
-            // Add new userRoles
-            var rolesList = await _roleRepository.GetList().ToListAsync();
-            var Roles = userDto.Roles
-                .Select(ur => rolesList.FirstOrDefault(r => r.Name == ur))
-                .Where(r => r != null);
-
-            var newUserRoles = Roles.Select(r => new IdentityUserRole<string>
+            if (userDto.Roles != null && userDto.Roles.Count > 0)
             {
-                UserId = user.Id,
-                RoleId = r?.Id!
-            }).ToList();
+                var newUserRoles = userDto.Roles.Select(r => new IdentityUserRole<string>
+                {
+                    UserId = user.Id,
+                    RoleId = rolesList.First(p => p.Name == r).Id
+                }).ToList();
 
-            await _userRoleRepository.AddRangeAsync(newUserRoles);
-
-
+                await _userRoleRepository.AddRangeAsync(newUserRoles);
+            }
 
             await _userRepository.SaveChangesAsync();
             await transaction.CommitAsync();
             _logger.LogInformation("User '{UserEmail}' successfully updated!", user.Email);
-
 
 
             var newUserDto = new UserDto
@@ -304,7 +314,7 @@ public class UsersApiController(IRepository<IdentityRole> roleRepository, IRepos
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            _logger.LogError(ex, "Error occurred while trying to update User '{UserEmail}' in db!", user.Email);
+            _logger.LogError(ex, "Error occurred while trying to update User in db!");
             return StatusCode(500, "Error occurred while trying to update User in db");
         }
     }
