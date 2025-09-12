@@ -11,11 +11,19 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Moq;
 using System.Linq.Expressions;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace CineTrackBE.Tests.Integration.ApiEndpoints;
 
-public class AdminApiEndpointsTest2
+public class AdminApiControllerTests2
 {
+    private readonly ITestOutputHelper _output;
+
+    public AdminApiControllerTests2(ITestOutputHelper output)
+    {
+        _output = output;
+    }
+
     // ADD FILM //
     [Fact]
     public async Task AddFilm__ShouldReturnCreatedAtActionResult_WithFilmDto()
@@ -200,34 +208,41 @@ public class AdminApiEndpointsTest2
         await setup.FilmGenreRepository.AddRangeAsync(filmGenres);
         await setup.FilmGenreRepository.SaveChangesAsync();
 
-        var comments = await Fakers.Comment.RuleFor(c => c.FilmId, filmId).GenerateAndSaveAsync(2, setup.Context);
-        var rating = await Fakers.Rating.RuleFor(r => r.CommentId, comments[0].Id).GenerateOneAndSaveAsync(setup.Context);
+        var user = await Fakers.User.GenerateOneAndSaveAsync(setup.Context);
+
+        var comments = await Fakers.Comment
+            .RuleFor(c => c.FilmId, f => filmId)
+            .RuleFor(c => c.AutorId, f => user.Id)
+            .RuleFor(c => c.Rating, f => null!)
+            .RuleFor(c => c.RatingId, f => 0)
+            .GenerateAndSaveAsync(2, setup.Context);
+
+        var rating = await Fakers.Rating.RuleFor(r => r.CommentId, comments[1].Id).GenerateOneAndSaveAsync(setup.Context);
 
 
         // Pre-check
-        var filmCheck = await setup.FilmRepository.GetAllAsync();
-        filmCheck.Should().ContainSingle();
+        var filmCheck = await setup.FilmRepository.CountAsync();
+        filmCheck.Should().Be(1);
 
-        var filmGenreCheck = await setup.FilmGenreRepository.GetAllAsync();
-        filmGenreCheck.Should().HaveCount(genres.Count); // 2
+        var filmGenreCheck = await setup.FilmGenreRepository.CountAsync();
+        filmGenreCheck.Should().Be(genres.Count); // 2
 
-        var ratingCheck = await setup.Context.Ratings.ToListAsync();
-        ratingCheck.Should().ContainSingle();
+        var ratingCheck = await setup.Context.Ratings.CountAsync();
+        ratingCheck.Should().Be(1);
 
-        var commentsCheck = await setup.Context.Comments.ToListAsync();
-        commentsCheck.Should().HaveCount(comments.Count); // 2
+        var commentsCheck = await setup.Context.Comments.CountAsync();
+        commentsCheck.Should().Be(comments.Count); // 2
 
         // Act
         var result = await setup.Controller.DeleteFilm(filmId);
 
         // Assert
         var okResult = result.Should().BeOfType<OkResult>().Subject;
-        (await setup.FilmRepository.GetAllAsync()).Should().BeEmpty();
-        (await setup.FilmGenreRepository.GetAllAsync()).Should().BeEmpty();
-        (await setup.Context.Ratings.ToListAsync()).Should().BeEmpty();
-        (await setup.Context.Comments.ToListAsync()).Should().BeEmpty();
+        (await setup.FilmRepository.CountAsync()).Should().Be(0);
+        (await setup.FilmGenreRepository.CountAsync()).Should().Be(0);
+        (await setup.Context.Ratings.CountAsync()).Should().Be(0);
+        (await setup.Context.Comments.CountAsync()).Should().Be(0);
     }
-
 
     [Fact]
     public async Task DeleteFilm__ShouldReturn_Status500InternalServerError_WhenDbErrorOccured()

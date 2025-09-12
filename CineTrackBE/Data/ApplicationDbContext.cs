@@ -33,13 +33,23 @@ namespace CineTrackBE.Data
             }
 
 
+            builder.Entity<Film>()
+                .HasMany(f => f.Comments)
+                .WithOne(c => c.Film)
+                .HasForeignKey(c => c.FilmId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<ApplicationUser>()
+                .HasMany(p => p.Comments)
+                .WithOne(p => p.Autor)
+                .HasForeignKey(p => p.AutorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.Entity<Comment>()
                 .HasOne(p => p.Rating)
                 .WithOne(p => p.Comment)
                 .HasForeignKey<Rating>(p => p.CommentId)
-                .IsRequired();
-
-
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<FilmGenre>()
                 .HasKey(p => new { p.FilmId, p.GenreId });
@@ -47,7 +57,8 @@ namespace CineTrackBE.Data
             builder.Entity<FilmGenre>()
                 .HasOne(p => p.Film)
                 .WithMany(p => p.FilmGenres)
-                .HasForeignKey(p => p.FilmId);
+                .HasForeignKey(p => p.FilmId)
+                .OnDelete(DeleteBehavior.Cascade);
 
 
             builder.Entity<FilmGenre>()

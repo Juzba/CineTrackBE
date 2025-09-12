@@ -5,7 +5,7 @@ using Xunit;
 
 namespace CineTrackBE.Tests.Integration.ApiEndpoints;
 
-public class AuthApiEndpointsTests
+public class AuthApiControllerTests
 {
     //[Fact]
     //public async Task LoginAsync_Should_Return_BadRequest_When_ModelStateIsNotValid()

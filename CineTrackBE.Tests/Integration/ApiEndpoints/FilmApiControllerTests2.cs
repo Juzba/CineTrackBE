@@ -14,7 +14,7 @@ using Xunit;
 
 namespace CineTrackBE.Tests.Integration.ApiEndpoints;
 
-public class FilmApiEndpointsTests2
+public class FilmApiControllerTests2
 {
 
     [Fact]

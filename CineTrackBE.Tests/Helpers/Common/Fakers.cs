@@ -22,16 +22,24 @@ public static class Fakers
     // USER //
     public static readonly Faker<ApplicationUser> User =
         new Faker<ApplicationUser>()
-            .RuleFor(g => g.UserName, f => $"UserName {f.Random.AlphaNumeric(6)}")
+            .RuleFor(g => g.UserName, f => f.Name.FullName())
             .RuleFor(g => g.Email, f => $"TestEmail {f.Random.AlphaNumeric(6)}")
+            .RuleFor(g => g.NormalizedEmail, (f, u) => u.Email?.ToUpper())
             .RuleFor(g => g.PasswordHash, f => $"PassWord {f.Random.Hash(10)}")
-            .RuleFor(g => g.PhoneNumber, f => $"Test-PhoneNumber {f.Random.AlphaNumeric(6)}");
+            .RuleFor(g => g.PhoneNumber, f => f.Phone.PhoneNumber());
 
+    // USER-DTO //
+    public static readonly Faker<UserDto> UserDto =
+        new Faker<UserDto>()
+            .RuleFor(g => g.UserName, f => f.Name.FullName())
+            .RuleFor(g => g.Email, f => $"TestEmail {f.Random.AlphaNumeric(6)}")
+            .RuleFor(g => g.NewPassword, f => $"PassWord {f.Random.Hash(10)}")
+            .RuleFor(g => g.PhoneNumber, f => f.Phone.PhoneNumber());
 
     // ROLE //
     public static readonly Faker<IdentityRole> Role =
         new Faker<IdentityRole>()
-            .RuleFor(g => g.Name, f => $"Role {f.Random.AlphaNumeric(6)}");
+            .RuleFor(g => g.Name, f => $"Role {f.IndexFaker}");
 
     // FILM //
     public static readonly Faker<Film> Film =
@@ -88,6 +96,8 @@ public static class Fakers
           new Faker<Comment>()
             .RuleFor(fm => fm.Text, f => $"Test Comment {f.Random.AlphaNumeric(8)}")
             .RuleFor(fm => fm.SendDate, f => f.Date.Between(new DateTime(1980, 1, 1), new DateTime(2026, 12, 31)));
+
+
 
 
     // COMMENT-INCLUDE-RATING //

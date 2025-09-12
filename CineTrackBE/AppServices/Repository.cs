@@ -18,6 +18,7 @@ namespace CineTrackBE.AppServices
         IQueryable<T> GetList();
         Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
+        Task<int> CountAsync(CancellationToken cancellationToken = default);
         Task SaveChangesAsync(CancellationToken cancellationToken = default);
         Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
     }
@@ -135,6 +136,12 @@ namespace CineTrackBE.AppServices
         {
             ArgumentNullException.ThrowIfNull(predicate);
             return await _context.Set<T>().AnyAsync(predicate, cancellationToken);
+        }
+
+        // HAVE COUNT //
+        public async Task<int> CountAsync(CancellationToken cancellationToken = default)
+        {
+            return await _context.Set<T>().CountAsync(cancellationToken);
         }
 
 

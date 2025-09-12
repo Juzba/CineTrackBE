@@ -434,6 +434,23 @@ public class RepositoryTests
         result.Should().NotBeNull();
         result.Should().BeEquivalentTo(targetFilm);
     }
+
+
+    [Fact]
+    public async Task CountAsync__Should_ReturnFilmCount()
+    {
+        // Arrange
+        using var setup = RepositoryTestSetup.Create();
+        var filmRepository = setup.FilmRepository;
+
+        var films = await Fakers.Film.GenerateAndSaveAsync(3, setup.Context);
+
+        // Act
+        var result = await filmRepository.CountAsync();
+        // Assert
+        result.Should().Be(3);
+    }
+
 }
 
 

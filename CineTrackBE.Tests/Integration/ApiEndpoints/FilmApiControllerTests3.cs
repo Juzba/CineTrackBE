@@ -13,7 +13,7 @@ using Xunit;
 
 namespace CineTrackBE.Tests.Integration.ApiEndpoints;
 
-public class FilmApiEndpointsTests3
+public class FilmApiControllerTests3
 {
     [Fact]
     public async Task GetAllComments__Should_Return_OkResult_With_Enumerable_CommentsInclRatingDto()

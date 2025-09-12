@@ -12,7 +12,7 @@ using Xunit;
 
 namespace CineTrackBE.Tests.Integration.ApiEndpoints;
 
-public class AdminApiEndpointsTests1
+public class AdminApiControllerTests1
 {
     [Fact]
     public async Task AddGenre__Should_Return_CreateAtActionResult_WithObject_GenreDto()

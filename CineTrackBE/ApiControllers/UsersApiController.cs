@@ -24,7 +24,7 @@ public class UsersApiController(IRepository<IdentityRole> roleRepository, IRepos
 
     // GET ALL USERS //
     [HttpGet("AllUsers")]
-    public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUser()
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
     {
         try
         {
@@ -60,7 +60,7 @@ public class UsersApiController(IRepository<IdentityRole> roleRepository, IRepos
 
     // ADD USER //
     [HttpPost("AddUser")]
-    public async Task<ActionResult<UserDto>> AddUser(UserDto user)
+    public async Task<ActionResult<UserDto>> AddUser(UserDto userDto)
     {
 
         if (!ModelState.IsValid)
@@ -69,7 +69,7 @@ public class UsersApiController(IRepository<IdentityRole> roleRepository, IRepos
             return BadRequest(ModelState);
         }
 
-        if (string.IsNullOrWhiteSpace(user.NewPassword) || user.NewPassword.Length < 6)
+        if (string.IsNullOrWhiteSpace(userDto.NewPassword) || userDto.NewPassword.Length < 6)
         {
             _logger.LogWarning("Password must be at least 6 characters long!");
             return BadRequest("Password must be at least 6 characters long!");
@@ -80,11 +80,11 @@ public class UsersApiController(IRepository<IdentityRole> roleRepository, IRepos
 
 
         // Is User in db?
-        var exist = await _userRepository.GetList().AnyAsync(p => p.NormalizedEmail == user.Email.ToUpper());
+        var exist = await _userRepository.AnyAsync(p => p.NormalizedEmail == userDto.Email.ToUpper());
         if (exist)
         {
-            _logger.LogInformation("User with this Email already Exist {UserEmail}", user.Email);
-            return Conflict($"User with this Email already Exist {user.Email}");
+            _logger.LogInformation("User with this Email already Exist {UserEmail}", userDto.Email);
+            return Conflict($"User with this Email already Exist {userDto.Email}");
         }
 
         using var transaction = await _userRepository.BeginTransactionAsync();
@@ -92,33 +92,42 @@ public class UsersApiController(IRepository<IdentityRole> roleRepository, IRepos
         {
             var newUser = new ApplicationUser
             {
-                UserName = user.UserName,
-                NormalizedUserName = user.UserName.ToUpper(),
-                Email = user.Email,
-                NormalizedEmail = user.Email.ToUpper(),
-                PhoneNumber = user.PhoneNumber,
-                EmailConfirmed = user.EmailConfirmed,
-                PasswordHash = new PasswordHasher<ApplicationUser>().HashPassword(null!, user.NewPassword)
+                UserName = userDto.UserName,
+                NormalizedUserName = userDto.UserName.ToUpper(),
+                Email = userDto.Email,
+                NormalizedEmail = userDto.Email.ToUpper(),
+                PhoneNumber = userDto.PhoneNumber,
+                EmailConfirmed = userDto.EmailConfirmed,
+                PasswordHash = new PasswordHasher<ApplicationUser>().HashPassword(null!, userDto.NewPassword)
             };
 
             await _userRepository.AddAsync(newUser);
             await _userRepository.SaveChangesAsync();
 
-
+            // not empty roles in db?
             var rolesList = await _roleRepository.GetList().ToListAsync();
-            var newUserRoles = user.Roles
-                .Select(p => new IdentityUserRole<string>
+            if (rolesList.Count != 0)
+            {
+                // check if all roles are in db
+                var invalidRoles = userDto.Roles.Except(rolesList.Select(r => r.Name)).ToList();
+                if (invalidRoles.Count > 0)
                 {
-                    UserId = newUser.Id,
-                    RoleId = rolesList.FirstOrDefault(r => r.Name == p)!.Id
-                });
+                    _logger.LogWarning("Invalid roles found in UserDto: {InvalidRoles}", invalidRoles);
+                    return BadRequest($"Roles do not exist: {string.Join(", ", invalidRoles)}");
+                }
 
-            await _userRoleRepository.AddRangeAsync(newUserRoles);
-
-            await _userRepository.SaveChangesAsync();
+                var newUserRoles = userDto.Roles
+                    .Select(p => new IdentityUserRole<string>
+                    {
+                        UserId = newUser.Id,
+                        RoleId = rolesList.FirstOrDefault(r => r.Name == p)!.Id
+                    });
+                await _userRoleRepository.AddRangeAsync(newUserRoles);
+                await _userRepository.SaveChangesAsync();
+            }
 
             await transaction.CommitAsync();
-            _logger.LogInformation("Success add new user: {UserEmail}", user.Email);
+            _logger.LogInformation("Success add new user: {UserEmail}", userDto.Email);
 
 
             var resultDto = new UserDto
@@ -129,7 +138,7 @@ public class UsersApiController(IRepository<IdentityRole> roleRepository, IRepos
                 PhoneNumber = newUser.PhoneNumber,
                 EmailConfirmed = newUser.EmailConfirmed,
                 NewPassword = null,
-                Roles = user.Roles
+                Roles = userDto.Roles
             };
 
 
@@ -140,7 +149,7 @@ public class UsersApiController(IRepository<IdentityRole> roleRepository, IRepos
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            _logger.LogError(ex, "Error occurred while trying to save User '{UserEmail}' to db!", user.Email);
+            _logger.LogError(ex, "Error occurred while trying to save User '{UserEmail}' to db!", userDto.Email);
             return StatusCode(500, "Error occurred while trying to save User to db");
         }
     }
@@ -156,7 +165,6 @@ public class UsersApiController(IRepository<IdentityRole> roleRepository, IRepos
             return BadRequest("Invalid user ID. ID cannot be empty.");
         }
 
-        using var transaction = await _userRepository.BeginTransactionAsync();
         try
         {
             var user = await _userRepository.GetList()
@@ -175,30 +183,16 @@ public class UsersApiController(IRepository<IdentityRole> roleRepository, IRepos
                 return BadRequest("You cannot delete your own account while logged in!");
             }
 
-            // Remove associated userRoles
-            var userRoles = await _userRoleRepository.GetList()
-           .Where(ur => ur.UserId == id)
-           .ToListAsync();
-
-            if (userRoles.Count != 0)
-            {
-                _userRoleRepository.RemoveRange(userRoles);
-                await _userRepository.SaveChangesAsync();
-            }
-
             // Remove user 
             _userRepository.Remove(user);
             await _userRepository.SaveChangesAsync();
-            await transaction.CommitAsync();
-
 
             _logger.LogInformation("User '{UserEmail}' successfully deleted!", user.Email);
-            return Ok();
+            return Ok($"User with Id {user.Id} has been deleted successfully.");
 
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
             _logger.LogError(ex, "Error occurred while deleting user {UserId}", id);
             return StatusCode(500, "Error occurred while deleting user");
         }
