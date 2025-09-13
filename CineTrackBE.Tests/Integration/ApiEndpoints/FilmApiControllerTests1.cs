@@ -2,6 +2,7 @@
 using CineTrackBE.Models.DTO;
 using CineTrackBE.Models.Entities;
 using CineTrackBE.Tests.Helpers.Common;
+using CineTrackBE.Tests.Helpers.TestSetups.Universal;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -11,98 +12,99 @@ namespace CineTrackBE.Tests.Integration.ApiEndpoints;
 
 public class FilmApiControllerTests1
 {
-
     [Fact]
-    public async Task GetLatestFilms__Should_Return_OkResult()
+    public async Task GetFilmsForDashBoard__Should_Return_OkObjectResult_WithDashBoardDto_AndEmptyLists()
     {
         // Arrange 
         using var setup = FilmApiControllerTestSetup.Create();
-
-        var films = await Fakers.Film.GenerateAndSaveAsync(1, setup.Context);
+        await HttpContextTestSetup.Create().BuildAndSaveAsync(setup.Controller, setup.Context);
 
         // Act
-        var result = await setup.Controller.GetLatestFilms();
+        var result = await setup.Controller.GetFilmsForDashBoard();
 
         // Assert
         result.Should().NotBeNull();
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var dashBoardDto = okResult.Value.Should().BeOfType<DashBoardDto>().Subject;
+        dashBoardDto.Should().NotBeNull();
+        dashBoardDto.LatestFilms.Should().BeEmpty();
+        dashBoardDto.FavoriteFilms.Should().BeEmpty();
     }
 
     [Fact]
-    public async Task GetLatestFilms__Should_Return_EmptyList()
+    public async Task GetFilmsForDashBoard__Should_Return_Exactly_5_Films()
     {
         // Arrange 
         using var setup = FilmApiControllerTestSetup.Create();
-
-        // Act
-        var result = await setup.Controller.GetLatestFilms();
-
-        // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedFilms = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject;
-        returnedFilms.Should().BeEmpty();
-    }
-
-    [Fact]
-    public async Task GetLatestFilms__Should_Return_Exactly_5_Films()
-    {
-        // Arrange 
-        using var setup = FilmApiControllerTestSetup.Create();
+        await HttpContextTestSetup.Create().BuildAndSaveAsync(setup.Controller, setup.Context);
 
         var films = await Fakers.Film.GenerateAndSaveAsync(6, setup.Context);
 
         // Act
-        var result = await setup.Controller.GetLatestFilms();
+        var result = await setup.Controller.GetFilmsForDashBoard();
 
         // Assert
         result.Should().NotBeNull();
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedFilms = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject;
+        var dashBoardDto = okResult.Value.Should().BeOfType<DashBoardDto>().Subject;
 
-        returnedFilms.Should().HaveCount(5);
+        dashBoardDto.LatestFilms.Should().HaveCount(5);
     }
 
     [Fact]
-    public async Task GetLatestFilms__Should_Include_Genres()
+    public async Task GetFilmsForDashBoard__Should_ReturnDashBoardDto_WithLists_IncludeGenres()
     {
         // Arrange 
         using var setup = FilmApiControllerTestSetup.Create();
+        var httpSetup = await HttpContextTestSetup.Create().BuildAndSaveAsync(setup.Controller, setup.Context);
+        var (user, _, _) = httpSetup;
 
         var films = await Fakers.FilmIncGenre.GenerateAndSaveAsync(3, setup.Context);
 
-        var expectedGenreName = films.OrderByDescending(p => p.ReleaseDate).FirstOrDefault()?.FilmGenres.FirstOrDefault()?.Genre.Name;
-        expectedGenreName.Should().NotBeNullOrEmpty("Test setup should create films with genres");
+        user.FavoriteMovies = [.. films.Select(p => p.Id)];
+        await setup.Context.SaveChangesAsync();
+
+        var expectedFilm = films.OrderByDescending(p => p.ReleaseDate).First();
+        var expectedGenres = expectedFilm.FilmGenres.Select(fg => fg.Genre.Name).ToList();
+        expectedGenres.Should().NotBeNullOrEmpty("Test setup should create films with genres");
 
         // Act
-        var result = await setup.Controller.GetLatestFilms();
+        var result = await setup.Controller.GetFilmsForDashBoard();
 
         // Assert
         result.Should().NotBeNull();
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedFilms = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject;
+        var dashBoardDto = okResult.Value.Should().BeOfType<DashBoardDto>().Subject;
 
-        /// Include genre
-        returnedFilms.Should().OnlyContain(f => f.Genres != null && f.Genres.Any());
-        returnedFilms.First().Genres.First().Name.Should().Be(expectedGenreName);
+        /// Latest Films Include genre
+        dashBoardDto.LatestFilms.Should().NotBeNullOrEmpty();
+        dashBoardDto.LatestFilms.ForEach(p => p.Genres.Should().ContainSingle());
+        dashBoardDto.LatestFilms.ForEach(p => p.Genres[0].Name.Should().StartWith("Genre"));
+
+        /// Favorite Films Include genre
+        dashBoardDto.FavoriteFilms.Should().NotBeNullOrEmpty();
+        dashBoardDto.FavoriteFilms.ForEach(p => p.Genres.Should().ContainSingle());
+        dashBoardDto.FavoriteFilms.ForEach(p => p.Genres[0].Name.Should().StartWith("Genre"));
     }
 
     [Fact]
-    public async Task GetLatestFilms__Should_Return_Films_Ordered_By_ReleaseDate_Desc()
+    public async Task GetFilmsForDashBoard__Should_Return_LatestFilms_Ordered_By_ReleaseDate_Desc()
     {
         // Arrange 
         using var setup = FilmApiControllerTestSetup.Create();
+        await HttpContextTestSetup.Create().BuildAndSaveAsync(setup.Controller, setup.Context);
 
         var films = await Fakers.Film.GenerateAndSaveAsync(5, setup.Context);
 
         var expectedFilms = films.OrderByDescending(p => p.ReleaseDate).Take(5).ToList();
 
         // Act
-        var result = await setup.Controller.GetLatestFilms();
+        var result = await setup.Controller.GetFilmsForDashBoard();
 
         // Assert
         result.Should().NotBeNull();
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedFilms = okResult.Value.Should().BeAssignableTo<IEnumerable<FilmDto>>().Subject;
+        var returnedFilms = okResult.Value.Should().BeOfType<DashBoardDto>().Subject.LatestFilms;
 
         /// Compare Objects Film and FilmDto
         var expected = expectedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
@@ -116,7 +118,43 @@ public class FilmApiControllerTests1
     }
 
     [Fact]
-    public async Task GetLatestFilms__Should_Return_InternalServerError_When_Exception_Occurs()
+    public async Task GetFilmsForDashBoard__Should_Return_FavoriteFilms_OrderedByUserOrder_ByLatestAdding()
+    {
+        // Arrange 
+        using var setup = FilmApiControllerTestSetup.Create();
+        var httpSetup = await HttpContextTestSetup.Create().BuildAndSaveAsync(setup.Controller, setup.Context);
+        var (user, _, _) = httpSetup;
+
+        var films = await Fakers.Film.RuleFor(fm => fm.Id, f => f.Random.Number(9999)).GenerateAndSaveAsync(3, setup.Context);
+        user.FavoriteMovies = [.. films.Select(p => p.Id)];
+        await setup.Context.SaveChangesAsync();
+
+        var expectedFilms = films
+        .Where(f => user.FavoriteMovies.Contains(f.Id))
+        .OrderByDescending(f => Array.IndexOf([.. user.FavoriteMovies], f.Id))
+        .ToList();
+
+
+        // Act
+        var result = await setup.Controller.GetFilmsForDashBoard();
+
+        // Assert
+        result.Should().NotBeNull();
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var returnedFilms = okResult.Value.Should().BeOfType<DashBoardDto>().Subject.FavoriteFilms;
+
+        /// Compare Objects Film and FilmDto
+        var expected = expectedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
+        var returned = returnedFilms.Select(p => new { Name = p.Name, Director = p.Director, Date = p.ReleaseDate });
+
+        returned.Should().NotBeEmpty();
+        returned.Should().HaveSameCount(returned);
+        returned.Should().BeEquivalentTo(expected, options => options.WithStrictOrdering());
+
+    }
+
+    [Fact]
+    public async Task GetFilmsForDashBoard__Should_Return_InternalServerError_When_Exception_Occurs()
     {
         // Arrange
         var mockFilmRepository = new Mock<IRepository<Film>>();
@@ -128,7 +166,7 @@ public class FilmApiControllerTests1
         using var setup = FilmApiControllerTestSetup.Create(filmRepository: mockFilmRepository.Object);
 
         // Act
-        var result = await setup.Controller.GetLatestFilms();
+        var result = await setup.Controller.GetFilmsForDashBoard();
 
         // Assert
         result.Should().NotBeNull();

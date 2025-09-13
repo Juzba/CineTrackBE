@@ -23,20 +23,44 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
     private readonly IRepository<Rating> _ratingRepository = ratingRepository;
 
 
+
     // Top 5 Latest Films //
-    [HttpGet("LatestFilms")]
-    public async Task<ActionResult<IEnumerable<FilmDto>>> GetLatestFilms()
+    // User Favorite Films //
+    [HttpGet("DashBoardFilms")]
+    public async Task<ActionResult<DashBoardDto>> GetFilmsForDashBoard()
     {
         try
         {
-            var films = await _filmRepository.GetList()
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                _logger.LogWarning("User not authenticated when accessing dashboard films.");
+                return Unauthorized("User not authenticated!");
+            }
+
+            var user = await _userRepository.GetAsync(userId);
+            if (user == null)
+            {
+                _logger.LogWarning("User not authenticated when accessing dashboard films.");
+                return Unauthorized("User not authenticated!");
+            }
+
+            var favoriteFilms = await _filmRepository.GetList()
+                .Include(p => p.FilmGenres)
+                .ThenInclude(p => p.Genre)
+                .Where(p => user.FavoriteMovies.Contains(p.Id))
+                .Take(30)
+                .ToListAsync();
+
+            var latestFilms = await _filmRepository.GetList()
                 .Include(p => p.FilmGenres)
                 .ThenInclude(p => p.Genre)
                 .OrderByDescending(p => p.ReleaseDate)
                 .Take(5)
                 .ToListAsync();
 
-            var filmsDTO = films.Select(p => new FilmDto()
+
+            var latestsFilmsDTO = latestFilms.Select(p => new FilmDto()
             {
                 Id = p.Id,
                 Name = p.Name,
@@ -47,14 +71,33 @@ public class FilmApiController(ILogger<FilmApiController> logger, IRepository<Fi
                 Genres = [.. p.FilmGenres.Select(g => new GenreDto { Id = g.Genre.Id, Name = g.Genre.Name })]
             });
 
-            if (!filmsDTO.Any())
+            var favoriteFilmsDto = favoriteFilms
+                .OrderByDescending(f => Array.IndexOf([.. user.FavoriteMovies], f.Id))
+                .Select(p => new FilmDto()
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Director = p.Director,
+                    ImageFileName = p.ImageFileName,
+                    Description = p.Description,
+                    ReleaseDate = p.ReleaseDate,
+                    Genres = [.. p.FilmGenres.Select(g => new GenreDto { Id = g.Genre.Id, Name = g.Genre.Name })]
+                });
+
+            var DashBoardDto = new DashBoardDto
+            {
+                LatestFilms = [.. latestsFilmsDTO],
+                FavoriteFilms = [.. favoriteFilmsDto]
+            };
+
+            if (!latestsFilmsDTO.Any())
             {
                 _logger.LogWarning("No films found in the database.");
-                return Ok(filmsDTO);
+                return Ok(DashBoardDto);
             }
 
-            _logger.LogInformation("Fetched latest films: {FilmsDTO}", filmsDTO);
-            return Ok(filmsDTO);
+            _logger.LogInformation("Fetched latest films: {FilmsDTO}", latestsFilmsDTO);
+            return Ok(DashBoardDto);
 
         }
         catch (Exception ex)
