@@ -17,16 +17,6 @@
 ## Popis projektu
 CineTrack je komplexní systém pro správu a hodnocení filmů. Projekt se skládá z backendu vytvořeného v ASP.NET MVC s Web API a frontendu ve WPF využívajícího MVVM architekturu s Prism frameworkem.
 
-## Rozšíření projektu
-1. Implementace systému doporučení filmů na základě uživatelských preferencí
-2. Integrace s externím API (např. TMDB) pro získávání dodatečných informací o filmech
-3. Implementace fulltextového vyhledávání v databázi filmů
-4. Přidání funkce pro generování statistik a reportů (např. nejlépe hodnocené filmy, aktivita uživatelů)
-5. Implementace systému notifikací (např. při nových komentářích k oblíbeným filmům)
-6. Rozšíření o sekci pro sledování seriálů včetně správy epizod
-7. Přidání možnosti vytváření a sdílení uživatelských seznamů filmů
-
-
 ## Cíle projektu
 - Demonstrovat schopnost vytvořit komplexní full-stack aplikaci
 - Ukázat efektivní práci s databází a implementaci business logiky na straně serveru
