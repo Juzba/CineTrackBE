@@ -15,7 +15,9 @@ namespace CineTrackBE.Tests.Integration.ApiEndpoints;
 
 public class UsersApiControllersTests2
 {
+
     // DELETE USER //
+
     [Fact]
     public async Task DeleteUser_Should_Return_OkResult_And_DeleteUserWithRelatedData()
     {

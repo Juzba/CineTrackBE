@@ -36,6 +36,7 @@ namespace CineTrackBE.AppServices
 
             var userRole = new IdentityUserRole<string> { UserId = user.Id, RoleId = roleEntity.Id };
             await _context.UserRoles.AddAsync(userRole, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
             _logger.LogInformation("Role {Role} added to user {UserName}", role, user.UserName);
         }
 
@@ -55,6 +56,7 @@ namespace CineTrackBE.AppServices
 
 
             _context.UserRoles.Remove(userRole);
+            await _context.SaveChangesAsync(cancellationToken);
             _logger.LogInformation("Role {Role} removed from user {UserName}", role, user.UserName);
         }
 
@@ -64,7 +66,7 @@ namespace CineTrackBE.AppServices
         {
             ArgumentNullException.ThrowIfNull(user);
 
-            var userRoles = await _context.UserRoles.Where(ur => ur.UserId == user.Id).Select(ur => ur.RoleId).ToListAsync(cancellationToken); 
+            var userRoles = await _context.UserRoles.Where(ur => ur.UserId == user.Id).Select(ur => ur.RoleId).ToListAsync(cancellationToken);
             return await _context.Roles.Where(r => userRoles.Contains(r.Id)).ToListAsync(cancellationToken);
         }
 
@@ -99,13 +101,14 @@ namespace CineTrackBE.AppServices
             // film-genres not existing in db //
             var genreList = genreIds.Except(existsFilmGenres.Select(p => p.GenreId)).Select(p => new FilmGenre() { GenreId = p, FilmId = film.Id });
 
-            if (genreList == null)
+            if (genreList == null || !genreList.Any())
             {
                 _logger.LogWarning("No new genres to add for film with ID {FilmId}", film.Id);
-                throw new ArgumentException("No new genres to add.", nameof(genreIds));
+                return;
             }
 
             await _context.AddRangeAsync(genreList, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
     }

@@ -114,7 +114,7 @@ namespace CineTrackBE.Controllers
             Add_Additional_UserParametrs(ref user);
             Add_Hash_To_UserPassword(ref user);
 
-
+            using var transaction = await _userRepository.BeginTransactionAsync();
             try
             {
                 // add role admin
@@ -125,12 +125,14 @@ namespace CineTrackBE.Controllers
 
                 await _userRepository.AddAsync(user);
                 await _userRepository.SaveChangesAsync();
+                await transaction.CommitAsync();
                 _logger.LogInformation("New user created with ID {UserId}", user.Id);
                 return RedirectToAction(nameof(Index));
 
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 _logger.LogError(ex, "An error occurred while creating a new user.");
                 ModelState.AddModelError(string.Empty, "Něco se pokazilo, zkuste to prosím znovu.");
                 return View(user);

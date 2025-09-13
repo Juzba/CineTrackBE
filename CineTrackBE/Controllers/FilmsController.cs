@@ -95,7 +95,7 @@ public class FilmsController( IRepository<FilmGenre> filmGenreRepository ,ILogge
 
 
             await _dataService.AddGenresToFilmAsync(filmViewModel.Film, filmViewModel.SelectedGenresId);
-            await _filmRepository.SaveChangesAsync();
+           
 
             await transaction.CommitAsync();
             _logger.LogInformation("New film created with ID {FilmId}", filmViewModel.Film!.Id);

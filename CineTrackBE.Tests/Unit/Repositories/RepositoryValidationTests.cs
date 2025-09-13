@@ -57,13 +57,13 @@ public class RepositoryValidationTests
     [InlineData("")]
     [InlineData(" ")]
     [InlineData(null)]
-    public async Task GetAsync_ThrowsArgumentNullException_WhenStringIsInvalid(string? Id)
+    public async Task GetAsync_ThrowsArgumentNullException_WhenStringIsInvalid(string? id)
     {
         // Act & Assert
         await FluentActions
-            .Invoking(async () => await _repository.GetAsync(null!))
+            .Invoking(async () => await _repository.GetAsync(id!))
             .Should()
-            .ThrowAsync<ArgumentNullException>();
+            .ThrowAsync<ArgumentException>();
     }
 
     [Fact]

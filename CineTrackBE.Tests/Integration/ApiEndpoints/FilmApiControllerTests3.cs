@@ -24,6 +24,7 @@ public class FilmApiControllerTests3
         var user = await Fakers.User.GenerateOneAndSaveAsync(setup.Context);
         var film = await Fakers.Film.GenerateOneAndSaveAsync(setup.Context);
         var comments = await Fakers.Comment
+            .UseSeed(5412)
             .RuleFor(fm => fm.AutorId, f => user.Id)
             .RuleFor(fm => fm.FilmId, f => film.Id)
             .RuleFor(fm => fm.Rating, f => new())

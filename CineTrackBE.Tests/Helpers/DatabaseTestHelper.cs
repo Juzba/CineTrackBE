@@ -36,7 +36,7 @@ public static class DatabaseTestHelper
     public static ApplicationDbContext CreateInMemoryContext(bool enableSeeding = false)
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-              .UseInMemoryDatabase(databaseName: "TestDb")
+              .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
               .Options;
 
         var context = new ApplicationDbContext(options, false);
