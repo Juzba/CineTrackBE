@@ -391,7 +391,7 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
     {
         try
         {
-            var movies = _filmRepository.GetList().Include(p => p.Comments).Include(p => p.Ratings);
+            var movies = _filmRepository.GetList().Include(p => p.Comments).ThenInclude(p => p.Rating);
             var users = _userRepository.GetList().Include(p => p.Comments);
             var ratings = _ratingRepository.GetList();
             var comments = _commentRepository.GetList();
@@ -402,9 +402,9 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
             var averageRating = totalRating > 0 ? await ratings.Select(p => p.UserRating).AverageAsync() : 0;
 
             // best rated films
-            var bestRatedFilms = await movies.Where(p=>p.Ratings.Any())
-                .OrderByDescending(p => p.Ratings.Select(p => p.UserRating)
-                .Average()).Take(3)
+            var bestRatedFilms = await movies.Where(p=>p.Comments.Select(p=>p.Rating.UserRating).Any())
+                .OrderByDescending(p => p.Comments.Select(p => p.Rating.UserRating).Average())
+                .Take(3)
                 .ToListAsync();
 
             // most popular
