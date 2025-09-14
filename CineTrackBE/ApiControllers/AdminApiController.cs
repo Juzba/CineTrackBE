@@ -12,13 +12,16 @@ namespace CineTrackBE.ApiControllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRepository, ILogger<AdminApiController> logger, IRepository<Film> filmRepository, IRepository<Genre> genreRepository, IRepository<FilmGenre> filmGenreRepository) : ControllerBase
+public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRepository, ILogger<AdminApiController> logger, IRepository<Film> filmRepository, IRepository<Genre> genreRepository, IRepository<FilmGenre> filmGenreRepository, IRepository<ApplicationUser> userRepository, IRepository<Rating> ratingRepository, IRepository<Comment> commentRepository) : ControllerBase
 {
     private readonly IRepository<Genre> _genreRepository = genreRepository;
     private readonly IRepository<FilmGenre> _filmGenreRepository = filmGenreRepository;
     private readonly IRepository<Film> _filmRepository = filmRepository;
+    private readonly IRepository<ApplicationUser> _userRepository = userRepository;
     private readonly IRepository<IdentityUserRole<string>> _userRoleRepository = userRoleRepository;
     private readonly ILogger<AdminApiController> _logger = logger;
+    private readonly IRepository<Rating> _ratingRepository = ratingRepository;
+    private readonly IRepository<Comment> _commentRepository = commentRepository;
 
 
     // ADD GENRE //
@@ -382,7 +385,75 @@ public class AdminApiController(IRepository<IdentityUserRole<string>> userRoleRe
         }
     }
 
+    // WEB STATISTICS //
+    [HttpGet("Statistics")]
+    public async Task<ActionResult<StatisticsDto>> GetWebStatistics()
+    {
+        try
+        {
+            var movies = _filmRepository.GetList().Include(p => p.Comments).Include(p => p.Ratings);
+            var users = _userRepository.GetList().Include(p => p.Comments);
+            var ratings = _ratingRepository.GetList();
+            var comments = _commentRepository.GetList();
 
+            var totalUsers = await users.CountAsync();
+            var totalComments = await comments.CountAsync();
+            var totalRating = await ratings.CountAsync();
+            var averageRating = totalRating > 0 ? await ratings.Select(p => p.UserRating).AverageAsync() : 0;
+
+            // best rated films
+            var bestRatedFilms = await movies.Where(p=>p.Ratings.Any())
+                .OrderByDescending(p => p.Ratings.Select(p => p.UserRating)
+                .Average()).Take(3)
+                .ToListAsync();
+
+            // most popular
+            var mostPopularFilms = await movies.OrderByDescending(p => p.Comments.Count()).Take(3).ToListAsync();
+            // Latest films
+            var latestFilms = await movies.OrderByDescending(p => p.ReleaseDate).Take(3).ToListAsync();
+            // top active users
+            var mostActiveUsers = await users.OrderByDescending(p => p.Comments.Count()).Take(3).ToListAsync();
+
+            var overview = new Overview
+            {
+                TotalMovies = await movies.CountAsync(),
+                AverageRating = averageRating,
+                TotalRatings = totalRating,
+                TotalComments = totalComments,
+                TotalUsers = totalUsers
+            };
+
+            var topMovies = new TopMovies
+            {
+                BestRated = [.. bestRatedFilms.Select(p => new FilmDto { Id = p.Id, Name = p.Name, Director = p.Director, ReleaseDate = p.ReleaseDate, ImageFileName = p.ImageFileName })],
+                MostPopular = [.. mostPopularFilms.Select(p => new FilmDto { Id = p.Id, Name = p.Name, Director = p.Director, ReleaseDate = p.ReleaseDate, ImageFileName = p.ImageFileName })],
+                Newest = [.. latestFilms.Select(p => new FilmDto { Id = p.Id, Name = p.Name, Director = p.Director, ReleaseDate = p.ReleaseDate, ImageFileName = p.ImageFileName })]
+            };
+
+            var userActivity = new UserActivity
+            {
+                AverageCommentsPerUser = totalUsers > 0 ? (double)totalComments / totalUsers : 0,
+                MostActiveUsers = [.. mostActiveUsers.Select(p => new UserDto { Id = p.Id, Email = p.Email, UserName = p.UserName })]
+            };
+
+            var statisticsDto = new StatisticsDto
+            {
+                Overview = overview,
+                TopMovies = topMovies,
+                UserActivity = userActivity
+            };
+
+            _logger.LogInformation("Web statistics successfully retrieved.");
+            return Ok(statisticsDto);
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while trying to retrieve statistics from the database.");
+            return StatusCode(500, "Error occurred while trying to retrieve statistics from the database.");
+        }
+
+    }
 
 
 
