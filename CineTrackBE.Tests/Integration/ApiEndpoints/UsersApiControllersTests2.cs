@@ -29,8 +29,13 @@ public class UsersApiControllersTests2
         var roles = await Fakers.Role.GenerateAndSaveAsync(2, setup.Context);
 
         var film = await Fakers.Film.GenerateOneAndSaveAsync(setup.Context);
-        var comment = await Fakers.Comment.RuleFor(p => p.AutorId, user.Id).RuleFor(p => p.FilmId, film.Id).GenerateOneAndSaveAsync(setup.Context);
-        await Fakers.Rating.RuleFor(p => p.CommentId, comment.Id).GenerateOneAndSaveAsync(setup.Context);
+
+        var comment = await Fakers.Comment.UseSeed(8542).RuleFor(p => p.AutorId, user.Id).RuleFor(p => p.FilmId, film.Id).GenerateOneAndSaveAsync(setup.Context);
+
+
+        await Fakers.Rating
+            .RuleFor(p => p.CommentId, comment.Id)
+            .GenerateOneAndSaveAsync(setup.Context);
 
 
         var userRoles = new List<IdentityUserRole<string>>()

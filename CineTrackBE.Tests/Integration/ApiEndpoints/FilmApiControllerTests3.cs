@@ -23,11 +23,15 @@ public class FilmApiControllerTests3
 
         var user = await Fakers.User.GenerateOneAndSaveAsync(setup.Context);
         var film = await Fakers.Film.GenerateOneAndSaveAsync(setup.Context);
-        var comments = await Fakers.Comment
-            .RuleFor(fm => fm.AutorId, f => user.Id)
-            .RuleFor(fm => fm.FilmId, f => film.Id)
-            .RuleFor(fm => fm.Rating, f => new())
-            .GenerateAndSaveAsync(3, setup.Context);
+        var comments = new List<Comment>
+        {
+            new() { Id=1, AutorId = user.Id,FilmId = film.Id,Rating = new Rating { UserRating = 85 },Text = "Amazing movie!", SendDate = DateTime.UtcNow},
+            new() { Id=2, AutorId = user.Id,FilmId = film.Id,Rating = new Rating { UserRating = 90 },Text = "Loved it!", SendDate = DateTime.UtcNow.AddMinutes(-10)},
+            new() {Id=3,  AutorId = user.Id,FilmId = film.Id,Rating = new Rating { UserRating = 75 },Text = "Good watch.", SendDate = DateTime.UtcNow.AddHours(-1)},
+        };
+
+        await setup.CommentRepository.AddRangeAsync(comments);
+        await setup.CommentRepository.SaveChangesAsync();
 
         // Act
         var result = await setup.Controller.GetAllComments(film.Id);
